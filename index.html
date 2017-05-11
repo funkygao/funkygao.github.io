@@ -87,7 +87,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="主要逻辑"><a href="#主要逻辑" class="headerlink" title="主要逻辑"></a>主要逻辑</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">// 合法性检查</div><div class="line">// 包括：是否有外键、用户权限、表是否合法、是否有唯一键等</div><div class="line"></div><div class="line">// 创建变更记录表</div><div class="line">CREATE /* changelog table */ TABLE _tbs_c</div><div class="line"></div><div class="line">// 创建影子表</div><div class="line">CREATE /* shadow table */ TABLE _tbl_s LIKE tbl</div><div class="line"></div><div class="line">// 在影子表上应用alter语句</div><div class="line">ALTER TABLE _tbl_s STATEMENT</div><div class="line"></div><div class="line">// 开始行拷贝线程</div><div class="line">row copy:                tbl -&gt; _tbl_s</div><div class="line"></div><div class="line">// 开始binlog接收和应用线程</div><div class="line">capture ongoing changes: binlog -&gt; _tbl_s</div><div class="line"></div><div class="line">// 等待行拷贝线程完成</div><div class="line">// 通知binlog线程收工</div><div class="line">// 等待binlog线程结束</div><div class="line"></div><div class="line">// 开始切换</div><div class="line">LOCK TABLES tbl WRITE</div><div class="line">RENAME TABLE tbl TO _tbl_old, _tbl_s TO tbl </div><div class="line">UNLOCK TABLES</div></pre></td></tr></table></figure>
+        <h2 id="主要逻辑"><a href="#主要逻辑" class="headerlink" title="主要逻辑"></a>主要逻辑</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">// 合法性检查</div><div class="line">// 包括：是否有外键、用户权限、表是否合法、是否有唯一键等</div><div class="line"></div><div class="line">// 创建变更记录表</div><div class="line">CREATE /* changelog table */ TABLE _tbs_c</div><div class="line"></div><div class="line">// 创建影子表</div><div class="line">CREATE /* shadow table */ TABLE _tbl_s LIKE tbl</div><div class="line"></div><div class="line">// 在影子表上应用alter语句</div><div class="line">ALTER TABLE _tbl_s STATEMENT</div><div class="line"></div><div class="line">// 开始行拷贝线程 tbl -&gt; _tbl_s</div><div class="line">// 开始binlog接收和应用线程 binlog -&gt; _tbl_s</div><div class="line"></div><div class="line">// 等待行拷贝线程完成</div><div class="line">// 通知binlog线程收工</div><div class="line">// 等待binlog线程结束</div><div class="line"></div><div class="line">// 开始切换</div><div class="line">LOCK TABLES tbl WRITE</div><div class="line">RENAME TABLE tbl TO _tbl_old, _tbl_s TO tbl </div><div class="line">UNLOCK TABLES</div></pre></td></tr></table></figure>
 <h3 id="确定行拷贝范围"><a href="#确定行拷贝范围" class="headerlink" title="确定行拷贝范围"></a>确定行拷贝范围</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">select id from </div><div class="line">   (select id from a where id&gt;=0 and id&lt;=3001 order by id asc limit 1000) select_osc_chunk </div><div class="line">order by id desc limit 1;</div></pre></td></tr></table></figure>
 <h3 id="行拷贝"><a href="#行拷贝" class="headerlink" title="行拷贝"></a>行拷贝</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">insert ignore into `a`.`_a_gho` (`id`, `value`)</div><div class="line">  (select `id`, `value` from `a`.`a` force index (`PRIMARY`)</div><div class="line">      where (((`id` &gt; ?) or ((`id` = ?))) and ((`id` &lt; ?) or ((`id` = ?)))) </div><div class="line">          lock in share mode</div><div class="line">  )</div><div class="line">commit;</div></pre></td></tr></table></figure>
 <h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><h3 id="async-binlog-worker如何判断所有数据变更已经完成"><a href="#async-binlog-worker如何判断所有数据变更已经完成" class="headerlink" title="async binlog worker如何判断所有数据变更已经完成"></a>async binlog worker如何判断所有数据变更已经完成</h3><p>binlog worker向changelog table发一行记录，在收到这个记录时，即表示完成</p>
@@ -97,7 +97,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj2k4smix0001jm5br1b8rjd8" class="article-share-link">Share</a>
+      <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj2k4thby0003k75big8s2g0o" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/database/">database</a></li></ul>
@@ -135,7 +135,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj2k4smir0000jm5b845te1g6" class="article-share-link">Share</a>
+      <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj2k4thbo0000k75bt70doxfa" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/database/">database</a></li></ul>
@@ -182,7 +182,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://funkygao.github.io/2017/05/11/hello-world/" data-id="cj2k4smj20003jm5bqlkenzis" class="article-share-link">Share</a>
+      <a data-url="http://funkygao.github.io/2017/05/11/hello-world/" data-id="cj2k4thbu0001k75bzhg5uu5h" class="article-share-link">Share</a>
       
       
     </footer>
