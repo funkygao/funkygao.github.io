@@ -3,14 +3,19 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Tech Blog</title>
+  <title>mysql在线alter table | Tech Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Tech Blog">
-<meta property="og:url" content="http://funkygao.github.io/index.html">
+  <meta name="description" content="主要逻辑1234567891011121314151617181920212223242526// 合法性检查// 包括：是否有外键、用户权限、表是否合法、是否有唯一键等// 创建变更记录表CREATE /* changelog table */ TABLE _tbs_c// 创建影子表CREATE /* shadow table */ TABLE _tbl_s LIKE tbl// 在影子表上应">
+<meta name="keywords" content="database">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql在线alter table">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/11/osc/index.html">
 <meta property="og:site_name" content="Tech Blog">
+<meta property="og:description" content="主要逻辑1234567891011121314151617181920212223242526// 合法性检查// 包括：是否有外键、用户权限、表是否合法、是否有唯一键等// 创建变更记录表CREATE /* changelog table */ TABLE _tbs_c// 创建影子表CREATE /* shadow table */ TABLE _tbl_s LIKE tbl// 在影子表上应">
+<meta property="og:updated_time" content="2017-05-11T08:02:42.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Tech Blog">
+<meta name="twitter:title" content="mysql在线alter table">
+<meta name="twitter:description" content="主要逻辑1234567891011121314151617181920212223242526// 合法性检查// 包括：是否有外键、用户权限、表是否合法、是否有唯一键等// 创建变更记录表CREATE /* changelog table */ TABLE _tbs_c// 创建影子表CREATE /* shadow table */ TABLE _tbl_s LIKE tbl// 在影子表上应">
   
     <link rel="alternate" href="/atom.xml" title="Tech Blog" type="application/atom+xml">
   
@@ -63,9 +68,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-osc" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-osc" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/05/11/osc/" class="article-date">
   <time datetime="2017-05-11T07:42:46.000Z" itemprop="datePublished">2017-05-11</time>
@@ -78,8 +81,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/11/osc/">mysql在线alter table</a>
+    <h1 class="article-title" itemprop="name">
+      mysql在线alter table
     </h1>
   
 
@@ -105,93 +108,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-2PL" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/05/11/2PL/" class="article-date">
-  <time datetime="2017-05-11T07:33:41.000Z" itemprop="datePublished">2017-05-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/11/2PL/">两段锁 2PL</a>
-    </h1>
+    <a href="/2017/05/11/2PL/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">两段锁 2PL</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj2k4n7h60000g15b48ciallo" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/database/">database</a></li></ul>
-
-    </footer>
-  </div>
   
 </article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/05/11/hello-world/" class="article-date">
-  <time datetime="2017-05-11T07:16:01.000Z" itemprop="datePublished">2017-05-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/11/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://funkygao.github.io/2017/05/11/hello-world/" data-id="cj2k4n7hb0001g15bo4d5p4w0" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 </section>
         
