@@ -539,13 +539,13 @@
 </ul>
 <h2 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h2><p><a href="http://mysqlhighavailability.com/an-overview-of-the-group-replication-performance/" target="_blank" rel="external">http://mysqlhighavailability.com/an-overview-of-the-group-replication-performance/</a></p>
 <p>80% throughput of a standalone MySQL server</p>
-<h2 id="限制条件"><a href="#限制条件" class="headerlink" title="限制条件"></a>限制条件</h2><ul>
+<h2 id="Limitations"><a href="#Limitations" class="headerlink" title="Limitations"></a>Limitations</h2><ul>
 <li>至少3台master</li>
 <li>每个表必须有primary key</li>
 <li>serialized isolation not supported</li>
 <li>auto_increment字段通过offset把各个master隔离开，避免冲突</li>
 </ul>
-<h2 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h2><p><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
+<h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
 <p>事务commit时，与client连接的那个master1向group里的所有成员发送paxos proposal，每台master进行冲突检测，如果<br>被certified，那么事务就被master1提交，然后异步应用到所有其他成员master</p>
 <p>if any transaction is committed on any member it must also be committed on all the others non-faulty group members.<br>读事务都是本地执行的</p>
 <p>atomic broadcast是通过全局有序消息(逻辑时钟)实现的</p>
@@ -666,7 +666,7 @@
 <h3 id="确定行拷贝chunk范围"><a href="#确定行拷贝chunk范围" class="headerlink" title="确定行拷贝chunk范围"></a>确定行拷贝chunk范围</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">select id from </div><div class="line">   (select id from a where id&gt;=0 and id&lt;=3001 order by id asc limit 1000) select_osc_chunk </div><div class="line">order by id desc limit 1;</div></pre></td></tr></table></figure>
 <h3 id="行拷贝in-chunk"><a href="#行拷贝in-chunk" class="headerlink" title="行拷贝in chunk"></a>行拷贝in chunk</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">insert ignore into `a`.`_a_gho` (`id`, `value`)</div><div class="line">  (select `id`, `value` from `a`.`a` force index (`PRIMARY`)</div><div class="line">      where (((`id` &gt; ?) or ((`id` = ?))) and ((`id` &lt; ?) or ((`id` = ?)))) </div><div class="line">          lock in share mode</div><div class="line">  )</div><div class="line">commit;</div></pre></td></tr></table></figure>
 <h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><h3 id="async-binlog-worker如何判断所有数据变更已经完成"><a href="#async-binlog-worker如何判断所有数据变更已经完成" class="headerlink" title="async binlog worker如何判断所有数据变更已经完成"></a>async binlog worker如何判断所有数据变更已经完成</h3><p>binlog worker向changelog table发一行记录，在收到这个记录时，即表示完成</p>
-<h3 id="RENAME-race-condition-with-DML"><a href="#RENAME-race-condition-with-DML" class="headerlink" title="RENAME race condition with DML"></a>RENAME race condition with DML</h3><p>mysql内部保证，LOCK TABLE后，如果有DML与RENAME并发操作，那么在UNLOCK TABLES时，RENAME<br>一定获取最高优先级，即：RENAME一定会先执行。<br>否则，会丢数据</p>
+<h3 id="RENAME-race-condition-with-DML"><a href="#RENAME-race-condition-with-DML" class="headerlink" title="RENAME race condition with DML"></a>RENAME race condition with DML</h3><p>mysql内部保证，LOCK TABLE后，如果有DML与RENAME并发操作，那么在UNLOCK TABLES时，RENAME<br>一定获取最高优先级，即：RENAME一定会先执行。<br>否则，会丢数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">LOCK</div><div class="line">INSERT</div><div class="line">RENAME</div><div class="line"></div><div class="line">UNLOCK</div><div class="line">INERT // 如果INSERT先执行，那么它会插入原表</div><div class="line">RENAME // 原表被rename to tbl_old，刚才INSERT的数据丢失: 存放在了tbl_old</div></pre></td></tr></table></figure></p>
 <h3 id="LOCK-RENAME"><a href="#LOCK-RENAME" class="headerlink" title="LOCK, RENAME"></a>LOCK, RENAME</h3><p>如果在一个mysql连接内执行LOCK; RENAME，那么会失败<br>解决办法：创建2个mysql连接，分别执行LOCK和RENAME</p>
 
           

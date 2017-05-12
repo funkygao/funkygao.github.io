@@ -97,7 +97,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/05/11/mysql-group-replication/index.html">
 <meta property="og:site_name" content="Architecture Blog">
 <meta property="og:description" content="简介GR是个mysql插件，通过原子广播协议、乐观事务冲突检测实现了高可用的多master集群每个master都有全量数据，但为了分配write workload，client端来load balance  自动冲突处理 自动成员管理和健康检查  Performancehttp://mysqlhighavailability.com/an-overview-of-the-group-replica">
-<meta property="og:updated_time" content="2017-05-11T09:35:33.000Z">
+<meta property="og:updated_time" content="2017-05-12T00:51:43.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql group replication">
 <meta name="twitter:description" content="简介GR是个mysql插件，通过原子广播协议、乐观事务冲突检测实现了高可用的多master集群每个master都有全量数据，但为了分配write workload，client端来load balance  自动冲突处理 自动成员管理和健康检查  Performancehttp://mysqlhighavailability.com/an-overview-of-the-group-replica">
@@ -319,13 +319,13 @@
 </ul>
 <h2 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h2><p><a href="http://mysqlhighavailability.com/an-overview-of-the-group-replication-performance/" target="_blank" rel="external">http://mysqlhighavailability.com/an-overview-of-the-group-replication-performance/</a></p>
 <p>80% throughput of a standalone MySQL server</p>
-<h2 id="限制条件"><a href="#限制条件" class="headerlink" title="限制条件"></a>限制条件</h2><ul>
+<h2 id="Limitations"><a href="#Limitations" class="headerlink" title="Limitations"></a>Limitations</h2><ul>
 <li>至少3台master</li>
 <li>每个表必须有primary key</li>
 <li>serialized isolation not supported</li>
 <li>auto_increment字段通过offset把各个master隔离开，避免冲突</li>
 </ul>
-<h2 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h2><p><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
+<h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
 <p>事务commit时，与client连接的那个master1向group里的所有成员发送paxos proposal，每台master进行冲突检测，如果<br>被certified，那么事务就被master1提交，然后异步应用到所有其他成员master</p>
 <p>if any transaction is committed on any member it must also be committed on all the others non-faulty group members.<br>读事务都是本地执行的</p>
 <p>atomic broadcast是通过全局有序消息(逻辑时钟)实现的</p>
@@ -516,7 +516,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Performance"><span class="nav-number">2.</span> <span class="nav-text">Performance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#限制条件"><span class="nav-number">3.</span> <span class="nav-text">限制条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transaction"><span class="nav-number">4.</span> <span class="nav-text">Transaction</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Performance"><span class="nav-number">2.</span> <span class="nav-text">Performance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Limitations"><span class="nav-number">3.</span> <span class="nav-text">Limitations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Internals"><span class="nav-number">4.</span> <span class="nav-text">Internals</span></a></li></ol></div>
             
 
           </div>
