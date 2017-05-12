@@ -91,11 +91,11 @@
 
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Architecture Blog">
+<meta property="og:title" content="All Things Distributed">
 <meta property="og:url" content="http://funkygao.github.io/index.html">
-<meta property="og:site_name" content="Architecture Blog">
+<meta property="og:site_name" content="All Things Distributed">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Architecture Blog">
+<meta name="twitter:title" content="All Things Distributed">
 
 
 
@@ -129,7 +129,7 @@
 
 
 
-  <title>Architecture Blog</title>
+  <title>All Things Distributed</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -167,12 +167,12 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Architecture Blog</span>
+        <span class="site-title">All Things Distributed</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
       
-        <p class="site-subtitle">explore, solve problems</p>
+        <p class="site-subtitle">Funky Gao's weblog on building scalable and robust distributed systems.</p>
       
   </div>
 
@@ -249,7 +249,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Architecture Blog">
+      <meta itemprop="name" content="All Things Distributed">
     </span>
 
     
@@ -361,7 +361,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Architecture Blog">
+      <meta itemprop="name" content="All Things Distributed">
     </span>
 
     
@@ -473,7 +473,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Architecture Blog">
+      <meta itemprop="name" content="All Things Distributed">
     </span>
 
     
@@ -545,7 +545,9 @@
 <li>serialized isolation not supported</li>
 <li>auto_increment字段通过offset把各个master隔离开，避免冲突</li>
 </ul>
-<h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
+<h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p>google percolator<br>hybrid logical clock</p>
+<p>virtual synchrony =&gt; totem protocl(corosync)  一致性协议</p>
+<p><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
 <p>事务commit时，与client连接的那个master1向group里的所有成员发送paxos proposal，每台master进行冲突检测，如果<br>被certified，那么事务就被master1提交，然后异步应用到所有其他成员master</p>
 <p>if any transaction is committed on any member it must also be committed on all the others non-faulty group members.<br>读事务都是本地执行的</p>
 <p>atomic broadcast是通过全局有序消息(逻辑时钟)实现的</p>
@@ -603,7 +605,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Architecture Blog">
+      <meta itemprop="name" content="All Things Distributed">
     </span>
 
     
@@ -720,7 +722,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Architecture Blog">
+      <meta itemprop="name" content="All Things Distributed">
     </span>
 
     
