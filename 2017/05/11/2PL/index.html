@@ -90,17 +90,19 @@
 
 
 
-<meta name="description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件">
+<meta name="description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件 MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC MySQL 2PL提供2种锁  shared(read) exc">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
 <meta property="og:title" content="两段锁 2PL">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/11/2PL/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件">
-<meta property="og:updated_time" content="2017-05-15T08:22:10.000Z">
+<meta property="og:description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件 MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC MySQL 2PL提供2种锁  shared(read) exc">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true">
+<meta property="og:updated_time" content="2017-05-16T08:51:42.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="两段锁 2PL">
-<meta name="twitter:description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件">
+<meta name="twitter:description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件 MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC MySQL 2PL提供2种锁  shared(read) exc">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true">
 
 
 
@@ -324,6 +326,14 @@
       
         <p>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段</p>
 <p>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件</p>
+<p>MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC</p>
+<p>MySQL 2PL提供2种锁</p>
+<ul>
+<li>shared(read)</li>
+<li>exclusive(write)</li>
+</ul>
+<p>读写互斥，但读读不互斥</p>
+<p>MySQL serialized isolation<br><img src="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true" alt="2pl"></p>
 
       
     </div>
