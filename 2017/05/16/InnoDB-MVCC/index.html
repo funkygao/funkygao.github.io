@@ -101,7 +101,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo2.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo3.jpg?raw=true">
-<meta property="og:updated_time" content="2017-05-16T01:19:23.000Z">
+<meta property="og:updated_time" content="2017-05-16T01:28:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="InnoDB MVCC">
 <meta name="twitter:description" content="BasicInnoDB中通过Undo log实现了txn rollback和MVCC，而并发控制(isolation)通过锁来实现Undo log分为insert undo和update undo(delete是一种特殊的update)，回滚时  insert只要把insert undo log丢弃即可 update需要通过DB_ROLL_PTR DB_TRX_ID找到事务修改前的版本并恢复  与">
@@ -352,6 +352,8 @@
 <h3 id="write-skew"><a href="#write-skew" class="headerlink" title="write skew"></a>write skew</h3><p>InnoDB通过Undo log实现的MVCC在修改单行记录是没有问题的，但多行时就可能出问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">update table set col1=2 where id=1; // 成功，创建了undo log</div><div class="line">update table set col2=3 where id=2; // 失败</div><div class="line">rollback;</div></pre></td></tr></table></figure></p>
 <p>回滚row(id=1)时，由于它没有被lock，此时可能已经被另外一个txn给修改了，这个回滚会破坏已经commit的事务</p>
 <p>如果要解决这个问题，需要应用层进行控制</p>
+<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><p>RR隔离级别下，普通select不加锁，使用MVCC进行一致性读取，即snapshot read<br>update, insert, delete, select … for update, select … lock in share mode都会进行加锁，并且读取的是当前版本: READ COMMITTED读<br>除了lock in share mode是S锁，其他都是X锁</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html</a></p>
 
       
     </div>
@@ -533,7 +535,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basic"><span class="nav-number">1.</span> <span class="nav-text">Basic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内部存储"><span class="nav-number">2.</span> <span class="nav-text">内部存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Undo-log实现方式"><span class="nav-number">3.</span> <span class="nav-text">Undo log实现方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demo"><span class="nav-number">4.</span> <span class="nav-text">Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Issues"><span class="nav-number">5.</span> <span class="nav-text">Issues</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#回滚成本"><span class="nav-number">5.1.</span> <span class="nav-text">回滚成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#write-skew"><span class="nav-number">5.2.</span> <span class="nav-text">write skew</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basic"><span class="nav-number">1.</span> <span class="nav-text">Basic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内部存储"><span class="nav-number">2.</span> <span class="nav-text">内部存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Undo-log实现方式"><span class="nav-number">3.</span> <span class="nav-text">Undo log实现方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demo"><span class="nav-number">4.</span> <span class="nav-text">Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Issues"><span class="nav-number">5.</span> <span class="nav-text">Issues</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#回滚成本"><span class="nav-number">5.1.</span> <span class="nav-text">回滚成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#write-skew"><span class="nav-number">5.2.</span> <span class="nav-text">write skew</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁"><span class="nav-number">6.</span> <span class="nav-text">锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
