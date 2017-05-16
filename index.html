@@ -250,6 +250,127 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Funky Gao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Funky's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/16/PostgreSQL-MVCC/" itemprop="url">PostgreSQL MVCC</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-16T11:54:13+08:00">
+                2017-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p>MySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure.</p>
+<p>每个row有2个隐藏字段</p>
+<ul>
+<li>Tmin insert时的trx id</li>
+<li>Tmax delete时的trx id</li>
+</ul>
+<h2 id="INSERT"><a href="#INSERT" class="headerlink" title="INSERT"></a>INSERT</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_insert.png?raw=true" alt="insert"></p>
+<h2 id="DELETE"><a href="#DELETE" class="headerlink" title="DELETE"></a>DELETE</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_delete.png?raw=true" alt="delete"></p>
+<p>DELETE操作并不会马上物理删除，而是VACUUM进程调度进行purge</p>
+<h2 id="UPDATE"><a href="#UPDATE" class="headerlink" title="UPDATE"></a>UPDATE</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_update.png?raw=true" alt="update"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/VNC-protocol/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1337,176 +1458,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/11/mysql-group-replication/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Funky Gao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Funky's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/11/mysql-group-replication/" itemprop="url">mysql group replication</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-11T16:50:06+08:00">
-                2017-05-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>GR是个mysql插件，通过原子广播协议、乐观事务冲突检测实现了高可用的多master集群<br>每个master都有全量数据，client side load balance write workload或者使用<a href="http://www.proxysql.com/" target="_blank" rel="external">ProxySQL</a><br>读事务都是本地执行的<br>有2种模式</p>
-<ul>
-<li>单主，自动选主</li>
-<li>多主，active active master</li>
-</ul>
-<p>与PXC是完全的竞争产品</p>
-<h2 id="Requirements-and-Limitations"><a href="#Requirements-and-Limitations" class="headerlink" title="Requirements and Limitations"></a>Requirements and Limitations</h2><ul>
-<li>InnoDB engine only, rollback uncommitted changes</li>
-<li>turn on binlog RBR</li>
-<li>GTID enabled</li>
-<li>each table MUST have a primary key或者not null unique key</li>
-<li>no concurrent DDL</li>
-<li>至少3台master，至多9台，不需要slave</li>
-<li>auto_increment字段通过offset把各个master隔离开，避免冲突</li>
-<li>cascading foreign key not supported</li>
-<li>只是校验write set，serializable isolation NOT supported</li>
-<li>存在stale read问题，如果write/read不在一台member</li>
-<li>savepoints可能有问题</li>
-</ul>
-<h2 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h2><p><a href="http://mysqlhighavailability.com/an-overview-of-the-group-replication-performance/" target="_blank" rel="external">http://mysqlhighavailability.com/an-overview-of-the-group-replication-performance/</a></p>
-<p>80% throughput of a standalone MySQL server</p>
-<h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/gr-replication-diagram.png?raw=true" alt="GR"></p>
-<h3 id="XCOM"><a href="#XCOM" class="headerlink" title="XCOM"></a>XCOM</h3><p>eXtended COMmunications，一个Paxos系统</p>
-<ul>
-<li>确保消息在所有member上相同顺序分发</li>
-<li>动态成员，成员失效检测</li>
-</ul>
-<p>理论基础 <a href="https://infoscience.epfl.ch/record/52305/files/IC_TECH_REPORT_199908.pdf" target="_blank" rel="external">Database State Machine</a></p>
-<p>事务的Update操作都在一个成员上执行，在Commit时把write-set以total order发送消息给每个成员；<br>每个成员上的certification进程检查事务冲突(first commit wins)，完成最终提交或回滚</p>
-<p>Commit时的Paxos有2个作用</p>
-<ul>
-<li>certification，检测事务冲突</li>
-<li>propagate</li>
-</ul>
-<p>Group Replication ensures that a transaction only commits after a majority of the members in a group have received it<br>and agreed on the relative order between all transactions that were sent concurrently.</p>
-<p>与multi-paxos不同，XCOM是multi-leader/multi-proposer：每个member都是leader of its own slots</p>
-<h3 id="Certification"><a href="#Certification" class="headerlink" title="Certification"></a>Certification</h3><p>group_replication_group_name就是GTID里的UUID<br>GTID就是database version<br>mysql&gt; select @@global.gtid_executed</p>
-<p>transaction write set: [{updated_row_pk: GTID_EXECUTED}, {updated_row_pk: GTID_EXECUTED}, …]</p>
-<p>GTID是由certification模块负责的，由它来负责GTID GNO的increment<br>所有member会定期交换GTID_EXECUTED，所有member已经committed事务的交集：Stable Set.</p>
-<h3 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/gr-trans1.png?raw=true" alt="async apply"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/gr-trans2.png?raw=true" alt="async apply"></p>
-<h3 id="Distributed-Recovery"><a href="#Distributed-Recovery" class="headerlink" title="Distributed Recovery"></a>Distributed Recovery</h3><p>向group增加新成员的过程: 获取missing data，同时cache正在发生的新事务，最后catch up</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">// 从现有member里通过mysql backup工具(mysqldump等)搞个backup instance</div><div class="line"></div><div class="line">// phase 0: join</div><div class="line">Joiner.join(), 通过total order broadcast发给每个member</div><div class="line">生成view change binlog event: $viewID</div><div class="line">group里每个member(包括Joiner)都会收到该view event</div><div class="line">每个online member会把该binlog event排队到现有transaction queue里</div><div class="line"></div><div class="line">// phase 1: row copy</div><div class="line">Joiner pick a live member from the group as Donor // Donor可能会有lag</div><div class="line">Doner transmits all data up to the joining moment: master/slave connection</div><div class="line">for &#123;</div><div class="line">    if binlog.event.view_id == $viewID &#123;</div><div class="line">        Joiner.SQLThread.stop()</div><div class="line">        break</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if Doner.dies &#123;</div><div class="line">        reselect Donner</div><div class="line">        goto restart</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// phase 2: catch up</div><div class="line">joining moment后发生的binlogDonor发给Joiner，Joiner apply</div><div class="line"></div><div class="line">catch up同步完成后，declare Joiner online，开始对外服务</div><div class="line"></div><div class="line">// Joiner.leave()类似的过程</div><div class="line">// crash过程会被detector发现，自动执行Joiner.leave()</div></pre></td></tr></table></figure>
-<p>这个过程与<a href="http://funkygao.github.io/2017/05/11/osc/">mysql在线alter table设计</a>原理类似</p>
-<h4 id="binlog-view-change-markers"><a href="#binlog-view-change-markers" class="headerlink" title="binlog view change markers"></a>binlog view change markers</h4><p>group里member变化，会产生一种新的binlog event: view change log event.<br>view id就是一种logicl clock，在member变化时inrement<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+-----------------+</div><div class="line">| epoch | counter |</div><div class="line">+-----------------+</div></pre></td></tr></table></figure></p>
-<p>epoch在第一个加入group的member生成，作用是为了解决all members crash问题: avoid dup counter</p>
-<h3 id="certification-based-replication"><a href="#certification-based-replication" class="headerlink" title="certification based replication"></a>certification based replication</h3><p>通过group communication和total order transaction实现synchronous replication</p>
-<p>事务在单节点乐观运行，在commit时，通过广播和冲突检测实现全局数据一致性<br>它需要</p>
-<ul>
-<li>transactional database来rollback uncommitted changes</li>
-<li>primary keys to generate broadcast write-set</li>
-<li>atomic changes</li>
-<li>global ordering replication events</li>
-</ul>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/certificationbasedreplication.png?raw=true" alt="certificationbasedreplication"></p>
-<h2 id="Config"><a href="#Config" class="headerlink" title="Config"></a>Config</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[mysqld]</div><div class="line">log-bin</div><div class="line">binlog-format=row</div><div class="line">binlog-checksum=NONE</div><div class="line">gtid-mode=ON</div><div class="line">enforce-gtid-consistency</div><div class="line">log-slave-updates</div><div class="line">master-info-repository=TABLE</div><div class="line">relay-log-info-repository=TABLE</div><div class="line">transaction-write-set-extraction=MURMUR32</div><div class="line"></div><div class="line">// GR</div><div class="line">group_replication_group_name=&quot;da7bad5b-daed-da7a-ba44-da7aba5e7ab&quot;</div><div class="line">group_replication_local_address=&quot;host2:24901&quot;</div><div class="line">group_replication_group_seeds=&quot;host1:24901,host2:24901,host3:24901&quot;</div></pre></td></tr></table></figure>
-<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><h3 id="GR是同步还是异步？"><a href="#GR是同步还是异步？" class="headerlink" title="GR是同步还是异步？"></a>GR是同步还是异步？</h3><p>replication分为5步<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">master locally apply</div><div class="line">master generate binlog event</div><div class="line">master sending the event to slave(s)</div><div class="line">slave IO thread add event to relay log</div><div class="line">slave SQL thread apply the event from relay log</div></pre></td></tr></table></figure></p>
-<p>GR下，只有3是同步的: 把write set广播并得到majority certify confirm<br>广播时发送消息是同步的，但apply write set还是异步的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">member1: DELETE FROM a; // a table with many rows</div><div class="line">member1: 产生一个非常大的binlog event</div><div class="line"></div><div class="line">member1: group communicate the binlog event to all members(包括它自己)</div><div class="line"></div><div class="line">其他member确认ok，那么member1就返回ok给client</div><div class="line">client访问member1，那么数据是一致的</div><div class="line"></div><div class="line">但其他member在异步apply binlog event，可能花很长时间，这时候client访问member2，可能不一致：</div><div class="line">delete的数据仍然能读出来</div></pre></td></tr></table></figure></p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/cert-apply.png?raw=true" alt="async apply"></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://lefred.be/content/mysql-group-replication-about-ack-from-majority/" target="_blank" rel="external">http://lefred.be/content/mysql-group-replication-about-ack-from-majority/</a><br><a href="http://lefred.be/content/mysql-group-replication-synchronous-or-asynchronous-replication/" target="_blank" rel="external">http://lefred.be/content/mysql-group-replication-synchronous-or-asynchronous-replication/</a><br><a href="http://lefred.be/content/galera-replication-demystified-how-does-it-work/" target="_blank" rel="external">http://lefred.be/content/galera-replication-demystified-how-does-it-work/</a><br><a href="http://www.tocker.ca/2014/12/30/an-easy-way-to-describe-mysqls-binary-log-group-commit.html" target="_blank" rel="external">http://www.tocker.ca/2014/12/30/an-easy-way-to-describe-mysqls-binary-log-group-commit.html</a><br><a href="http://mysqlhighavailability.com/tag/mysql-group-replication/" target="_blank" rel="external">http://mysqlhighavailability.com/tag/mysql-group-replication/</a><br><a href="http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/" target="_blank" rel="external">http://mysqlhighavailability.com/mysql-group-replication-transaction-life-cycle-explained/</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1556,7 +1507,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
