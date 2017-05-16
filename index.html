@@ -326,7 +326,7 @@
 <h2 id="VNC"><a href="#VNC" class="headerlink" title="VNC"></a>VNC</h2><p>Remote Frame Buffer，支持X11, Windows, Mac<br>远程终端用户使用机器（比如显示器、键盘、鼠标）的叫做客户端，提供帧缓存变化的被称为服务器</p>
 <h3 id="显示协议"><a href="#显示协议" class="headerlink" title="显示协议"></a>显示协议</h3><p>pixel(x, y)  =&gt; 像素数据编码</p>
 <h3 id="C-gt-S消息类型"><a href="#C-gt-S消息类型" class="headerlink" title="C-&gt;S消息类型"></a>C-&gt;S消息类型</h3><h4 id="SetEncodings"><a href="#SetEncodings" class="headerlink" title="SetEncodings"></a>SetEncodings</h4><p>Raw, CopyRect, RRE, Hextile, TRLE, ZRLE</p>
-<h4 id="FramebufferUpdateRequest"><a href="#FramebufferUpdateRequest" class="headerlink" title="FramebufferUpdateRequest"></a>FramebufferUpdateRequest</h4><p>最重要的显示消息</p>
+<h4 id="FramebufferUpdateRequest"><a href="#FramebufferUpdateRequest" class="headerlink" title="FramebufferUpdateRequest"></a>FramebufferUpdateRequest</h4><p>最重要的显示消息，表示client要server传回哪些区域的图像</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">client.send(messageType, incremental, x, y, width, height) =&gt; server</div><div class="line">// incremental&gt;0，表示该区域内容变化了才发给client；没有变化，就不用发</div></pre></td></tr></table></figure>
 <h4 id="KeyEvent"><a href="#KeyEvent" class="headerlink" title="KeyEvent"></a>KeyEvent</h4><p>client端的键盘动作</p>
 <h4 id="PointerEvent"><a href="#PointerEvent" class="headerlink" title="PointerEvent"></a>PointerEvent</h4><p>client端的鼠标动作</p>
