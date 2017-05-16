@@ -749,7 +749,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/05/16/LSM/" itemprop="url">LSM</a></h1>
+                <a class="post-title-link" href="/2017/05/16/LSM/" itemprop="url">LSM for SSD</a></h1>
         
 
         <div class="post-meta">
@@ -798,7 +798,21 @@
       
         
           
-            
+            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true" alt="leveldb"></p>
+<h2 id="SSD"><a href="#SSD" class="headerlink" title="SSD"></a>SSD</h2><p>主流SSD，例如<a href="http://www.anandtech.com/show/10754/samsung-960-pro-ssd-review" target="_blank" rel="external">Samsung 960 Pro</a>，可以提供440K/s random read<br>with block size=4KB</p>
+<p>LSM是为传统硬盘设计的，在SSD下，可以做优化</p>
+<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h2><p>LSM-Tree的主要成本都在compaction，造成IO放大(50倍)</p>
+<ul>
+<li>读很多文件到内存</li>
+<li>排序</li>
+<li>再写回到磁盘</li>
+</ul>
+<p>要优化compaction，可以把LSM Tree变小，RocksDB是通过压缩实现的</p>
+<p>在SSD下，可以考虑把key和value分离，在LSM Tree里只保存sorted key和pointer(value)，value直接保存在WAL里</p>
+<p>key: 16B<br>pointer(value): 16B</p>
+<p>2M个k/v，需要64MB<br>2B个k/v，需要64GB</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf" target="_blank" rel="external">https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf</a></p>
+
           
         
       

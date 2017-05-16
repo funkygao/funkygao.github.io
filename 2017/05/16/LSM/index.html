@@ -90,14 +90,19 @@
 
 
 
+<meta name="description" content="Basics SSD主流SSD，例如Samsung 960 Pro，可以提供440K/s random readwith block size=4KB LSM是为传统硬盘设计的，在SSD下，可以做优化 优化LSM-Tree的主要成本都在compaction，造成IO放大(50倍)  读很多文件到内存 排序 再写回到磁盘  要优化compaction，可以把LSM Tree变小，RocksDB是通过">
 <meta name="keywords" content="storage">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LSM">
+<meta property="og:title" content="LSM for SSD">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/16/LSM/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:updated_time" content="2017-05-16T01:37:53.000Z">
+<meta property="og:description" content="Basics SSD主流SSD，例如Samsung 960 Pro，可以提供440K/s random readwith block size=4KB LSM是为传统硬盘设计的，在SSD下，可以做优化 优化LSM-Tree的主要成本都在compaction，造成IO放大(50倍)  读很多文件到内存 排序 再写回到磁盘  要优化compaction，可以把LSM Tree变小，RocksDB是通过">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true">
+<meta property="og:updated_time" content="2017-05-16T09:28:12.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="LSM">
+<meta name="twitter:title" content="LSM for SSD">
+<meta name="twitter:description" content="Basics SSD主流SSD，例如Samsung 960 Pro，可以提供440K/s random readwith block size=4KB LSM是为传统硬盘设计的，在SSD下，可以做优化 优化LSM-Tree的主要成本都在compaction，造成IO放大(50倍)  读很多文件到内存 排序 再写回到磁盘  要优化compaction，可以把LSM Tree变小，RocksDB是通过">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true">
 
 
 
@@ -131,7 +136,7 @@
 
 
 
-  <title>LSM | Funky's Blog</title>
+  <title>LSM for SSD | Funky's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -267,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">LSM</h1>
+          <h1 class="post-title" itemprop="name headline">LSM for SSD</h1>
         
 
         <div class="post-meta">
@@ -319,7 +324,21 @@
       
 
       
-        
+        <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true" alt="leveldb"></p>
+<h2 id="SSD"><a href="#SSD" class="headerlink" title="SSD"></a>SSD</h2><p>主流SSD，例如<a href="http://www.anandtech.com/show/10754/samsung-960-pro-ssd-review" target="_blank" rel="external">Samsung 960 Pro</a>，可以提供440K/s random read<br>with block size=4KB</p>
+<p>LSM是为传统硬盘设计的，在SSD下，可以做优化</p>
+<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h2><p>LSM-Tree的主要成本都在compaction，造成IO放大(50倍)</p>
+<ul>
+<li>读很多文件到内存</li>
+<li>排序</li>
+<li>再写回到磁盘</li>
+</ul>
+<p>要优化compaction，可以把LSM Tree变小，RocksDB是通过压缩实现的</p>
+<p>在SSD下，可以考虑把key和value分离，在LSM Tree里只保存sorted key和pointer(value)，value直接保存在WAL里</p>
+<p>key: 16B<br>pointer(value): 16B</p>
+<p>2M个k/v，需要64MB<br>2B个k/v，需要64GB</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf" target="_blank" rel="external">https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf</a></p>
+
       
     </div>
 
@@ -420,8 +439,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.jpeg"
@@ -485,6 +513,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basics"><span class="nav-number">1.</span> <span class="nav-text">Basics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSD"><span class="nav-number">2.</span> <span class="nav-text">SSD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化"><span class="nav-number">3.</span> <span class="nav-text">优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
