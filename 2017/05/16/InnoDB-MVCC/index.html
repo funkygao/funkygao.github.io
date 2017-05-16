@@ -100,7 +100,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo2.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo3.jpg?raw=true">
-<meta property="og:updated_time" content="2017-05-16T01:07:04.000Z">
+<meta property="og:updated_time" content="2017-05-16T01:10:19.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="InnoDB MVCC">
 <meta name="twitter:description" content="BasicInnoDB中通过Undo log实现了txn rollback和MVCC，而并发控制(isolation)通过锁来实现Undo log分为insert undo和update undo，回滚时  insert只要把insert undo log丢弃即可 update需要通过DB_ROLL_PTR DB_TRX_ID找到事务修改前的版本并恢复  与redo log不同的是，磁盘上不存在单">
@@ -339,10 +339,15 @@
 <li>DB_ROLL_PTR</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef ib_uint64_t ib_id_t;</div><div class="line"></div><div class="line">typedef ib_id_t row_id_t;</div><div class="line">typedef ib_id_t trx_id_t;</div><div class="line">typedef ib_id_t roll_ptr_t;</div></pre></td></tr></table></figure>
+<h2 id="Undo-log实现方式"><a href="#Undo-log实现方式" class="headerlink" title="Undo log实现方式"></a>Undo log实现方式</h2><ul>
+<li>事务以排他锁的形式修改原始数据</li>
+<li>把修改前的数据存放于undo log，通过回滚指针与主数据关联</li>
+<li>修改成功（commit）啥都不做，失败则恢复undo log中的数据（rollback）</li>
+</ul>
 <h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/undo1.jpg?raw=true" alt="syscol"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/undo2.jpg?raw=true" alt="syscol"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/undo3.jpg?raw=true" alt="syscol"></p>
 <p>Innodb中存在purge线程，它会查询那些比现在最老的活动事务还早的undo log，并删除它们</p>
 <h2 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h2><h3 id="回滚成本"><a href="#回滚成本" class="headerlink" title="回滚成本"></a>回滚成本</h3><p>当事务正常提交时Innbod只需要更改事务状态为COMMIT即可，不需做其他额外的工作<br>而Rollback如果事务影响的行非常多，回滚则可能成本很高</p>
-<h3 id="Limitation"><a href="#Limitation" class="headerlink" title="Limitation"></a>Limitation</h3><p>InnoDB通过Undo log实现的MVCC在修改单行记录是没有问题的，但多行时就可能出问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">update table set col1=2 where id=1; // 成功，创建了undo log</div><div class="line">update table set col2=3 where id=2; // 失败</div><div class="line">rollback;</div></pre></td></tr></table></figure></p>
+<h3 id="write-skew"><a href="#write-skew" class="headerlink" title="write skew"></a>write skew</h3><p>InnoDB通过Undo log实现的MVCC在修改单行记录是没有问题的，但多行时就可能出问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">update table set col1=2 where id=1; // 成功，创建了undo log</div><div class="line">update table set col2=3 where id=2; // 失败</div><div class="line">rollback;</div></pre></td></tr></table></figure></p>
 <p>回滚row(id=1)时，由于它没有被lock，此时可能已经被另外一个txn给修改了，这个回滚会破坏已经commit的事务</p>
 <p>如果要解决这个问题，需要应用层进行控制</p>
 
@@ -526,7 +531,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basic"><span class="nav-number">1.</span> <span class="nav-text">Basic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内部存储"><span class="nav-number">2.</span> <span class="nav-text">内部存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demo"><span class="nav-number">3.</span> <span class="nav-text">Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Issues"><span class="nav-number">4.</span> <span class="nav-text">Issues</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#回滚成本"><span class="nav-number">4.1.</span> <span class="nav-text">回滚成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Limitation"><span class="nav-number">4.2.</span> <span class="nav-text">Limitation</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basic"><span class="nav-number">1.</span> <span class="nav-text">Basic</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内部存储"><span class="nav-number">2.</span> <span class="nav-text">内部存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Undo-log实现方式"><span class="nav-number">3.</span> <span class="nav-text">Undo log实现方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demo"><span class="nav-number">4.</span> <span class="nav-text">Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Issues"><span class="nav-number">5.</span> <span class="nav-text">Issues</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#回滚成本"><span class="nav-number">5.1.</span> <span class="nav-text">回滚成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#write-skew"><span class="nav-number">5.2.</span> <span class="nav-text">write skew</span></a></li></ol></li></ol></div>
             
 
           </div>
