@@ -250,6 +250,139 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/LSM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Funky Gao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Funky's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/16/LSM/" itemprop="url">LSM for SSD</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-16T09:33:59+08:00">
+                2017-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true" alt="leveldb"></p>
+<ul>
+<li>(immutable)memtable: sorted skiplist</li>
+<li>SSTable: sorted string table</li>
+<li>L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的</li>
+</ul>
+<h3 id="SSTable-file"><a href="#SSTable-file" class="headerlink" title="SSTable file"></a>SSTable file</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+-------------------+-------------------------+------------+</div><div class="line">| index block(16KB) | bloom-filter block(4KB) | data block |</div><div class="line">+-------------------+-------------------------+------------+</div></pre></td></tr></table></figure>
+<h3 id="Get-key"><a href="#Get-key" class="headerlink" title="Get(key)"></a>Get(key)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">locate key in memtable</div><div class="line">if found then return</div><div class="line">locate key in immutable memtable</div><div class="line">if found then return</div><div class="line">for level:=0; level&lt;=6; level++ &#123;</div><div class="line">    // 对于level0，需要遍历所有SSTable，因为keys overlap</div><div class="line">    // 但leveldb为了解决这个问题，除了Bloomfilter，也限制了L0的文件数量，一旦超过8，就compact(L0-&gt;L1)</div><div class="line">    // 对于其他level，由于已经sorted，可以直接定位SSTable</div><div class="line">    //</div><div class="line">    // 最坏情况下，Get(key)需要读8个L0以及L1-L6，共14个文件</div><div class="line">    locate key in SSTable in $level </div><div class="line">    if found then return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="SSD"><a href="#SSD" class="headerlink" title="SSD"></a>SSD</h2><p>主流SSD，例如<a href="http://www.anandtech.com/show/10754/samsung-960-pro-ssd-review" target="_blank" rel="external">Samsung 960 Pro</a>，可以提供440K/s random read<br>with block size=4KB</p>
+<p>LSM是为传统硬盘设计的，在SSD下，可以做优化</p>
+<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h2><p>LSM-Tree的主要成本都在compaction(merge sort)，造成IO放大(50倍)</p>
+<ul>
+<li>读很多文件到内存</li>
+<li>排序</li>
+<li>再写回到磁盘</li>
+</ul>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/ioamplification.png?raw=true" alt="io"></p>
+<p>要优化compaction，可以把LSM Tree变小，RocksDB是通过压缩实现的</p>
+<p>在SSD下，可以考虑把key和value分离，在LSM Tree里只保存sorted key和pointer(value)，value直接保存在WAL里</p>
+<p>key: 16B<br>pointer(value): 16B</p>
+<p>2M个k/v，需要64MB<br>2B个k/v，需要64GB</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf" target="_blank" rel="external">https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1388,132 +1521,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/11/2PL/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Funky Gao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Funky's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/11/2PL/" itemprop="url">两段锁 2PL</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-11T15:33:41+08:00">
-                2017-05-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段</p>
-<p>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件</p>
-<p>MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC</p>
-<p>MySQL 2PL提供2种锁</p>
-<ul>
-<li>shared(read)</li>
-<li>exclusive(write)</li>
-</ul>
-<p>读写互斥，但读读不互斥</p>
-<p>MySQL serialized isolation<br><img src="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true" alt="2pl"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1558,7 +1570,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-count">21</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
