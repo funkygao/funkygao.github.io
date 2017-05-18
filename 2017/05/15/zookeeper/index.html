@@ -97,7 +97,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/05/15/zookeeper/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
 <meta property="og:description" content="BasicsModelFile api without partial R/WNo rename operation zab通过TCP+zxid实现事务的totally order n(n-1)/2 conns只允许id比较大的server发起主动连接：由于任意server在启动时都会主动向其他server发起连接，如果这样，任意两台server之间就拥有两条连接，这明显是没有必要的1234567">
-<meta property="og:updated_time" content="2017-05-18T03:29:14.000Z">
+<meta property="og:updated_time" content="2017-05-18T03:35:36.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zookeeper internals">
 <meta name="twitter:description" content="BasicsModelFile api without partial R/WNo rename operation zab通过TCP+zxid实现事务的totally order n(n-1)/2 conns只允许id比较大的server发起主动连接：由于任意server在启动时都会主动向其他server发起连接，如果这样，任意两台server之间就拥有两条连接，这明显是没有必要的1234567">
@@ -331,7 +331,12 @@
 <li>epoch和zxid都相等，选择server id最大的</li>
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">return (newEpoch &gt; curEpoch) ||</div><div class="line">		((newEpoch == curEpoch) &amp;&amp;</div><div class="line">			((newZxid &gt; curZxid) ||</div><div class="line">				((newZxid == curZxid) &amp;&amp; (newId &gt; curId))))</div></pre></td></tr></table></figure>
-<p>在Zab协议的实现时，三个阶段：<br>1、 Fast Leader Election<br>2、 Recovery Phase<br>3、 Broadcast Phase</p>
+<h3 id="何时选举"><a href="#何时选举" class="headerlink" title="何时选举"></a>何时选举</h3><p>进入LOOKING状态</p>
+<ul>
+<li>刚启动时</li>
+<li>稳定运行中，任何的异常都会让本机进入LOOKING态<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">catch (Exception e) &#123;</div><div class="line">    setPeerState(LOOKING)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
 <h3 id="Constraints"><a href="#Constraints" class="headerlink" title="Constraints"></a>Constraints</h3><p>Many ZooKeeper write requests are conditional in nature:</p>
 <ul>
 <li>a znode can only be deleted if it does not have any children</li>
@@ -532,7 +537,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basics"><span class="nav-number">1.</span> <span class="nav-text">Basics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Model"><span class="nav-number">1.1.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#n-n-1-2-conns"><span class="nav-number">1.2.</span> <span class="nav-text">n(n-1)/2 conns</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#成为-leader-的条件"><span class="nav-number">1.3.</span> <span class="nav-text">成为 leader 的条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Constraints"><span class="nav-number">1.4.</span> <span class="nav-text">Constraints</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Edge-cases"><span class="nav-number">2.</span> <span class="nav-text">Edge cases</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#leader-election"><span class="nav-number">2.1.</span> <span class="nav-text">leader election</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#async-commit"><span class="nav-number">2.2.</span> <span class="nav-text">async commit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync-proposal"><span class="nav-number">2.3.</span> <span class="nav-text">sync proposal</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basics"><span class="nav-number">1.</span> <span class="nav-text">Basics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Model"><span class="nav-number">1.1.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#n-n-1-2-conns"><span class="nav-number">1.2.</span> <span class="nav-text">n(n-1)/2 conns</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#成为-leader-的条件"><span class="nav-number">1.3.</span> <span class="nav-text">成为 leader 的条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何时选举"><span class="nav-number">1.4.</span> <span class="nav-text">何时选举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Constraints"><span class="nav-number">1.5.</span> <span class="nav-text">Constraints</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Edge-cases"><span class="nav-number">2.</span> <span class="nav-text">Edge cases</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#leader-election"><span class="nav-number">2.1.</span> <span class="nav-text">leader election</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#async-commit"><span class="nav-number">2.2.</span> <span class="nav-text">async commit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync-proposal"><span class="nav-number">2.3.</span> <span class="nav-text">sync proposal</span></a></li></ol></li></ol></div>
             
 
           </div>
