@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="database," />
+  <meta name="keywords" content="一致性," />
 
 
 
@@ -90,19 +90,17 @@
 
 
 
-<meta name="description" content="Undo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本  Redo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里称为WAL">
-<meta name="keywords" content="database">
+<meta name="description" content="MDCC提供了跨机房的分布式数据库强一致性模型 Referenceshttp://mdcc.cs.berkeley.edu/">
+<meta name="keywords" content="一致性">
 <meta property="og:type" content="article">
-<meta property="og:title" content="how DBMS works">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/16/how-DBMS-works/index.html">
+<meta property="og:title" content="Multi-Data Center Consistency">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="Undo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本  Redo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里称为WAL">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/datastructuredb1.png?raw=true">
-<meta property="og:updated_time" content="2017-05-16T08:37:01.000Z">
+<meta property="og:description" content="MDCC提供了跨机房的分布式数据库强一致性模型 Referenceshttp://mdcc.cs.berkeley.edu/">
+<meta property="og:updated_time" content="2017-05-19T07:27:38.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="how DBMS works">
-<meta name="twitter:description" content="Undo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本  Redo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里称为WAL">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/datastructuredb1.png?raw=true">
+<meta name="twitter:title" content="Multi-Data Center Consistency">
+<meta name="twitter:description" content="MDCC提供了跨机房的分布式数据库强一致性模型 Referenceshttp://mdcc.cs.berkeley.edu/">
 
 
 
@@ -130,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://funkygao.github.io/2017/05/16/how-DBMS-works/"/>
+  <link rel="canonical" href="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/"/>
 
 
 
 
 
-  <title>how DBMS works | Funky's Blog</title>
+  <title>Multi-Data Center Consistency | Funky's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -255,7 +253,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/how-DBMS-works/">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Funky Gao">
@@ -272,7 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">how DBMS works</h1>
+          <h1 class="post-title" itemprop="name headline">Multi-Data Center Consistency</h1>
         
 
         <div class="post-meta">
@@ -284,8 +282,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-16T16:31:29+08:00">
-                2017-05-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T15:18:33+08:00">
+                2017-05-19
               </time>
             
 
@@ -324,17 +322,8 @@
       
 
       
-        <p><img src="https://github.com/funkygao/blogassets/blob/master/img/datastructuredb1.png?raw=true" alt="dbms"></p>
-<h3 id="Undo-log"><a href="#Undo-log" class="headerlink" title="Undo log"></a>Undo log</h3><ul>
-<li>Oracle和MySQL机制类似</li>
-<li>MS SQL Server里，称为transaction log</li>
-<li>PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本</li>
-</ul>
-<h3 id="Redo-log"><a href="#Redo-log" class="headerlink" title="Redo log"></a>Redo log</h3><ul>
-<li>Oracle和MySQL机制类似</li>
-<li>MS SQL Server里，称为transaction log</li>
-<li>PostgreSQL里称为WAL</li>
-</ul>
+        <p>MDCC提供了跨机房的分布式数据库强一致性模型</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://mdcc.cs.berkeley.edu/" target="_blank" rel="external">http://mdcc.cs.berkeley.edu/</a></p>
 
       
     </div>
@@ -364,7 +353,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/database/" rel="tag"># database</a>
+            <a href="/tags/一致性/" rel="tag"># 一致性</a>
           
         </div>
       
@@ -377,8 +366,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/16/scalability-papers/" rel="next" title="scalability papers">
-                <i class="fa fa-chevron-left"></i> scalability papers
+              <a href="/2017/05/19/distributed-snapshot/" rel="next" title="asynchronous distributed snapshot">
+                <i class="fa fa-chevron-left"></i> asynchronous distributed snapshot
               </a>
             
           </div>
@@ -386,10 +375,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/17/kateway-replay-messages/" rel="prev" title="kateway replay messages">
-                kateway replay messages <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -520,7 +505,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Undo-log"><span class="nav-number">1.</span> <span class="nav-text">Undo log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redo-log"><span class="nav-number">2.</span> <span class="nav-text">Redo log</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">1.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
