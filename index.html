@@ -318,14 +318,17 @@
       
         
           
-            <p>injecter负责写优化(WAL)，让storage node负责read优化: CQRS<br>与<a href="https://funkygao.github.io/2017/05/17/RocketMQ/">RocketMQ</a>类似:</p>
+            <p>injecter负责write优化(WAL)，让storage node负责read优化<br>与<a href="https://funkygao.github.io/2017/05/17/RocketMQ/">RocketMQ</a>类似: CQRS</p>
 <ul>
 <li>injecter = commit log</li>
 <li>storage node = consume log</li>
 </ul>
-<p>不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器<br>而<a href="https://funkygao.github.io/2017/05/17/RocketMQ/">RocketMQ</a>的commit log与consume log是<br>在同一台broker上的</p>
-<p>kafka是R/W紧耦合，无法独立scale<br>而oklog decouples read from write，可以独立scale</p>
-<h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injector上，injector间通过gossip来负载均衡，load高的会通过<br>与forwarder协商进行redirect distribution</p>
+<p>不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器<br>而<a href="https://funkygao.github.io/2017/05/17/RocketMQ/">RocketMQ</a>的commit log与consume log是在同一台broker上的</p>
+<ul>
+<li>kafka couples R/W，无法独立scale</li>
+<li>CQRS decouples R/W，可以独立scale</li>
+</ul>
+<h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injecter上，injecter间通过gossip来负载均衡，load高的会通过<br>与forwarder协商进行redirect distribution</p>
 <h2 id="query"><a href="#query" class="headerlink" title="query"></a>query</h2><p>scatter-gather</p>
 
           
