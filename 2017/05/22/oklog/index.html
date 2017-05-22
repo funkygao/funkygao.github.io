@@ -90,17 +90,17 @@
 
 
 
-<meta name="description" content="injecter负责写优化(WAL)，让storage node负责read优化: CQRS与RocketMQ类似:  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器 kafka是R/W紧耦合，无法独立scale而okl">
+<meta name="description" content="injecter负责写优化(WAL)，让storage node负责read优化: CQRS与RocketMQ类似:  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器而RocketMQ的commit log与consum">
 <meta name="keywords" content="PubSub">
 <meta property="og:type" content="article">
 <meta property="og:title" content="oklog">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/22/oklog/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="injecter负责写优化(WAL)，让storage node负责read优化: CQRS与RocketMQ类似:  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器 kafka是R/W紧耦合，无法独立scale而okl">
-<meta property="og:updated_time" content="2017-05-22T05:55:21.000Z">
+<meta property="og:description" content="injecter负责写优化(WAL)，让storage node负责read优化: CQRS与RocketMQ类似:  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器而RocketMQ的commit log与consum">
+<meta property="og:updated_time" content="2017-05-22T06:11:30.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="oklog">
-<meta name="twitter:description" content="injecter负责写优化(WAL)，让storage node负责read优化: CQRS与RocketMQ类似:  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器 kafka是R/W紧耦合，无法独立scale而okl">
+<meta name="twitter:description" content="injecter负责写优化(WAL)，让storage node负责read优化: CQRS与RocketMQ类似:  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器而RocketMQ的commit log与consum">
 
 
 
@@ -327,7 +327,7 @@
 <li>injecter = commit log</li>
 <li>storage node = consume log</li>
 </ul>
-<p>不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器</p>
+<p>不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器<br>而<a href="https://funkygao.github.io/2017/05/17/RocketMQ/">RocketMQ</a>的commit log与consume log是<br>在同一台broker上的</p>
 <p>kafka是R/W紧耦合，无法独立scale<br>而oklog decouples read from write，可以独立scale</p>
 <h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injector上，injector间通过gossip来负载均衡，load高的会通过<br>与forwarder协商进行redirect distribution</p>
 <h2 id="query"><a href="#query" class="headerlink" title="query"></a>query</h2><p>scatter-gather</p>
