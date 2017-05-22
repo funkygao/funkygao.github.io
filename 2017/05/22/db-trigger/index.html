@@ -90,17 +90,17 @@
 
 
 
-<meta name="description" content="Isolation教科书里的4种isolation  read uncommitted: 即dirty read，可能读到其他rollback的数据 read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同 repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read) s">
+<meta name="description" content="触发器的缺陷  如何监控 代码的版本控制 test 部署 性能损耗 多租户 资源隔离 无法频繁发布，如何应付频繁的需求变更">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mysql repeatable read write skew">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/index.html">
+<meta property="og:title" content="db trigger">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/22/db-trigger/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="Isolation教科书里的4种isolation  read uncommitted: 即dirty read，可能读到其他rollback的数据 read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同 repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read) s">
-<meta property="og:updated_time" content="2017-05-15T09:25:14.000Z">
+<meta property="og:description" content="触发器的缺陷  如何监控 代码的版本控制 test 部署 性能损耗 多租户 资源隔离 无法频繁发布，如何应付频繁的需求变更">
+<meta property="og:updated_time" content="2017-05-22T02:50:00.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mysql repeatable read write skew">
-<meta name="twitter:description" content="Isolation教科书里的4种isolation  read uncommitted: 即dirty read，可能读到其他rollback的数据 read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同 repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read) s">
+<meta name="twitter:title" content="db trigger">
+<meta name="twitter:description" content="触发器的缺陷  如何监控 代码的版本控制 test 部署 性能损耗 多租户 资源隔离 无法频繁发布，如何应付频繁的需求变更">
 
 
 
@@ -128,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/"/>
+  <link rel="canonical" href="http://funkygao.github.io/2017/05/22/db-trigger/"/>
 
 
 
 
 
-  <title>mysql repeatable read write skew | Funky's Blog</title>
+  <title>db trigger | Funky's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -253,7 +253,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/22/db-trigger/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Funky Gao">
@@ -270,7 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">mysql repeatable read write skew</h1>
+          <h1 class="post-title" itemprop="name headline">db trigger</h1>
         
 
         <div class="post-meta">
@@ -282,8 +282,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-12T09:18:24+08:00">
-                2017-05-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T10:40:14+08:00">
+                2017-05-22
               </time>
             
 
@@ -322,30 +322,17 @@
       
 
       
-        <h2 id="Isolation"><a href="#Isolation" class="headerlink" title="Isolation"></a>Isolation</h2><p>教科书里的4种isolation</p>
+        <p>触发器的缺陷</p>
 <ul>
-<li>read uncommitted: 即dirty read，可能读到其他rollback的数据</li>
-<li>read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同</li>
-<li>repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read)</li>
-<li>serialized</li>
+<li>如何监控</li>
+<li>代码的版本控制</li>
+<li>test</li>
+<li>部署</li>
+<li>性能损耗</li>
+<li>多租户</li>
+<li>资源隔离</li>
+<li>无法频繁发布，如何应付频繁的需求变更</li>
 </ul>
-<p>但它只是从锁的实现来描述的，不适用于MVCC。<br>各个数据库产品，虽然采用了这些isolation名字，但语义各不相同，很多与教科书里的定义不符</p>
-<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><p>不会出现phantom read。<br>MySQL里的RR其实是Snapshot Isolation，只有Serialized是完全基于锁</p>
-<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><p>实际上只有2个隔离级别：Read Committed和Serialized<br>而Serialized是基于MVCC的无锁实现，即Serialized Snapshot</p>
-<h2 id="MVCC-Snapshot"><a href="#MVCC-Snapshot" class="headerlink" title="MVCC Snapshot"></a>MVCC Snapshot</h2><p>存在write skew问题</p>
-<p>甲在一个银行有两张信用卡，分别是A和B。银行给这两张卡总的信用额度是2000，即A透支的额度和B透支的额度相加必须不大于2000：A+B&lt;=2000。</p>
-<p>A账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update a set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
-<p>B账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update b set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
-<p>假设现在credit(a)=1000, credit(b)=500, 1500&lt;=2000<br>甲同时用a账号消费400，b账号消费300<br>在mysql RR下，2个事务都成功，但2个事务结束后<br>credit(a)=1400, credit(b)=700, 2100&gt;2000</p>
-<p>如果是serialized隔离级别，则没有问题：一个事务会失败</p>
-<p>在mysql RR下，可以通过应用层加约束来避免write skew</p>
-<h2 id="结论for-mysql"><a href="#结论for-mysql" class="headerlink" title="结论for mysql"></a>结论for mysql</h2><p>不能期望加了一个事务就万事大吉，而要了解每种隔离级别的语义。</p>
-<ul>
-<li>涉及单行数据事务的话，只要 Read Committed ＋ 乐观锁就足够保证不丢写</li>
-<li>涉及多行数据的事务的话，Serializable 隔离环境的话不会出错，但是你不会开</li>
-<li>如果开 Repeatable Read （Snapshot）隔离级别，那么可能会因为 Write Skew 而丢掉写</li>
-</ul>
-<p>如果是金融业务，尽量不要用MySQL</p>
 
       
     </div>
@@ -388,8 +375,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/12/dual-write-conflict/" rel="next" title="dual write conflict">
-                <i class="fa fa-chevron-left"></i> dual write conflict
+              <a href="/2017/05/22/materialized-view/" rel="next" title="materialized view">
+                <i class="fa fa-chevron-left"></i> materialized view
               </a>
             
           </div>
@@ -397,10 +384,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/15/delay-and-schedule-message-delivery/" rel="prev" title="delay and schedule message delivery">
-                delay and schedule message delivery <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -447,17 +430,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.jpeg"
@@ -521,22 +495,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Isolation"><span class="nav-number">1.</span> <span class="nav-text">Isolation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL"><span class="nav-number">1.1.</span> <span class="nav-text">MySQL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL"><span class="nav-number">1.2.</span> <span class="nav-text">PostgreSQL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC-Snapshot"><span class="nav-number">2.</span> <span class="nav-text">MVCC Snapshot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论for-mysql"><span class="nav-number">3.</span> <span class="nav-text">结论for mysql</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       

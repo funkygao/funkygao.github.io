@@ -90,17 +90,19 @@
 
 
 
-<meta name="description" content="Isolation教科书里的4种isolation  read uncommitted: 即dirty read，可能读到其他rollback的数据 read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同 repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read) s">
+<meta name="description" content="物化试图，可以理解为cache of query results, derived result觉得用“异构表”可能更贴切  与试图不同，它是物理存在的，并由数据库来确保与主库的一致性它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly MySQL没有提供该功能，但通过dbus可以方便构造materialized viewPostgreSQL提">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mysql repeatable read write skew">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/index.html">
+<meta property="og:title" content="materialized view">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/22/materialized-view/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="Isolation教科书里的4种isolation  read uncommitted: 即dirty read，可能读到其他rollback的数据 read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同 repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read) s">
-<meta property="og:updated_time" content="2017-05-15T09:25:14.000Z">
+<meta property="og:description" content="物化试图，可以理解为cache of query results, derived result觉得用“异构表”可能更贴切  与试图不同，它是物理存在的，并由数据库来确保与主库的一致性它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly MySQL没有提供该功能，但通过dbus可以方便构造materialized viewPostgreSQL提">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true">
+<meta property="og:updated_time" content="2017-05-22T02:57:51.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mysql repeatable read write skew">
-<meta name="twitter:description" content="Isolation教科书里的4种isolation  read uncommitted: 即dirty read，可能读到其他rollback的数据 read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同 repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read) s">
+<meta name="twitter:title" content="materialized view">
+<meta name="twitter:description" content="物化试图，可以理解为cache of query results, derived result觉得用“异构表”可能更贴切  与试图不同，它是物理存在的，并由数据库来确保与主库的一致性它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly MySQL没有提供该功能，但通过dbus可以方便构造materialized viewPostgreSQL提">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true">
 
 
 
@@ -128,13 +130,13 @@
 
 
 
-  <link rel="canonical" href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/"/>
+  <link rel="canonical" href="http://funkygao.github.io/2017/05/22/materialized-view/"/>
 
 
 
 
 
-  <title>mysql repeatable read write skew | Funky's Blog</title>
+  <title>materialized view | Funky's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -253,7 +255,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/22/materialized-view/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Funky Gao">
@@ -270,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">mysql repeatable read write skew</h1>
+          <h1 class="post-title" itemprop="name headline">materialized view</h1>
         
 
         <div class="post-meta">
@@ -282,8 +284,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-12T09:18:24+08:00">
-                2017-05-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T10:05:02+08:00">
+                2017-05-22
               </time>
             
 
@@ -322,30 +324,11 @@
       
 
       
-        <h2 id="Isolation"><a href="#Isolation" class="headerlink" title="Isolation"></a>Isolation</h2><p>教科书里的4种isolation</p>
-<ul>
-<li>read uncommitted: 即dirty read，可能读到其他rollback的数据</li>
-<li>read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同</li>
-<li>repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read)</li>
-<li>serialized</li>
-</ul>
-<p>但它只是从锁的实现来描述的，不适用于MVCC。<br>各个数据库产品，虽然采用了这些isolation名字，但语义各不相同，很多与教科书里的定义不符</p>
-<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><p>不会出现phantom read。<br>MySQL里的RR其实是Snapshot Isolation，只有Serialized是完全基于锁</p>
-<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><p>实际上只有2个隔离级别：Read Committed和Serialized<br>而Serialized是基于MVCC的无锁实现，即Serialized Snapshot</p>
-<h2 id="MVCC-Snapshot"><a href="#MVCC-Snapshot" class="headerlink" title="MVCC Snapshot"></a>MVCC Snapshot</h2><p>存在write skew问题</p>
-<p>甲在一个银行有两张信用卡，分别是A和B。银行给这两张卡总的信用额度是2000，即A透支的额度和B透支的额度相加必须不大于2000：A+B&lt;=2000。</p>
-<p>A账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update a set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
-<p>B账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update b set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
-<p>假设现在credit(a)=1000, credit(b)=500, 1500&lt;=2000<br>甲同时用a账号消费400，b账号消费300<br>在mysql RR下，2个事务都成功，但2个事务结束后<br>credit(a)=1400, credit(b)=700, 2100&gt;2000</p>
-<p>如果是serialized隔离级别，则没有问题：一个事务会失败</p>
-<p>在mysql RR下，可以通过应用层加约束来避免write skew</p>
-<h2 id="结论for-mysql"><a href="#结论for-mysql" class="headerlink" title="结论for mysql"></a>结论for mysql</h2><p>不能期望加了一个事务就万事大吉，而要了解每种隔离级别的语义。</p>
-<ul>
-<li>涉及单行数据事务的话，只要 Read Committed ＋ 乐观锁就足够保证不丢写</li>
-<li>涉及多行数据的事务的话，Serializable 隔离环境的话不会出错，但是你不会开</li>
-<li>如果开 Repeatable Read （Snapshot）隔离级别，那么可能会因为 Write Skew 而丢掉写</li>
-</ul>
-<p>如果是金融业务，尽量不要用MySQL</p>
+        <p>物化试图，可以理解为cache of query results, derived result<br>觉得用“异构表”可能更贴切</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true" alt="materialized view"></p>
+<p>与试图不同，它是物理存在的，并由数据库来确保与主库的一致性<br>它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly</p>
+<p>MySQL没有提供该功能，但通过<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>可以方便构造materialized view<br>PostgreSQL提供了materialized view</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/materialized-view" target="_blank" rel="external">https://docs.microsoft.com/en-us/azure/architecture/patterns/materialized-view</a></p>
 
       
     </div>
@@ -388,8 +371,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/12/dual-write-conflict/" rel="next" title="dual write conflict">
-                <i class="fa fa-chevron-left"></i> dual write conflict
+              <a href="/2017/05/22/cache-invalidation/" rel="next" title="cache invalidation">
+                <i class="fa fa-chevron-left"></i> cache invalidation
               </a>
             
           </div>
@@ -398,8 +381,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/05/15/delay-and-schedule-message-delivery/" rel="prev" title="delay and schedule message delivery">
-                delay and schedule message delivery <i class="fa fa-chevron-right"></i>
+              <a href="/2017/05/22/db-trigger/" rel="prev" title="db trigger">
+                db trigger <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -531,7 +514,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Isolation"><span class="nav-number">1.</span> <span class="nav-text">Isolation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL"><span class="nav-number">1.1.</span> <span class="nav-text">MySQL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL"><span class="nav-number">1.2.</span> <span class="nav-text">PostgreSQL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC-Snapshot"><span class="nav-number">2.</span> <span class="nav-text">MVCC Snapshot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论for-mysql"><span class="nav-number">3.</span> <span class="nav-text">结论for mysql</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">1.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
