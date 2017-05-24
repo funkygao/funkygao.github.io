@@ -97,7 +97,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/05/22/oklog/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
 <meta property="og:description" content="injecter负责write优化(WAL)，让storage node负责read优化与RocketMQ类似: CQRS  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器而RocketMQ的commit log与con">
-<meta property="og:updated_time" content="2017-05-22T06:20:55.000Z">
+<meta property="og:updated_time" content="2017-05-23T01:35:42.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="oklog">
 <meta name="twitter:description" content="injecter负责write优化(WAL)，让storage node负责read优化与RocketMQ类似: CQRS  injecter = commit log storage node = consume log  不同在于：storage node是通过pull mode replication机制实现，可以与injecter位于不同机器而RocketMQ的commit log与con">
@@ -332,7 +332,7 @@
 <li>kafka couples R/W，无法独立scale</li>
 <li>CQRS decouples R/W，可以独立scale</li>
 </ul>
-<h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injecter上，injecter间通过gossip来负载均衡，load高的会通过<br>与forwarder协商进行redirect distribution</p>
+<h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injecter上，injecter间通过gossip来负载均衡，load高的会通过与forwarder协商进行redirect distribution</p>
 <h2 id="query"><a href="#query" class="headerlink" title="query"></a>query</h2><p>scatter-gather</p>
 
       
@@ -460,7 +460,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

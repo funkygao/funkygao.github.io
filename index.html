@@ -250,6 +250,283 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/24/kafka-redesign/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Funky Gao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Funky's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/24/kafka-redesign/" itemprop="url">kafka redesign</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-24T10:21:06+08:00">
+                2017-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Goals"><a href="#Goals" class="headerlink" title="Goals"></a>Goals</h2><ul>
+<li>support many topics<ul>
+<li>needle in haystack</li>
+</ul>
+</li>
+<li>IO optimization<ul>
+<li>R/W isolation</li>
+<li>index file leads to random sync write</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/23/apache-bookeeper/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Funky Gao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Funky's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/23/apache-bookeeper/" itemprop="url">apache bookeeper</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-23T17:04:32+08:00">
+                2017-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h2><ul>
+<li>没有topic/partition概念，一个stream是由多个ledger组成的，每个ledger是有边界的<br>createLedger(int ensSize, int writeQuorumSize, int ackQuorumSize)</li>
+<li>ledger只有int id，没有名字</li>
+<li>每个entry(log)是有unique int64 id的</li>
+<li>striped write: 交错存储</li>
+<li>各个存储节点bookie之间没有明确的主从关系</li>
+<li>shared WAL</li>
+<li>single writer</li>
+<li>Quorum投票复制，通过存储在zk里的LastAddConfirmedId确保read consistency</li>
+<li>bookie does not communicate with other bookies，由client进行并发broadcast/quorum</li>
+</ul>
+<h2 id="VS-Kafka"><a href="#VS-Kafka" class="headerlink" title="VS Kafka"></a>VS Kafka</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/kfk_bk.jpg?raw=true" alt="vs kafka"></p>
+<p>createLedger时，客户端决定如何placement(org.apache.bookkeeper.client.EnsemblePlacementPolicy)，然后存放在zookeeper<br>例如，5个bookie，createLedger(3, 3, 2)</p>
+<h2 id="IO-Model"><a href="#IO-Model" class="headerlink" title="IO Model"></a>IO Model</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bk_io.jpg?raw=true" alt="io"></p>
+<ul>
+<li>读写分离</li>
+<li>Disk 1: Journal(WAL) Device<ul>
+<li>{timestamp}.txn</li>
+</ul>
+</li>
+<li>Disk 2: Ledger Device<ul>
+<li>数据存放在多个ledger目录</li>
+<li>LastLogMark表示index+data在此之前的都已经持久化到了Ledger Device，之前的WAL可以删除</li>
+<li>异步写</li>
+<li>而且是顺序写<ul>
+<li>所有的active ledger共用一个entry logger</li>
+<li>读的时候利用ledger index/cache</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>[Disk 3]: Index Device<ul>
+<li>默认Disk2和Disk3是在一起的</li>
+</ul>
+</li>
+<li>在写入Memtable后，就可以向client ack了</li>
+</ul>
+<h3 id="IO被分成4种类型，分别优化"><a href="#IO被分成4种类型，分别优化" class="headerlink" title="IO被分成4种类型，分别优化"></a>IO被分成4种类型，分别优化</h3><ul>
+<li>sync sequential write: shared WAL</li>
+<li>async random write: group commit from Memtable</li>
+<li>tail read: from Memtable</li>
+<li>random read: from (index + os pagecache)</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://github.com/ivankelly/bookkeeper-tutorial" target="_blank" rel="external">https://github.com/ivankelly/bookkeeper-tutorial</a><br><a href="https://github.com/twitter/DistributedLog" target="_blank" rel="external">https://github.com/twitter/DistributedLog</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/22/SSD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -440,7 +717,7 @@
 <li>kafka couples R/W，无法独立scale</li>
 <li>CQRS decouples R/W，可以独立scale</li>
 </ul>
-<h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injecter上，injecter间通过gossip来负载均衡，load高的会通过<br>与forwarder协商进行redirect distribution</p>
+<h2 id="produce"><a href="#produce" class="headerlink" title="produce"></a>produce</h2><p>Producer通过forwarder连接到多个injecter上，injecter间通过gossip来负载均衡，load高的会通过与forwarder协商进行redirect distribution</p>
 <h2 id="query"><a href="#query" class="headerlink" title="query"></a>query</h2><p>scatter-gather</p>
 
           
@@ -908,6 +1185,7 @@
           
             <h2 id="What"><a href="#What" class="headerlink" title="What"></a>What</h2><p>Distributed Document Store</p>
 <ul>
+<li>RESTful API</li>
 <li>MySQL作为存储</li>
 <li>Helix负责集群</li>
 <li>Databus异步replicate不同数据中心commit log</li>
@@ -1187,234 +1465,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/19/https/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Funky Gao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Funky's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/19/https/" itemprop="url">https</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T08:21:27+08:00">
-                2017-05-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>curl <a href="https://baidu.com" target="_blank" rel="external">https://baidu.com</a><br>How the 270ms passed<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">1 1  0.0721 (0.0721)  C&gt;S  Handshake</div><div class="line">      ClientHello</div><div class="line">        Version 3.1</div><div class="line">        cipher suites</div><div class="line">        TLS_EMPTY_RENEGOTIATION_INFO_SCSV</div><div class="line">        TLS_DHE_RSA_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</div><div class="line">        TLS_DHE_DSS_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_256_CBC_SHA256</div><div class="line">        TLS_DHE_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</div><div class="line">        TLS_DHE_DSS_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_RSA_WITH_RC4_128_SHA</div><div class="line">        TLS_RSA_WITH_RC4_128_MD5</div><div class="line">        TLS_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_128_CBC_SHA256</div><div class="line">        TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA</div><div class="line">        TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA</div><div class="line">        TLS_RSA_WITH_3DES_EDE_CBC_SHA</div><div class="line">        compression methods</div><div class="line">                  NULL</div><div class="line">1 2  0.1202 (0.0480)  S&gt;C  Handshake</div><div class="line">      ServerHello</div><div class="line">        Version 3.1</div><div class="line">        session_id[32]=</div><div class="line">          b3 ea 99 ee 5a 4c 03 e8 e0 74 95 09 f1 11 09 2a</div><div class="line">          9d f5 8f 2a 26 7a d3 7f 71 ff dc 39 62 66 b0 f9</div><div class="line">        cipherSuite         TLS_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        compressionMethod                   NULL</div><div class="line">1 3  0.1205 (0.0002)  S&gt;C  Handshake</div><div class="line">      Certificate</div><div class="line">1 4  0.1205 (0.0000)  S&gt;C  Handshake</div><div class="line">      ServerHelloDone</div><div class="line">1 5  0.1244 (0.0039)  C&gt;S  Handshake</div><div class="line">      ClientKeyExchange</div><div class="line">1 6  0.1244 (0.0000)  C&gt;S  ChangeCipherSpec</div><div class="line">1 7  0.1244 (0.0000)  C&gt;S  Handshake</div><div class="line">1 8  0.1737 (0.0492)  S&gt;C  ChangeCipherSpec</div><div class="line">1 9  0.1737 (0.0000)  S&gt;C  Handshake</div><div class="line">1 10 0.1738 (0.0001)  C&gt;S  application_data</div><div class="line">1 11 0.2232 (0.0493)  S&gt;C  application_data</div><div class="line">1 12 0.2233 (0.0001)  C&gt;S  Alert</div><div class="line">1    0.2234 (0.0000)  C&gt;S  TCP FIN</div><div class="line">1    0.2709 (0.0475)  S&gt;C  TCP FIN</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/19/hlc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Funky Gao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Funky's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/19/hlc/" itemprop="url">hybrid logical clock</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T07:51:28+08:00">
-                2017-05-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>分布式事务，为了性能，目前通常提供SI/SSI级别的isolation，通过乐观冲突检测<br>而非2PC悲观方式实现，这就要求实现事务的causality，通常都是拿逻辑时钟实现total order<br>例如vector clock就是一种，zab里的txid也是；google percolator里的total order算是<br>另外一种逻辑时钟，但这种方法由于有明显瓶颈，也增加了一次消息传递</p>
-<p>但逻辑时钟无法反应物理时钟，因此有人提出了混合时钟，wall time + logical time，分别是<br>给人看和给机器看，原理比较简单，就是在交互消息时，接收方一定sender event happens before receiver</p>
-<p>但wall time本身比较脆弱，例如一个集群，有台机器ntp出现问题，管理员调整时间的时候出现人为<br>错误，本来应该是2017-09-09 10:00:00，结果typo成2071-09-09 10:00:00，后果是它会传染给集群<br>内所有机器，hlc里的wall time都会变成2071年，人工无法修复，除非允许丢弃历史数据，只有等<br>到2071年那一天系统会自动恢复，wall time部分也就失去了意义</p>
-<p>要解决这个问题，可以加入epoch<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">HLC</div><div class="line">+-------+-----------+--------------+</div><div class="line">| epoch | wall time | logical time |</div><div class="line">+-------+-----------+--------------+</div></pre></td></tr></table></figure></p>
-<p>修复2071问题时，只需把epoch+1</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1464,7 +1514,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

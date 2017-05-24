@@ -250,6 +250,234 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/19/https/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Funky Gao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Funky's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/19/https/" itemprop="url">https</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T08:21:27+08:00">
+                2017-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>curl <a href="https://baidu.com" target="_blank" rel="external">https://baidu.com</a><br>How the 270ms passed<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">1 1  0.0721 (0.0721)  C&gt;S  Handshake</div><div class="line">      ClientHello</div><div class="line">        Version 3.1</div><div class="line">        cipher suites</div><div class="line">        TLS_EMPTY_RENEGOTIATION_INFO_SCSV</div><div class="line">        TLS_DHE_RSA_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</div><div class="line">        TLS_DHE_DSS_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_256_CBC_SHA256</div><div class="line">        TLS_DHE_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</div><div class="line">        TLS_DHE_DSS_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_RSA_WITH_RC4_128_SHA</div><div class="line">        TLS_RSA_WITH_RC4_128_MD5</div><div class="line">        TLS_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_128_CBC_SHA256</div><div class="line">        TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA</div><div class="line">        TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA</div><div class="line">        TLS_RSA_WITH_3DES_EDE_CBC_SHA</div><div class="line">        compression methods</div><div class="line">                  NULL</div><div class="line">1 2  0.1202 (0.0480)  S&gt;C  Handshake</div><div class="line">      ServerHello</div><div class="line">        Version 3.1</div><div class="line">        session_id[32]=</div><div class="line">          b3 ea 99 ee 5a 4c 03 e8 e0 74 95 09 f1 11 09 2a</div><div class="line">          9d f5 8f 2a 26 7a d3 7f 71 ff dc 39 62 66 b0 f9</div><div class="line">        cipherSuite         TLS_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        compressionMethod                   NULL</div><div class="line">1 3  0.1205 (0.0002)  S&gt;C  Handshake</div><div class="line">      Certificate</div><div class="line">1 4  0.1205 (0.0000)  S&gt;C  Handshake</div><div class="line">      ServerHelloDone</div><div class="line">1 5  0.1244 (0.0039)  C&gt;S  Handshake</div><div class="line">      ClientKeyExchange</div><div class="line">1 6  0.1244 (0.0000)  C&gt;S  ChangeCipherSpec</div><div class="line">1 7  0.1244 (0.0000)  C&gt;S  Handshake</div><div class="line">1 8  0.1737 (0.0492)  S&gt;C  ChangeCipherSpec</div><div class="line">1 9  0.1737 (0.0000)  S&gt;C  Handshake</div><div class="line">1 10 0.1738 (0.0001)  C&gt;S  application_data</div><div class="line">1 11 0.2232 (0.0493)  S&gt;C  application_data</div><div class="line">1 12 0.2233 (0.0001)  C&gt;S  Alert</div><div class="line">1    0.2234 (0.0000)  C&gt;S  TCP FIN</div><div class="line">1    0.2709 (0.0475)  S&gt;C  TCP FIN</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/19/hlc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Funky Gao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Funky's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/19/hlc/" itemprop="url">hybrid logical clock</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T07:51:28+08:00">
+                2017-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>分布式事务，为了性能，目前通常提供SI/SSI级别的isolation，通过乐观冲突检测<br>而非2PC悲观方式实现，这就要求实现事务的causality，通常都是拿逻辑时钟实现total order<br>例如vector clock就是一种，zab里的txid也是；google percolator里的total order算是<br>另外一种逻辑时钟，但这种方法由于有明显瓶颈，也增加了一次消息传递</p>
+<p>但逻辑时钟无法反应物理时钟，因此有人提出了混合时钟，wall time + logical time，分别是<br>给人看和给机器看，原理比较简单，就是在交互消息时，接收方一定sender event happens before receiver</p>
+<p>但wall time本身比较脆弱，例如一个集群，有台机器ntp出现问题，管理员调整时间的时候出现人为<br>错误，本来应该是2017-09-09 10:00:00，结果typo成2071-09-09 10:00:00，后果是它会传染给集群<br>内所有机器，hlc里的wall time都会变成2071年，人工无法修复，除非允许丢弃历史数据，只有等<br>到2071年那一天系统会自动恢复，wall time部分也就失去了意义</p>
+<p>要解决这个问题，可以加入epoch<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">HLC</div><div class="line">+-------+-----------+--------------+</div><div class="line">| epoch | wall time | logical time |</div><div class="line">+-------+-----------+--------------+</div></pre></td></tr></table></figure></p>
+<p>修复2071问题时，只需把epoch+1</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/18/SRE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1199,239 +1427,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/scalability-papers/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Funky Gao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Funky's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/16/scalability-papers/" itemprop="url">scalability papers</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-16T16:28:29+08:00">
-                2017-05-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><a href="http://www.perfdynamics.com/Manifesto/USLscalability.html" target="_blank" rel="external">http://www.perfdynamics.com/Manifesto/USLscalability.html</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Funky Gao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Funky's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/16/PostgreSQL-MVCC/" itemprop="url">PostgreSQL MVCC</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-16T11:54:13+08:00">
-                2017-05-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p>MySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure.</p>
-<p>每个row有2个隐藏字段</p>
-<ul>
-<li>Tmin insert时的trx id</li>
-<li>Tmax delete时的trx id</li>
-</ul>
-<h2 id="INSERT"><a href="#INSERT" class="headerlink" title="INSERT"></a>INSERT</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_insert.png?raw=true" alt="insert"></p>
-<h2 id="DELETE"><a href="#DELETE" class="headerlink" title="DELETE"></a>DELETE</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_delete.png?raw=true" alt="delete"></p>
-<p>DELETE操作并不会马上物理删除，而是VACUUM进程调度进行purge</p>
-<h2 id="UPDATE"><a href="#UPDATE" class="headerlink" title="UPDATE"></a>UPDATE</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_update.png?raw=true" alt="update"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1481,7 +1476,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
