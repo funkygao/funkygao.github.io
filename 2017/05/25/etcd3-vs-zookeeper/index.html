@@ -90,17 +90,17 @@
 
 
 
-<meta name="description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets  Net etcd v3 gRPC，充分利用muliplex zookeeper支持NIO或者Netty">
+<meta name="description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets watcher功能丰富 支持index参数，不会lose event streaming recursive?    zk独有的特性 ephemeral/sequential znode  Net etcd">
 <meta name="keywords" content="一致性">
 <meta property="og:type" content="article">
 <meta property="og:title" content="etcd3 vs zookeeper">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets  Net etcd v3 gRPC，充分利用muliplex zookeeper支持NIO或者Netty">
-<meta property="og:updated_time" content="2017-05-25T09:14:38.000Z">
+<meta property="og:description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets watcher功能丰富 支持index参数，不会lose event streaming recursive?    zk独有的特性 ephemeral/sequential znode  Net etcd">
+<meta property="og:updated_time" content="2017-05-25T09:21:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="etcd3 vs zookeeper">
-<meta name="twitter:description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets  Net etcd v3 gRPC，充分利用muliplex zookeeper支持NIO或者Netty">
+<meta name="twitter:description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets watcher功能丰富 支持index参数，不会lose event streaming recursive?    zk独有的特性 ephemeral/sequential znode  Net etcd">
 
 
 
@@ -326,6 +326,15 @@
 <li>get and watch by prefix, by interval</li>
 <li>获取历史版本信息(这个非常有用)</li>
 <li>lease based TTL for key sets</li>
+<li>watcher功能丰富<ul>
+<li>支持index参数，不会lose event</li>
+<li>streaming</li>
+<li>recursive?</li>
+</ul>
+</li>
+</ul>
+<h2 id="zk独有的特性"><a href="#zk独有的特性" class="headerlink" title="zk独有的特性"></a>zk独有的特性</h2><ul>
+<li>ephemeral/sequential znode</li>
 </ul>
 <h2 id="Net"><a href="#Net" class="headerlink" title="Net"></a>Net</h2><ul>
 <li>etcd v3 gRPC，充分利用muliplex</li>
@@ -512,7 +521,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-v3独有的特性"><span class="nav-number">1.</span> <span class="nav-text">etcd v3独有的特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Net"><span class="nav-number">2.</span> <span class="nav-text">Net</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-v3独有的特性"><span class="nav-number">1.</span> <span class="nav-text">etcd v3独有的特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zk独有的特性"><span class="nav-number">2.</span> <span class="nav-text">zk独有的特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Net"><span class="nav-number">3.</span> <span class="nav-text">Net</span></a></li></ol></div>
             
 
           </div>
