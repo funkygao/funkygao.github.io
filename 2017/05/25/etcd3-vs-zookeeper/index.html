@@ -90,19 +90,17 @@
 
 
 
-<meta name="description" content="MDCC提供了跨机房的分布式数据库强一致性模型  Referenceshttp://mdcc.cs.berkeley.edu/">
+<meta name="description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets  Net etcd v3 gRPC，充分利用muliplex zookeeper支持NIO或者Netty">
 <meta name="keywords" content="一致性">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Multi-Data Center Consistency">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/index.html">
+<meta property="og:title" content="etcd3 vs zookeeper">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="MDCC提供了跨机房的分布式数据库强一致性模型  Referenceshttp://mdcc.cs.berkeley.edu/">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mdcc.png?raw=true">
-<meta property="og:updated_time" content="2017-05-19T08:09:06.000Z">
+<meta property="og:description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets  Net etcd v3 gRPC，充分利用muliplex zookeeper支持NIO或者Netty">
+<meta property="og:updated_time" content="2017-05-25T09:14:38.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Multi-Data Center Consistency">
-<meta name="twitter:description" content="MDCC提供了跨机房的分布式数据库强一致性模型  Referenceshttp://mdcc.cs.berkeley.edu/">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/mdcc.png?raw=true">
+<meta name="twitter:title" content="etcd3 vs zookeeper">
+<meta name="twitter:description" content="etcd v3独有的特性 get and watch by prefix, by interval 获取历史版本信息(这个非常有用) lease based TTL for key sets  Net etcd v3 gRPC，充分利用muliplex zookeeper支持NIO或者Netty">
 
 
 
@@ -130,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/"/>
+  <link rel="canonical" href="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/"/>
 
 
 
 
 
-  <title>Multi-Data Center Consistency | Funky's Blog</title>
+  <title>etcd3 vs zookeeper | Funky's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -255,7 +253,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Funky Gao">
@@ -272,7 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Multi-Data Center Consistency</h1>
+          <h1 class="post-title" itemprop="name headline">etcd3 vs zookeeper</h1>
         
 
         <div class="post-meta">
@@ -284,8 +282,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-19T15:18:33+08:00">
-                2017-05-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-25T17:07:34+08:00">
+                2017-05-25
               </time>
             
 
@@ -324,9 +322,15 @@
       
 
       
-        <p>MDCC提供了跨机房的分布式数据库强一致性模型</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/mdcc.png?raw=true" alt="mdcc"></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://mdcc.cs.berkeley.edu/" target="_blank" rel="external">http://mdcc.cs.berkeley.edu/</a></p>
+        <h2 id="etcd-v3独有的特性"><a href="#etcd-v3独有的特性" class="headerlink" title="etcd v3独有的特性"></a>etcd v3独有的特性</h2><ul>
+<li>get and watch by prefix, by interval</li>
+<li>获取历史版本信息(这个非常有用)</li>
+<li>lease based TTL for key sets</li>
+</ul>
+<h2 id="Net"><a href="#Net" class="headerlink" title="Net"></a>Net</h2><ul>
+<li>etcd v3 gRPC，充分利用muliplex</li>
+<li>zookeeper支持NIO或者Netty</li>
+</ul>
 
       
     </div>
@@ -369,8 +373,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/19/distributed-snapshot/" rel="next" title="asynchronous distributed snapshot">
-                <i class="fa fa-chevron-left"></i> asynchronous distributed snapshot
+              <a href="/2017/05/25/ElasticSearch-internals/" rel="next" title="ElasticSearch internals">
+                <i class="fa fa-chevron-left"></i> ElasticSearch internals
               </a>
             
           </div>
@@ -378,10 +382,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/22/Linked-Esprosso/" rel="prev" title="Linked Esprosso">
-                Linked Esprosso <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -512,7 +512,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">1.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-v3独有的特性"><span class="nav-number">1.</span> <span class="nav-text">etcd v3独有的特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Net"><span class="nav-number">2.</span> <span class="nav-text">Net</span></a></li></ol></div>
             
 
           </div>
