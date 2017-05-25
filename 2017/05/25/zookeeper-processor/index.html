@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="database," />
+  <meta name="keywords" content="一致性," />
 
 
 
@@ -90,19 +90,20 @@
 
 
 
-<meta name="description" content="物化试图，可以理解为cache of query results, derived result觉得用“异构表”可能更贴切  与试图不同，它是物理存在的，并由数据库来确保与主库的一致性它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly MySQL没有提供该功能，但通过dbus可以方便构造materialized viewPostgreSQL提">
-<meta name="keywords" content="database">
+<meta name="description" content="Chain of Responsibility为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain 123interface RequestProcessor &amp;#123;    void processRequest(Request request) throws RequestProcessorException;&amp;#125; LeaderZo">
+<meta name="keywords" content="一致性">
 <meta property="og:type" content="article">
-<meta property="og:title" content="materialized view">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/22/materialized-view/index.html">
+<meta property="og:title" content="zookeeper processor">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/25/zookeeper-processor/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="物化试图，可以理解为cache of query results, derived result觉得用“异构表”可能更贴切  与试图不同，它是物理存在的，并由数据库来确保与主库的一致性它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly MySQL没有提供该功能，但通过dbus可以方便构造materialized viewPostgreSQL提">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true">
-<meta property="og:updated_time" content="2017-05-22T02:57:51.000Z">
+<meta property="og:description" content="Chain of Responsibility为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain 123interface RequestProcessor &amp;#123;    void processRequest(Request request) throws RequestProcessorException;&amp;#125; LeaderZo">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor2.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor3.png?raw=true">
+<meta property="og:updated_time" content="2017-05-25T08:21:23.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="materialized view">
-<meta name="twitter:description" content="物化试图，可以理解为cache of query results, derived result觉得用“异构表”可能更贴切  与试图不同，它是物理存在的，并由数据库来确保与主库的一致性它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly MySQL没有提供该功能，但通过dbus可以方便构造materialized viewPostgreSQL提">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true">
+<meta name="twitter:title" content="zookeeper processor">
+<meta name="twitter:description" content="Chain of Responsibility为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain 123interface RequestProcessor &amp;#123;    void processRequest(Request request) throws RequestProcessorException;&amp;#125; LeaderZo">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor2.png?raw=true">
 
 
 
@@ -130,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="http://funkygao.github.io/2017/05/22/materialized-view/"/>
+  <link rel="canonical" href="http://funkygao.github.io/2017/05/25/zookeeper-processor/"/>
 
 
 
 
 
-  <title>materialized view | Funky's Blog</title>
+  <title>zookeeper processor | Funky's Blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -255,7 +256,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/22/materialized-view/">
+    <link itemprop="mainEntityOfPage" href="http://funkygao.github.io/2017/05/25/zookeeper-processor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Funky Gao">
@@ -272,7 +273,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">materialized view</h1>
+          <h1 class="post-title" itemprop="name headline">zookeeper processor</h1>
         
 
         <div class="post-meta">
@@ -284,8 +285,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T10:05:02+08:00">
-                2017-05-22
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-25T08:39:35+08:00">
+                2017-05-25
               </time>
             
 
@@ -324,11 +325,11 @@
       
 
       
-        <p>物化试图，可以理解为cache of query results, derived result<br>觉得用“异构表”可能更贴切</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true" alt="materialized view"></p>
-<p>与试图不同，它是物理存在的，并由数据库来确保与主库的一致性<br>它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly</p>
-<p>MySQL没有提供该功能，但通过<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>可以方便构造materialized view<br>PostgreSQL提供了materialized view</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/materialized-view" target="_blank" rel="external">https://docs.microsoft.com/en-us/azure/architecture/patterns/materialized-view</a></p>
+        <p>Chain of Responsibility<br>为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">interface RequestProcessor &#123;</div><div class="line">    void processRequest(Request request) throws RequestProcessorException;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>LeaderZooKeeperServer.java<br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor2.png?raw=true" alt="Leader"></p>
+<p>FollowerZooKeeperServer.java<br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor3.png?raw=true" alt="Follower"></p>
+<p>ZooKeeperServer.java<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func processPacket() &#123;</div><div class="line">    submitRequest()</div><div class="line">&#125;</div><div class="line"></div><div class="line">func submitRequest(req) &#123;</div><div class="line">    firstProcessor.processRequest(req)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -358,7 +359,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/database/" rel="tag"># database</a>
+            <a href="/tags/一致性/" rel="tag"># 一致性</a>
           
         </div>
       
@@ -371,8 +372,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/22/cache-invalidation/" rel="next" title="cache invalidation">
-                <i class="fa fa-chevron-left"></i> cache invalidation
+              <a href="/2017/05/24/kafka-redesign/" rel="next" title="kafka redesign">
+                <i class="fa fa-chevron-left"></i> kafka redesign
               </a>
             
           </div>
@@ -381,8 +382,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/05/22/db-trigger/" rel="prev" title="db trigger">
-                db trigger <i class="fa fa-chevron-right"></i>
+              <a href="/2017/05/25/2017-kafka-report/" rel="prev" title="2017 kafka report">
+                2017 kafka report <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -430,17 +431,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.jpeg"
@@ -504,22 +496,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">1.</span> <span class="nav-text">References</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
