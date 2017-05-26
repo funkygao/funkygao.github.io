@@ -98,8 +98,10 @@
 <meta property="og:site_name" content="Funky&#39;s Blog">
 <meta property="og:description" content="Chain of Responsibility为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain 123interface RequestProcessor &amp;#123;    void processRequest(Request request) throws RequestProcessorException;&amp;#125; LeaderZo">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor2.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkleader.jpeg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor3.png?raw=true">
-<meta property="og:updated_time" content="2017-05-25T08:21:23.000Z">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/zkfollower.jpeg?raw=true">
+<meta property="og:updated_time" content="2017-05-26T07:11:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zookeeper processor">
 <meta name="twitter:description" content="Chain of Responsibility为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain 123interface RequestProcessor &amp;#123;    void processRequest(Request request) throws RequestProcessorException;&amp;#125; LeaderZo">
@@ -327,8 +329,8 @@
       
         <p>Chain of Responsibility<br>为了实现各种服务器的代码结构的高度统一，不同角色的server对应不同的processor chain</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">interface RequestProcessor &#123;</div><div class="line">    void processRequest(Request request) throws RequestProcessorException;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>LeaderZooKeeperServer.java<br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor2.png?raw=true" alt="Leader"></p>
-<p>FollowerZooKeeperServer.java<br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor3.png?raw=true" alt="Follower"></p>
+<p>LeaderZooKeeperServer.java<br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor2.png?raw=true" alt="Leader"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkleader.jpeg?raw=true" alt="Leader"></p>
+<p>FollowerZooKeeperServer.java<br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkprocessor3.png?raw=true" alt="Follower"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/zkfollower.jpeg?raw=true" alt="Follower"></p>
 <p>ZooKeeperServer.java<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func processPacket() &#123;</div><div class="line">    submitRequest()</div><div class="line">&#125;</div><div class="line"></div><div class="line">func submitRequest(req) &#123;</div><div class="line">    firstProcessor.processRequest(req)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 
       
@@ -447,7 +449,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-count">37</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
