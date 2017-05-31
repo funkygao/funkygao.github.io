@@ -232,7 +232,14 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <ul>
+            <h2 id="Cassandra"><a href="#Cassandra" class="headerlink" title="Cassandra"></a>Cassandra</h2><h3 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h3><ul>
+<li>CQL(Cassandra Query Language)</li>
+<li>1,000 node clusters</li>
+<li>multi-data center</li>
+<li>out-of-the-box replication</li>
+<li>ecosystem with Spark</li>
+</ul>
+<h3 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h3><ul>
 <li>LSM Tree</li>
 <li>Gossip P2P</li>
 <li>DHT</li>
@@ -245,7 +252,20 @@
 </li>
 <li>Thrift</li>
 </ul>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://db-engines.com/en/ranking" target="_blank" rel="external">https://db-engines.com/en/ranking</a><br><a href="https://github.com/scylladb/scylla" target="_blank" rel="external">https://github.com/scylladb/scylla</a><br><a href="http://www.scylladb.com/" target="_blank" rel="external">http://www.scylladb.com/</a></p>
+<h2 id="ScyllaDB"><a href="#ScyllaDB" class="headerlink" title="ScyllaDB"></a>ScyllaDB</h2><p>KVM核心人员用C++写的Cassandra(Java) clone，单机性能提高了10倍，主要原因是：</p>
+<ul>
+<li>DPDK, bypass kernel</li>
+<li>O_DIRECT IO, bypass pagecache, cache由scylla自己管理<ul>
+<li>pagecahce的格式必须是文件的格式(sstable)，而app level cache更有效，更terse</li>
+<li>compaction的时候，pagecache讲是个累赘，它可能造成很多热点数据的淘汰</li>
+</ul>
+</li>
+<li>把一个node看做是多个cpu core组成的cluster, share nothing</li>
+<li>sharding at the cpu core instead of node<br>更充分利用多核，减少contention，充分利用cpu cache, NUMA friendly</li>
+<li>在需要core间交换数据时，使用explicit messaging</li>
+<li>avoid JVM GC</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://db-engines.com/en/ranking" target="_blank" rel="external">https://db-engines.com/en/ranking</a><br><a href="https://github.com/scylladb/scylla" target="_blank" rel="external">https://github.com/scylladb/scylla</a><br><a href="http://www.scylladb.com/" target="_blank" rel="external">http://www.scylladb.com/</a><br><a href="https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/" target="_blank" rel="external">https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/</a><br><a href="https://news.ycombinator.com/item?id=10262719" target="_blank" rel="external">https://news.ycombinator.com/item?id=10262719</a></p>
 
         
         </div>
