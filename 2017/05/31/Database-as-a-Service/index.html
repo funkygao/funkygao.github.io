@@ -3,23 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>PostgreSQL MVCC | Funky&#39;s Blog</title>
+    <title>Database as a Service | Funky&#39;s Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="InternalsMySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure. 每个row有2个隐藏字段  Tmin insert时的trx id Tmax delete时的trx id  INSERT DELETE DELETE操作并不会马上物理删除，而是V">
+    <meta name="description" content="Trove https://wiki.openstack.org/wiki/Trove">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
-<meta property="og:title" content="PostgreSQL MVCC">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/index.html">
+<meta property="og:title" content="Database as a Service">
+<meta property="og:url" content="http://funkygao.github.io/2017/05/31/Database-as-a-Service/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="InternalsMySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure. 每个row有2个隐藏字段  Tmin insert时的trx id Tmax delete时的trx id  INSERT DELETE DELETE操作并不会马上物理删除，而是V">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mvcc_insert.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mvcc_delete.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mvcc_update.png?raw=true">
-<meta property="og:updated_time" content="2017-05-16T08:23:45.000Z">
+<meta property="og:description" content="Trove https://wiki.openstack.org/wiki/Trove">
+<meta property="og:updated_time" content="2017-05-31T05:43:41.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="PostgreSQL MVCC">
-<meta name="twitter:description" content="InternalsMySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure. 每个row有2个隐藏字段  Tmin insert时的trx id Tmax delete时的trx id  INSERT DELETE DELETE操作并不会马上物理删除，而是V">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/mvcc_insert.png?raw=true">
+<meta name="twitter:title" content="Database as a Service">
+<meta name="twitter:description" content="Trove https://wiki.openstack.org/wiki/Trove">
     
 
     
@@ -202,7 +198,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-PostgreSQL-MVCC" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Database-as-a-Service" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +206,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            PostgreSQL MVCC
+            Database as a Service
         </h1>
     
 
@@ -219,8 +215,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/16/PostgreSQL-MVCC/">
-            <time datetime="2017-05-16T03:54:13.000Z" itemprop="datePublished">2017-05-16</time>
+        <a href="/2017/05/31/Database-as-a-Service/">
+            <time datetime="2017-05-31T05:37:27.000Z" itemprop="datePublished">2017-05-31</time>
         </a>
     </div>
 
@@ -240,16 +236,8 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><p>MySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure.</p>
-<p>每个row有2个隐藏字段</p>
-<ul>
-<li>Tmin insert时的trx id</li>
-<li>Tmax delete时的trx id</li>
-</ul>
-<h2 id="INSERT"><a href="#INSERT" class="headerlink" title="INSERT"></a>INSERT</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_insert.png?raw=true" alt="insert"></p>
-<h2 id="DELETE"><a href="#DELETE" class="headerlink" title="DELETE"></a>DELETE</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_delete.png?raw=true" alt="delete"></p>
-<p>DELETE操作并不会马上物理删除，而是VACUUM进程调度进行purge</p>
-<h2 id="UPDATE"><a href="#UPDATE" class="headerlink" title="UPDATE"></a>UPDATE</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mvcc_update.png?raw=true" alt="update"></p>
+            <p>Trove</p>
+<p><a href="https://wiki.openstack.org/wiki/Trove" target="_blank" rel="external">https://wiki.openstack.org/wiki/Trove</a></p>
 
         
         </div>
@@ -313,7 +301,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/31/Database-as-a-Service/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/">Comments</a>
     
 
         </footer>
@@ -322,19 +310,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/16/scalability-papers/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    scalability papers
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/16/VNC-protocol/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/05/31/DB-Schema-Management/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">VNC protocol</div>
+            <div class="article-nav-title">DB Schema Management</div>
         </a>
     
 </nav>
@@ -465,9 +444,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/';
+            this.page.url = 'http://funkygao.github.io/2017/05/31/Database-as-a-Service/';
         
-        this.page.identifier = 'PostgreSQL-MVCC';
+        this.page.identifier = 'Database-as-a-Service';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
