@@ -262,10 +262,10 @@
 </li>
 <li>把一个node看做是多个cpu core组成的cluster, share nothing</li>
 <li>sharding at the cpu core instead of node<br>更充分利用多核，减少contention，充分利用cpu cache, NUMA friendly</li>
-<li>在需要core间交换数据时，使用explicit messaging</li>
+<li>在需要core间交换数据时，使用explicit message passing</li>
 <li>avoid JVM GC</li>
 </ul>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://db-engines.com/en/ranking" target="_blank" rel="external">https://db-engines.com/en/ranking</a><br><a href="https://github.com/scylladb/scylla" target="_blank" rel="external">https://github.com/scylladb/scylla</a><br><a href="http://www.scylladb.com/" target="_blank" rel="external">http://www.scylladb.com/</a><br><a href="https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/" target="_blank" rel="external">https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/</a><br><a href="https://news.ycombinator.com/item?id=10262719" target="_blank" rel="external">https://news.ycombinator.com/item?id=10262719</a></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://db-engines.com/en/ranking" target="_blank" rel="external">https://db-engines.com/en/ranking</a><br><a href="https://github.com/scylladb/scylla" target="_blank" rel="external">https://github.com/scylladb/scylla</a><br><a href="http://www.scylladb.com/" target="_blank" rel="external">http://www.scylladb.com/</a><br><a href="http://www.seastar-project.org/" target="_blank" rel="external">http://www.seastar-project.org/</a><br><a href="https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/" target="_blank" rel="external">https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/</a><br><a href="https://news.ycombinator.com/item?id=10262719" target="_blank" rel="external">https://news.ycombinator.com/item?id=10262719</a></p>
 
         
         </div>
