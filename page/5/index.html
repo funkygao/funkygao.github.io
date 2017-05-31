@@ -3,19 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>cannot have exactly-once delivery | Funky&#39;s Blog</title>
+    <title>Funky&#39;s Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="http://bravenewgeek.com/you-cannot-have-exactly-once-delivery/">
-<meta name="keywords" content="PubSub">
-<meta property="og:type" content="article">
-<meta property="og:title" content="cannot have exactly-once delivery">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/17/cannot-have-exactly-once-delivery/index.html">
+    <meta property="og:type" content="website">
+<meta property="og:title" content="Funky&#39;s Blog">
+<meta property="og:url" content="http://funkygao.github.io/page/5/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="http://bravenewgeek.com/you-cannot-have-exactly-once-delivery/">
-<meta property="og:updated_time" content="2017-05-18T06:12:44.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="cannot have exactly-once delivery">
-<meta name="twitter:description" content="http://bravenewgeek.com/you-cannot-have-exactly-once-delivery/">
+<meta name="twitter:title" content="Funky&#39;s Blog">
     
 
     
@@ -198,15 +193,16 @@
 </aside>
 
             
-            <section id="main"><article id="post-cannot-have-exactly-once-delivery" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main">
+    <article id="post-2PL" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
             <header class="article-header">
                 
     
-        <h1 class="article-title" itemprop="name">
-            cannot have exactly-once delivery
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/11/2PL/">两段锁 2PL</a>
         </h1>
     
 
@@ -215,8 +211,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/cannot-have-exactly-once-delivery/">
-            <time datetime="2017-05-17T02:46:26.000Z" itemprop="datePublished">2017-05-17</time>
+        <a href="/2017/05/11/2PL/">
+            <time datetime="2017-05-11T07:33:41.000Z" itemprop="datePublished">2017-05-11</time>
         </a>
     </div>
 
@@ -225,7 +221,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+        <a class="tag-link" href="/tags/database/">database</a>
     </div>
 
                     </div>
@@ -236,7 +232,16 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><a href="http://bravenewgeek.com/you-cannot-have-exactly-once-delivery/" target="_blank" rel="external">http://bravenewgeek.com/you-cannot-have-exactly-once-delivery/</a></p>
+            <p>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段</p>
+<p>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件</p>
+<p>MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC</p>
+<p>MySQL 2PL提供2种锁</p>
+<ul>
+<li>shared(read)</li>
+<li>exclusive(write)</li>
+</ul>
+<p>读写互斥，但读读不互斥</p>
+<p>MySQL serialized isolation<br><img src="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true" alt="2pl"></p>
 
         
         </div>
@@ -300,48 +305,19 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/17/cannot-have-exactly-once-delivery/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/cannot-have-exactly-once-delivery/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/11/2PL/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/2PL/">Comments</a>
     
 
         </footer>
     </div>
     
-        
-<nav id="article-nav">
-    
-        <a href="/2017/05/18/batch-insert/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    batch insert(mysql)
-                
-            </div>
-        </a>
-    
-    
-        <a href="/2017/05/17/RocketMQ/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">RocketMQ解读</div>
-        </a>
-    
-</nav>
-
-
-    
 </article>
 
 
-    
-    <section id="comments">
-    
-        
-    <div id="disqus_thread">
-        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
 
-    
-    </section>
-
+    <nav id="page-nav">
+        <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
+    </nav>
 </section>
             
                 <aside id="sidebar">
@@ -452,13 +428,11 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/17/cannot-have-exactly-once-delivery/';
-        
-        this.page.identifier = 'cannot-have-exactly-once-delivery';
+        this.page.identifier = 'undefined';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/count.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
