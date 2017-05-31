@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                38
+                39
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,122 @@
 
             
             <section id="main">
+    <article id="post-DB-Schema-Management" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/31/DB-Schema-Management/">DB Schema Management</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/31/DB-Schema-Management/">
+            <time datetime="2017-05-31T03:06:12.000Z" itemprop="datePublished">2017-05-31</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/database/">database</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p><a href="https://github.com/skeema/skeema" target="_blank" rel="external">https://github.com/skeema/skeema</a></p>
+<p>统一控制dev/test/staging/prod等环境的scheme</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">$skeema</div><div class="line">Skeema is a MySQL schema management tool. It allows you to export a database</div><div class="line">schema to the filesystem, and apply online schema changes by modifying files.</div><div class="line"></div><div class="line">Usage:</div><div class="line">      skeema [&lt;options&gt;] &lt;command&gt;</div><div class="line"></div><div class="line">Commands:</div><div class="line">      add-environment  Add a new named environment to an existing host directory</div><div class="line">      diff             Compare a DB instance&apos;s schemas and tables to the filesystem</div><div class="line">      help             Display usage information</div><div class="line">      init             Save a DB instance&apos;s schemas and tables to the filesystem</div><div class="line">      lint             Verify table files and reformat them in a standardized way</div><div class="line">      pull             Update the filesystem representation of schemas and tables</div><div class="line">      push             Alter tables on DBs to reflect the filesystem representation</div><div class="line">      version          Display program version</div></pre></td></tr></table></figure>
+<p>与<a href="http://funkygao.github.io/2017/05/11/osc/">mysql在线alter table设计</a>不同，它是higher level的，底层仍旧需要OSC支持:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">alter-wrapper=&quot;/usr/local/bin/pt-online-schema-change --execute --alter &#123;CLAUSES&#125; D=&#123;SCHEMA&#125;,t=&#123;TABLE&#125;,h=&#123;HOST&#125;,P=&#123;PORT&#125;,u=&#123;USER&#125;,p=&#123;PASSWORDX&#125;&quot;</div></pre></td></tr></table></figure></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.percona.com/live/17/sessions/automatic-mysql-schema-management-skeema" target="_blank" rel="external">https://www.percona.com/live/17/sessions/automatic-mysql-schema-management-skeema</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+    <div class="jiathis_style">
+    <span class="jiathis_txt">分享到：</span>
+    <a class="jiathis_button_qzone">QQ空间</a>
+    <a class="jiathis_button_tsina">新浪微博</a>
+    <a class="jiathis_button_tqq">腾讯微博</a>
+    <a class="jiathis_button_weixin">微信</a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+    <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<style>
+    .jiathis_style div:first-child:not(.jiadiv_01) {
+        width: auto !important;
+        border: none !important;
+    }
+    .jiathis_style .jiadiv_01 {
+        margin: 10px 0;
+        border-radius: 4px;
+        border: #e1e1e1 solid 1px;
+    }
+    .jiathis_style .jiadiv_01 div:first-child {
+        display: none;
+    }
+    .jiathis_style .jiadiv_02 {
+        padding: 7px 0 !important;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle {
+        width: 85px;
+        border: none;
+        height: auto;
+        margin: 3px 10px;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:hover {
+        border: none;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
+        margin-left: 0;
+    }
+    .jiathis_style .jtico:hover {
+        opacity: 1;
+    }
+    .jiathis_style .ckepopBottom,
+    .jiathis_style .centerBottom {
+        width: auto !important;
+        padding: 5px;
+        background: #f7f7f7;
+    }
+</style>
+
+
+
+</div>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/31/DB-Schema-Management/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-Cassandra" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -1328,122 +1444,6 @@
 
 
 
-    <article id="post-materialized-view" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/22/materialized-view/">materialized view</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/materialized-view/">
-            <time datetime="2017-05-22T02:05:02.000Z" itemprop="datePublished">2017-05-22</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>物化试图，可以理解为cache of query results, derived result<br>觉得用“异构表”可能更贴切</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/materializedview.png?raw=true" alt="materialized view"></p>
-<p>与试图不同，它是物理存在的，并由数据库来确保与主库的一致性<br>它是随时可以rebuilt from source store，应用是从来不会更新它的: readonly</p>
-<p>MySQL没有提供该功能，但通过<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>可以方便构造materialized view<br>PostgreSQL提供了materialized view</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/materialized-view" target="_blank" rel="external">https://docs.microsoft.com/en-us/azure/architecture/patterns/materialized-view</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-    <div class="jiathis_style">
-    <span class="jiathis_txt">分享到：</span>
-    <a class="jiathis_button_qzone">QQ空间</a>
-    <a class="jiathis_button_tsina">新浪微博</a>
-    <a class="jiathis_button_tqq">腾讯微博</a>
-    <a class="jiathis_button_weixin">微信</a>
-    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
-    <a class="jiathis_counter_style"></a>
-</div>
-<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
-<style>
-    .jiathis_style div:first-child:not(.jiadiv_01) {
-        width: auto !important;
-        border: none !important;
-    }
-    .jiathis_style .jiadiv_01 {
-        margin: 10px 0;
-        border-radius: 4px;
-        border: #e1e1e1 solid 1px;
-    }
-    .jiathis_style .jiadiv_01 div:first-child {
-        display: none;
-    }
-    .jiathis_style .jiadiv_02 {
-        padding: 7px 0 !important;
-    }
-    .jiathis_style .jiadiv_02 .jiatitle {
-        width: 85px;
-        border: none;
-        height: auto;
-        margin: 3px 10px;
-        padding: 6px 10px;
-        border-radius: 4px;
-    }
-    .jiathis_style .jiadiv_02 .jiatitle:hover {
-        border: none;
-    }
-    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
-        margin-left: 0;
-    }
-    .jiathis_style .jtico:hover {
-        opacity: 1;
-    }
-    .jiathis_style .ckepopBottom,
-    .jiathis_style .centerBottom {
-        width: auto !important;
-        padding: 5px;
-        background: #f7f7f7;
-    }
-</style>
-
-
-
-</div>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/22/materialized-view/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/22/materialized-view/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
@@ -1456,6 +1456,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/05/31/DB-Schema-Management/" class="title">DB Schema Management</a></p>
+                            <p class="item-date"><time datetime="2017-05-31T03:06:12.000Z" itemprop="datePublished">2017-05-31</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1493,15 +1502,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/05/24/kafka-redesign/" class="title">kafka redesign</a></p>
-                            <p class="item-date"><time datetime="2017-05-24T02:21:06.000Z" itemprop="datePublished">2017-05-24</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1511,7 +1511,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">38</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">39</span></li></ul>
         </div>
     </div>
 
@@ -1520,7 +1520,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SRE/">SRE</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ops/">ops</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scalability/">scalability</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sharding/">sharding</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/">tools</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SRE/">SRE</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ops/">ops</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scalability/">scalability</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sharding/">sharding</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/">tools</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
         </div>
     </div>
 
