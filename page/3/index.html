@@ -1318,7 +1318,7 @@
 <li>区分细粒度和粗粒度的锁<br>数据库是个分层结构 hierarchical structure</li>
 <li>提出了多种隔离级别<br>最初都是2PL实现的serializable isolation</li>
 </ul>
-<h2 id="Database-Recovery"><a href="#Database-Recovery" class="headerlink" title="Database Recovery"></a>Database Recovery</h2><p>IBM的ARIES算法(1992)，Algorithm for Recovery and Isolation Exploiting Semantics<br>ARIES can only update the data in-place after the log reaches storage<br>确保在恢复时，已经commit的事务要redo，未commit的事务要undo</p>
+<h2 id="Database-Recovery"><a href="#Database-Recovery" class="headerlink" title="Database Recovery"></a>Database Recovery</h2><p>IBM的ARIES算法(1992)，Algorithm for Recovery and Isolation Exploiting Semantics<br>ARIES can only update the data in-place after the log reaches storage<br>确保在恢复时，已经commit的事务要redo，未commit的事务要undo<br>redo log是物理的，undo log是逻辑的</p>
 <p>No Force, Steal</p>
 <ul>
 <li>database need not write dirty pages to disk at commit time<br>由于有redo log，update pages are written to disk lazily after commit<br>No Force</li>
