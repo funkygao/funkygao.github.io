@@ -3,14 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Archive | Funky&#39;s Blog</title>
+    <title>aliware | Funky&#39;s Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta property="og:type" content="website">
-<meta property="og:title" content="Funky&#39;s Blog">
-<meta property="og:url" content="http://funkygao.github.io/archives/index.html">
+    <meta name="description" content="https://www.aliyun.com/aliware  EDAS Enterprise Distributed Application Service RPC framework + elasticjob + qconf + GTS + Dapper + autoscale 鉴权数据下放到服务机器，避免性能瓶颈   MQ DRDS TDDL proxy avg() =&amp;gt; sum()/">
+<meta name="keywords" content="cloud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="aliware">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/01/aliware/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
+<meta property="og:description" content="https://www.aliyun.com/aliware  EDAS Enterprise Distributed Application Service RPC framework + elasticjob + qconf + GTS + Dapper + autoscale 鉴权数据下放到服务机器，避免性能瓶颈   MQ DRDS TDDL proxy avg() =&amp;gt; sum()/">
+<meta property="og:updated_time" content="2017-06-01T08:37:15.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Funky&#39;s Blog">
+<meta name="twitter:title" content="aliware">
+<meta name="twitter:description" content="https://www.aliyun.com/aliware  EDAS Enterprise Distributed Application Service RPC framework + elasticjob + qconf + GTS + Dapper + autoscale 鉴权数据下放到服务机器，避免性能瓶颈   MQ DRDS TDDL proxy avg() =&amp;gt; sum()/">
     
 
     
@@ -193,25 +198,21 @@
 </aside>
 
             
-            <section id="main"><div class="timeline timeline-wrap">
-    
-            <div class="timeline-row timeline-row-major">
-                <span class="node"><i class="fa fa-calendar"></i></span>
-                <h1 class="title">2017</h1>
-            </div>
+            <section id="main"><article id="post-aliware" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
         
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+        
+            <header class="article-header">
                 
     
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/06/01/aliware/">aliware</a>
+        <h1 class="article-title" itemprop="name">
+            aliware
         </h1>
     
 
-                <div class="article-meta">
-                    
+                
+                    <div class="article-meta">
+                        
     <div class="article-date">
         <i class="fa fa-calendar"></i>
         <a href="/2017/06/01/aliware/">
@@ -220,301 +221,142 @@
     </div>
 
 
-                    
-                    
+                        
+                        
     <div class="article-tag">
         <i class="fa fa-tag"></i>
         <a class="tag-link" href="/tags/cloud/">cloud</a>
     </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+                    </div>
                 
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/06/01/TiDB-KV-Mapping/">TiDB KV Mapping</a>
-        </h1>
-    
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p><a href="https://www.aliyun.com/aliware" target="_blank" rel="external">https://www.aliyun.com/aliware</a></p>
+<ul>
+<li>EDAS<ul>
+<li>Enterprise Distributed Application Service</li>
+<li>RPC framework + elasticjob + qconf + GTS + Dapper + autoscale</li>
+<li>鉴权数据下放到服务机器，避免性能瓶颈</li>
+</ul>
+</li>
+<li>MQ</li>
+<li>DRDS<ul>
+<li>TDDL proxy</li>
+<li>avg() =&gt; sum()/count()</li>
+<li>扩容，切换时client可能会失败，需要client retry</li>
+<li>通过/<em> TDDL: XXX</em>/ sql注释来实现特定SQL路由规则</li>
+<li>可以冷热数据分离</li>
+</ul>
+</li>
+<li>ARMS<br>streaming processing，具有nifi式visualized workflow editor</li>
+<li><p>GTS</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@GtsTransaction(timeout=1000*60)</div><div class="line">public void transfer(DataSource db1, DataSource db2) &#123;</div><div class="line">    // 强一致，但涉及的事务比较大时，性能下降非常明显</div><div class="line">    // 通过soft state MQ的最终一致性吞吐量要好的多</div><div class="line">    db1.getConnection().execute(&quot;sql1&quot;)</div><div class="line">    db2.getConnection().execute(&quot;sql2&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>SchedulerX</p>
+</li>
+<li>CSB<br>cloud service bus，相当于api gateway，包含协议转换</li>
+</ul>
 
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/01/TiDB-KV-Mapping/">
-            <time datetime="2017-06-01T06:30:58.000Z" itemprop="datePublished">2017-06-01</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
+        
         </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/06/01/ssd-vs-hdd/">SSD vs HDD</a>
-        </h1>
-    
+        <footer class="article-footer">
+            <div class="share-container">
 
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/01/ssd-vs-hdd/">
-            <time datetime="2017-06-01T03:27:37.000Z" itemprop="datePublished">2017-06-01</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/performance/">performance</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/06/01/scale/">scale</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/01/scale/">
-            <time datetime="2017-05-31T23:48:41.000Z" itemprop="datePublished">2017-06-01</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/performance/">performance</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/31/gnatsd/">gnatsd</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/gnatsd/">
-            <time datetime="2017-05-31T07:33:01.000Z" itemprop="datePublished">2017-05-31</time>
-        </a>
-    </div>
+    <div class="jiathis_style">
+    <span class="jiathis_txt">分享到：</span>
+    <a class="jiathis_button_qzone">QQ空间</a>
+    <a class="jiathis_button_tsina">新浪微博</a>
+    <a class="jiathis_button_tqq">腾讯微博</a>
+    <a class="jiathis_button_weixin">微信</a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+    <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<style>
+    .jiathis_style div:first-child:not(.jiadiv_01) {
+        width: auto !important;
+        border: none !important;
+    }
+    .jiathis_style .jiadiv_01 {
+        margin: 10px 0;
+        border-radius: 4px;
+        border: #e1e1e1 solid 1px;
+    }
+    .jiathis_style .jiadiv_01 div:first-child {
+        display: none;
+    }
+    .jiathis_style .jiadiv_02 {
+        padding: 7px 0 !important;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle {
+        width: 85px;
+        border: none;
+        height: auto;
+        margin: 3px 10px;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:hover {
+        border: none;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
+        margin-left: 0;
+    }
+    .jiathis_style .jtico:hover {
+        opacity: 1;
+    }
+    .jiathis_style .ckepopBottom,
+    .jiathis_style .centerBottom {
+        width: auto !important;
+        padding: 5px;
+        background: #f7f7f7;
+    }
+</style>
 
 
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/31/microservice-gateway/">microservice gateway</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/microservice-gateway/">
-            <time datetime="2017-05-31T06:11:12.000Z" itemprop="datePublished">2017-05-31</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/cloud/">cloud</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/31/Database-as-a-Service/">Database as a Service</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/Database-as-a-Service/">
-            <time datetime="2017-05-31T05:37:27.000Z" itemprop="datePublished">2017-05-31</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/31/DB-Schema-Management/">DB Schema Management</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/DB-Schema-Management/">
-            <time datetime="2017-05-31T03:06:12.000Z" itemprop="datePublished">2017-05-31</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/31/Cassandra/">Cassandra vs ScyllaDB</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/Cassandra/">
-            <time datetime="2017-05-31T00:16:23.000Z" itemprop="datePublished">2017-05-31</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/25/etcd3-vs-zookeeper/">etcd3 vs zookeeper</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/25/etcd3-vs-zookeeper/">
-            <time datetime="2017-05-25T09:07:34.000Z" itemprop="datePublished">2017-05-25</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
 </div>
 
-    <nav id="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/5/">5</a><a class="extend next" rel="next" href="/archives/page/2/">Next &raquo;</a>
-    </nav>
+            
+    
+        <a href="http://funkygao.github.io/2017/06/01/aliware/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/aliware/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2017/06/01/TiDB-KV-Mapping/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">TiDB KV Mapping</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
 </section>
             
                 <aside id="sidebar">
@@ -625,11 +467,13 @@
     <script>
     var disqus_config = function () {
         
-        this.page.identifier = 'undefined';
+            this.page.url = 'http://funkygao.github.io/2017/06/01/aliware/';
+        
+        this.page.identifier = 'aliware';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/count.js';
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
