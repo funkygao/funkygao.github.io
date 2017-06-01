@@ -3,14 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Archive: 2017/5 | Funky&#39;s Blog</title>
+    <title>KafkaSpout | Funky&#39;s Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta property="og:type" content="website">
-<meta property="og:title" content="Funky&#39;s Blog">
-<meta property="og:url" content="http://funkygao.github.io/archives/2017/05/page/2/index.html">
+    <meta name="description" content="config12345678fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequestfetchMaxWait = 10000              // by defaultforceFromStart = falseConfig.TOPOLOGY_ACKERS                   // if">
+<meta name="keywords" content="PubSub">
+<meta property="og:type" content="article">
+<meta property="og:title" content="KafkaSpout">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/01/KafkaSpout/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
+<meta property="og:description" content="config12345678fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequestfetchMaxWait = 10000              // by defaultforceFromStart = falseConfig.TOPOLOGY_ACKERS                   // if">
+<meta property="og:updated_time" content="2017-06-01T11:29:56.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Funky&#39;s Blog">
+<meta name="twitter:title" content="KafkaSpout">
+<meta name="twitter:description" content="config12345678fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequestfetchMaxWait = 10000              // by defaultforceFromStart = falseConfig.TOPOLOGY_ACKERS                   // if">
     
 
     
@@ -193,328 +198,142 @@
 </aside>
 
             
-            <section id="main"><div class="timeline timeline-wrap">
-    
-            <div class="timeline-row timeline-row-major">
-                <span class="node"><i class="fa fa-calendar"></i></span>
-                <h1 class="title">2017</h1>
-            </div>
+            <section id="main"><article id="post-KafkaSpout" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
         
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+        
+            <header class="article-header">
                 
     
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/22/SSD/">SSD</a>
+        <h1 class="article-title" itemprop="name">
+            KafkaSpout
         </h1>
     
 
-                <div class="article-meta">
-                    
+                
+                    <div class="article-meta">
+                        
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/SSD/">
-            <time datetime="2017-05-22T06:31:39.000Z" itemprop="datePublished">2017-05-22</time>
+        <a href="/2017/06/01/KafkaSpout/">
+            <time datetime="2017-06-01T10:04:04.000Z" itemprop="datePublished">2017-06-01</time>
         </a>
     </div>
 
 
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/22/oklog/">oklog</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/oklog/">
-            <time datetime="2017-05-22T03:22:58.000Z" itemprop="datePublished">2017-05-22</time>
-        </a>
-    </div>
-
-
-                    
-                    
+                        
+                        
     <div class="article-tag">
         <i class="fa fa-tag"></i>
         <a class="tag-link" href="/tags/PubSub/">PubSub</a>
     </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+                    </div>
                 
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/22/db-trigger/">db trigger</a>
-        </h1>
-    
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="config"><a href="#config" class="headerlink" title="config"></a>config</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequest</div><div class="line">fetchMaxWait = 10000              // by default</div><div class="line">forceFromStart = false</div><div class="line"></div><div class="line">Config.TOPOLOGY_ACKERS                   // if 0, acking disabled</div><div class="line">Config.TOPOLOGY-ACKER-EXECUTORS   = 20</div><div class="line">Config.TOPOLOGY_MAX_SPOUT_PENDING = 5000 // max in-flight tuples per spout</div><div class="line">Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS     // 30s by default</div></pre></td></tr></table></figure>
+<h2 id="emit-ack-fail-flow"><a href="#emit-ack-fail-flow" class="headerlink" title="emit/ack/fail flow"></a>emit/ack/fail flow</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">class PartitionManager &#123;</div><div class="line">    SortedSet&lt;Long&gt; _pending, failed = new TreeSet();</div><div class="line">    LinkedList&lt;MessageAndRealOffset&gt; _waitingToEmit = new LinkedList();</div><div class="line"></div><div class="line">    func EmitState next(SpoutOutputCollector collector) &#123;</div><div class="line">        // 从LinkedList _waitingToEmit里取一条消息</div><div class="line">        MessageAndRealOffset toEmit = (MessageAndRealOffset)this._waitingToEmit.pollFirst();</div><div class="line">        // emit时指定了messageID</div><div class="line">        // BasicBoltExecutor.execute会通过template method自动执行_collector.getOutputter().ack(input)</div><div class="line">        // 即KafkaSpout.ack -&gt; PartitionManager.ack</div><div class="line">        collector.emit(tup, new PartitionManager.KafkaMessageId(this._partition, toEmit.offset));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    func ack(Long offset) &#123;</div><div class="line">        this._pending.remove(offset)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    func fail(Long offset) &#123;</div><div class="line">        this.failed.add(offset);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class TopologyBuilder &#123;</div><div class="line">    public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelism_hint) &#123;</div><div class="line">        return setBolt(id, new BasicBoltExecutor(bolt), parallelism_hint);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class BasicBoltExecutor &#123;</div><div class="line">    public void execute(Tuple input) &#123;</div><div class="line">         _collector.setContext(input);</div><div class="line">         try &#123;</div><div class="line">             _bolt.execute(input, _collector);</div><div class="line">             _collector.getOutputter().ack(input);</div><div class="line">         &#125; catch(FailedException e) &#123;</div><div class="line">             _collector.getOutputter().fail(input);</div><div class="line">         &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/db-trigger/">
-            <time datetime="2017-05-22T02:40:14.000Z" itemprop="datePublished">2017-05-22</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
+        
         </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/22/materialized-view/">materialized view</a>
-        </h1>
-    
+        <footer class="article-footer">
+            <div class="share-container">
 
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/materialized-view/">
-            <time datetime="2017-05-22T02:05:02.000Z" itemprop="datePublished">2017-05-22</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/22/cache-invalidation/">cache invalidation</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/cache-invalidation/">
-            <time datetime="2017-05-22T01:52:37.000Z" itemprop="datePublished">2017-05-22</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/22/Linked-Esprosso/">Linked Esprosso</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/22/Linked-Esprosso/">
-            <time datetime="2017-05-22T00:07:48.000Z" itemprop="datePublished">2017-05-22</time>
-        </a>
-    </div>
+    <div class="jiathis_style">
+    <span class="jiathis_txt">分享到：</span>
+    <a class="jiathis_button_qzone">QQ空间</a>
+    <a class="jiathis_button_tsina">新浪微博</a>
+    <a class="jiathis_button_tqq">腾讯微博</a>
+    <a class="jiathis_button_weixin">微信</a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+    <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<style>
+    .jiathis_style div:first-child:not(.jiadiv_01) {
+        width: auto !important;
+        border: none !important;
+    }
+    .jiathis_style .jiadiv_01 {
+        margin: 10px 0;
+        border-radius: 4px;
+        border: #e1e1e1 solid 1px;
+    }
+    .jiathis_style .jiadiv_01 div:first-child {
+        display: none;
+    }
+    .jiathis_style .jiadiv_02 {
+        padding: 7px 0 !important;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle {
+        width: 85px;
+        border: none;
+        height: auto;
+        margin: 3px 10px;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:hover {
+        border: none;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
+        margin-left: 0;
+    }
+    .jiathis_style .jtico:hover {
+        opacity: 1;
+    }
+    .jiathis_style .ckepopBottom,
+    .jiathis_style .centerBottom {
+        width: auto !important;
+        padding: 5px;
+        background: #f7f7f7;
+    }
+</style>
 
 
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/Multi-Data-Center-Consistency/">Multi-Data Center Consistency</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/Multi-Data-Center-Consistency/">
-            <time datetime="2017-05-19T07:18:33.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/distributed-snapshot/">asynchronous distributed snapshot</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/distributed-snapshot/">
-            <time datetime="2017-05-19T02:32:48.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/https/">https</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/https/">
-            <time datetime="2017-05-19T00:21:27.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/ops/">ops</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/hlc/">hybrid logical clock</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/hlc/">
-            <time datetime="2017-05-18T23:51:28.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
 </div>
 
-    <nav id="page-nav">
-        <a class="extend prev" rel="prev" href="/archives/2017/05/">&laquo; Prev</a><a class="page-number" href="/archives/2017/05/">1</a><span class="page-number current">2</span><a class="page-number" href="/archives/2017/05/page/3/">3</a><a class="page-number" href="/archives/2017/05/page/4/">4</a><a class="page-number" href="/archives/2017/05/page/5/">5</a><a class="extend next" rel="next" href="/archives/2017/05/page/3/">Next &raquo;</a>
-    </nav>
+            
+    
+        <a href="http://funkygao.github.io/2017/06/01/KafkaSpout/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/KafkaSpout/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2017/06/01/aliware/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">aliware</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
 </section>
             
                 <aside id="sidebar">
@@ -625,11 +444,13 @@
     <script>
     var disqus_config = function () {
         
-        this.page.identifier = 'undefined';
+            this.page.url = 'http://funkygao.github.io/2017/06/01/KafkaSpout/';
+        
+        this.page.identifier = 'KafkaSpout';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/count.js';
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
