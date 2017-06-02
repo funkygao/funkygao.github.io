@@ -14,7 +14,7 @@
 <meta property="og:description" content="configTopology config TOPOLOGY_WORKERS 整个topology在所有节点上的java进程总数 例如，设置成25，parallelism=150，那么每个worker进程会创建150/25=6个线程执行task   TOPOLOGY_ACKER_EXECUTORS = 20 不设或者为null，it=TOPOLOGY_WORKERS，即one acker task">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/backpressure.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/storm-internal-message-queues.png?raw=true">
-<meta property="og:updated_time" content="2017-06-02T01:01:21.000Z">
+<meta property="og:updated_time" content="2017-06-02T06:14:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="KafkaSpout">
 <meta name="twitter:description" content="configTopology config TOPOLOGY_WORKERS 整个topology在所有节点上的java进程总数 例如，设置成25，parallelism=150，那么每个worker进程会创建150/25=6个线程执行task   TOPOLOGY_ACKER_EXECUTORS = 20 不设或者为null，it=TOPOLOGY_WORKERS，即one acker task">
@@ -250,12 +250,15 @@
 <li>设置为0，表示turn off ack/reliability</li>
 </ul>
 </li>
-<li>TOPOLOGY_MAX_SPOUT_PENDING = 5000 <ul>
+<li><p>TOPOLOGY_MAX_SPOUT_PENDING = 5000 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">(defn executor-max-spout-pending [storm-conf num-tasks]</div><div class="line">  (let [p (storm-conf TOPOLOGY-MAX-SPOUT-PENDING)]</div><div class="line">    (if p (* p num-tasks))))</div></pre></td></tr></table></figure>
+<ul>
 <li>max in-flight(not ack or fail) spout tuples on a single spout task at once</li>
 <li>如果不指定，默认是1</li>
 </ul>
 </li>
-<li>TOPOLOGY_BACKPRESSURE_ENABLE = false</li>
+<li><p>TOPOLOGY_BACKPRESSURE_ENABLE = false</p>
+</li>
 <li>TOPOLOGY_MESSAGE_TIMEOUT_SECS<br>30s by default</li>
 </ul>
 <h3 id="KafkaSpout-config"><a href="#KafkaSpout-config" class="headerlink" title="KafkaSpout config"></a>KafkaSpout config</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequest</div><div class="line">fetchMaxWait    = 10000           // by default</div><div class="line">forceFromStart  = false</div></pre></td></tr></table></figure>

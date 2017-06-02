@@ -232,10 +232,12 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p>对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆</p>
+            <h2 id="Acker"><a href="#Acker" class="headerlink" title="Acker"></a>Acker</h2><p>对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆</p>
 <p>当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现</p>
 <p>tuple tree，中间任意一个edge fail，会理解触发Spout的fail，但后面的Bolt的执行不受影响。做无用功？</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true" alt="backtype.storm.daemon.acker"></p>
+<h2 id="Spout-Executor"><a href="#Spout-Executor" class="headerlink" title="Spout Executor"></a>Spout Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true" alt="spout executor"></p>
+<h2 id="Bolt-Executor"><a href="#Bolt-Executor" class="headerlink" title="Bolt Executor"></a>Bolt Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true" alt="bolt executor"></p>
 
         
         </div>
@@ -471,12 +473,15 @@
 <li>设置为0，表示turn off ack/reliability</li>
 </ul>
 </li>
-<li>TOPOLOGY_MAX_SPOUT_PENDING = 5000 <ul>
+<li><p>TOPOLOGY_MAX_SPOUT_PENDING = 5000 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">(defn executor-max-spout-pending [storm-conf num-tasks]</div><div class="line">  (let [p (storm-conf TOPOLOGY-MAX-SPOUT-PENDING)]</div><div class="line">    (if p (* p num-tasks))))</div></pre></td></tr></table></figure>
+<ul>
 <li>max in-flight(not ack or fail) spout tuples on a single spout task at once</li>
 <li>如果不指定，默认是1</li>
 </ul>
 </li>
-<li>TOPOLOGY_BACKPRESSURE_ENABLE = false</li>
+<li><p>TOPOLOGY_BACKPRESSURE_ENABLE = false</p>
+</li>
 <li>TOPOLOGY_MESSAGE_TIMEOUT_SECS<br>30s by default</li>
 </ul>
 <h3 id="KafkaSpout-config"><a href="#KafkaSpout-config" class="headerlink" title="KafkaSpout config"></a>KafkaSpout config</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequest</div><div class="line">fetchMaxWait    = 10000           // by default</div><div class="line">forceFromStart  = false</div></pre></td></tr></table></figure>
