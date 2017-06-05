@@ -70,7 +70,7 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
@@ -89,9 +89,9 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Posts',
+            POSTS: 'Articles',
             PAGES: 'Pages',
-            CATEGORIES: 'Categories',
+            CATEGORIES: 'Catégories',
             TAGS: 'Tags',
             UNTITLED: '(Untitled)',
         },
@@ -117,7 +117,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
     </div>
 
                 </td>
@@ -137,16 +137,16 @@
             <h2 id="name">Funky Gao</h2>
             <h3 id="title">Explore, Solve problems</h3>
             <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
-            <a id="follow" target="_blank" href="https://github.com/funkygao/">FOLLOW</a>
+            <a id="follow" target="_blank" href="https://github.com/funkygao/">SUIVRE</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                49
-                <span>posts</span>
+                50
+                <span>Articles</span>
             </div>
             <div class="article-info-block">
                 9
-                <span>tags</span>
+                <span>Tags</span>
             </div>
         </div>
         
@@ -194,6 +194,145 @@
 
             
             <section id="main">
+    <article id="post-InnoDB-MVCC" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/16/InnoDB-MVCC/">InnoDB MVCC</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/16/InnoDB-MVCC/">
+            <time datetime="2017-05-16T00:17:17.000Z" itemprop="datePublished">2017-05-16</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/database/">database</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h2><p>InnoDB中通过Undo log实现了txn rollback和MVCC，而并发控制(isolation)通过锁来实现<br>Undo log分为insert undo和update undo(delete是一种特殊的update)，回滚时</p>
+<ul>
+<li>insert只要把insert undo log丢弃即可</li>
+<li>update需要通过DB_ROLL_PTR DB_TRX_ID找到事务修改前的版本并恢复</li>
+</ul>
+<p>与redo log不同的是，磁盘上不存在单独的undo log文件，所有的undo log均存放在主ibd数据文件中（表空间），即使客户端设置了每表一个数据文件也是如此</p>
+<h2 id="内部存储"><a href="#内部存储" class="headerlink" title="内部存储"></a>内部存储</h2><p>InnoDB为每行row都reserved了隐藏字段(system column)</p>
+<ul>
+<li>DB_ROW_ID</li>
+<li>DB_TRX_ID</li>
+<li>DB_ROLL_PTR</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef ib_uint64_t ib_id_t;</div><div class="line"></div><div class="line">typedef ib_id_t row_id_t;</div><div class="line">typedef ib_id_t trx_id_t;</div><div class="line">typedef ib_id_t roll_ptr_t;</div></pre></td></tr></table></figure>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/undolog.jpg?raw=true" alt="syscol"></p>
+<h2 id="Undo-log实现方式"><a href="#Undo-log实现方式" class="headerlink" title="Undo log实现方式"></a>Undo log实现方式</h2><ul>
+<li>事务以排他锁的形式修改原始数据</li>
+<li>把修改前的数据存放于undo log，通过回滚指针与主数据关联</li>
+<li>修改成功（commit）啥都不做，失败则恢复undo log中的数据（rollback）</li>
+</ul>
+<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/undo1.jpg?raw=true" alt="demo"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/undo2.jpg?raw=true" alt="demo"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/undo3.jpg?raw=true" alt="demo"></p>
+<p>Innodb中存在purge线程，它会查询那些比现在最老的活动事务还早的undo log，并删除它们</p>
+<h2 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h2><h3 id="回滚成本"><a href="#回滚成本" class="headerlink" title="回滚成本"></a>回滚成本</h3><p>当事务正常提交时Innbod只需要更改事务状态为COMMIT即可，不需做其他额外的工作<br>而Rollback如果事务影响的行非常多，回滚则可能成本很高</p>
+<h3 id="write-skew"><a href="#write-skew" class="headerlink" title="write skew"></a>write skew</h3><p>InnoDB通过Undo log实现的MVCC在修改单行记录是没有问题的，但多行时就可能出问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">update table set col1=2 where id=1; // 成功，创建了undo log</div><div class="line">update table set col2=3 where id=2; // 失败</div><div class="line">rollback;</div></pre></td></tr></table></figure></p>
+<p>回滚row(id=1)时，由于它没有被lock，此时可能已经被另外一个txn给修改了，这个回滚会破坏已经commit的事务</p>
+<p>如果要解决这个问题，需要应用层进行控制</p>
+<p>另外一个例子<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">国家规定一个家庭最多养3只宠物(constraint)，Alice和Bob是一家人，他们现在有dog(1)+cat(1)</div><div class="line">如果并发地，Alice再买一只猫，而Bob再买一只狗，这2个事务就会write skew</div><div class="line">因为repeatable read：一个事务提交之后才visible by other txn</div><div class="line">TxnAlice      TxnBob</div><div class="line">cat=cat+1     dog=dog+1</div><div class="line">这2个事务都成功了，但却破坏了constraint</div></pre></td></tr></table></figure></p>
+<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><p>RR隔离级别下，普通select不加锁，使用MVCC进行一致性读取，即snapshot read<br>update, insert, delete, select … for update, select … lock in share mode都会进行加锁，并且读取的是当前版本: READ COMMITTED读<br>除了lock in share mode是S锁，其他都是X锁</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+    <div class="jiathis_style">
+    <span class="jiathis_txt">分享到：</span>
+    <a class="jiathis_button_qzone">QQ空间</a>
+    <a class="jiathis_button_tsina">新浪微博</a>
+    <a class="jiathis_button_tqq">腾讯微博</a>
+    <a class="jiathis_button_weixin">微信</a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+    <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<style>
+    .jiathis_style div:first-child:not(.jiadiv_01) {
+        width: auto !important;
+        border: none !important;
+    }
+    .jiathis_style .jiadiv_01 {
+        margin: 10px 0;
+        border-radius: 4px;
+        border: #e1e1e1 solid 1px;
+    }
+    .jiathis_style .jiadiv_01 div:first-child {
+        display: none;
+    }
+    .jiathis_style .jiadiv_02 {
+        padding: 7px 0 !important;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle {
+        width: 85px;
+        border: none;
+        height: auto;
+        margin: 3px 10px;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:hover {
+        border: none;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
+        margin-left: 0;
+    }
+    .jiathis_style .jtico:hover {
+        opacity: 1;
+    }
+    .jiathis_style .ckepopBottom,
+    .jiathis_style .centerBottom {
+        width: auto !important;
+        padding: 5px;
+        background: #f7f7f7;
+    }
+</style>
+
+
+
+</div>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/">Commentaires</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-microservice-transaction" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -296,7 +435,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/16/microservice-transaction/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/microservice-transaction/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/16/microservice-transaction/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/microservice-transaction/">Commentaires</a>
     
 
         </footer>
@@ -472,7 +611,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/15/zookeeper/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/zookeeper/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/15/zookeeper/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/zookeeper/">Commentaires</a>
     
 
         </footer>
@@ -589,7 +728,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/">Commentaires</a>
     
 
         </footer>
@@ -724,7 +863,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/">Commentaires</a>
     
 
         </footer>
@@ -836,7 +975,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/">Commentaires</a>
     
 
         </footer>
@@ -948,7 +1087,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/12/shard-scales/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/shard-scales/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/12/shard-scales/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/shard-scales/">Commentaires</a>
     
 
         </footer>
@@ -1118,7 +1257,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/11/mysql-group-replication/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/11/mysql-group-replication/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/">Commentaires</a>
     
 
         </footer>
@@ -1235,7 +1374,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/11/osc/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/osc/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/11/osc/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/osc/">Commentaires</a>
     
 
         </footer>
@@ -1356,7 +1495,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/11/2PL/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/2PL/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/11/2PL/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/2PL/">Commentaires</a>
     
 
         </footer>
@@ -1367,7 +1506,7 @@
 
 
     <nav id="page-nav">
-        <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
+        <a class="extend prev" rel="prev" href="/page/4/">&laquo; Préc</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
     </nav>
 </section>
             
@@ -1375,9 +1514,18 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">recent</h3>
+        <h3 class="widget-title">Récents</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/05/facebook-Mystery-Machine/" class="title">facebook Mystery Machine</a></p>
+                            <p class="item-date"><time datetime="2017-06-05T01:49:00.000Z" itemprop="datePublished">2017-06-05</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1415,15 +1563,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/01/TiDB-KV-Mapping/" class="title">TiDB KV Mapping</a></p>
-                            <p class="item-date"><time datetime="2017-06-01T06:30:58.000Z" itemprop="datePublished">2017-06-01</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1431,27 +1570,27 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">archives</h3>
+        <h3 class="widget-title">Archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tags</h3>
+        <h3 class="widget-title">Tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag cloud</h3>
+        <h3 class="widget-title">Nuage de tags</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 13.33px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15px;">architecture</a> <a href="/tags/cloud/" style="font-size: 11.67px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 13.33px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.67px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 13.33px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 13.33px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.67px;">一致性</a>
         </div>
     </div>
 

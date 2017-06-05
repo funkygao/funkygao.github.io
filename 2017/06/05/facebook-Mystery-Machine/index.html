@@ -3,21 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>how DBMS works | Funky&#39;s Blog</title>
+    <title>facebook Mystery Machine | Funky&#39;s Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Basics Undo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本  Redo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里称为WAL  Query Optim">
-<meta name="keywords" content="database">
+    <meta name="description" content="Data Flowconsistent sampling 1local log --&amp;gt; Scribe --&amp;gt; Hive --&amp;gt; UberTrace --&amp;gt; UI Log Schema1234request idhost idhost-local timestampunique event label(event name, task name) Timestamp Norm">
+<meta name="keywords" content="cloud">
 <meta property="og:type" content="article">
-<meta property="og:title" content="how DBMS works">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/16/how-DBMS-works/index.html">
+<meta property="og:title" content="facebook Mystery Machine">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/index.html">
 <meta property="og:site_name" content="Funky&#39;s Blog">
-<meta property="og:description" content="Basics Undo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本  Redo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里称为WAL  Query Optim">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/datastructuredb1.png?raw=true">
-<meta property="og:updated_time" content="2017-06-01T06:09:13.000Z">
+<meta property="og:description" content="Data Flowconsistent sampling 1local log --&amp;gt; Scribe --&amp;gt; Hive --&amp;gt; UberTrace --&amp;gt; UI Log Schema1234request idhost idhost-local timestampunique event label(event name, task name) Timestamp Norm">
+<meta property="og:updated_time" content="2017-06-05T02:58:05.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="how DBMS works">
-<meta name="twitter:description" content="Basics Undo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本  Redo log Oracle和MySQL机制类似 MS SQL Server里，称为transaction log PostgreSQL里称为WAL  Query Optim">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/datastructuredb1.png?raw=true">
+<meta name="twitter:title" content="facebook Mystery Machine">
+<meta name="twitter:description" content="Data Flowconsistent sampling 1local log --&amp;gt; Scribe --&amp;gt; Hive --&amp;gt; UberTrace --&amp;gt; UI Log Schema1234request idhost idhost-local timestampunique event label(event name, task name) Timestamp Norm">
     
 
     
@@ -200,7 +198,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-how-DBMS-works" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-facebook-Mystery-Machine" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -208,7 +206,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            how DBMS works
+            facebook Mystery Machine
         </h1>
     
 
@@ -217,8 +215,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/16/how-DBMS-works/">
-            <time datetime="2017-05-16T08:31:29.000Z" itemprop="datePublished">2017-05-16</time>
+        <a href="/2017/06/05/facebook-Mystery-Machine/">
+            <time datetime="2017-06-05T01:49:00.000Z" itemprop="datePublished">2017-06-05</time>
         </a>
     </div>
 
@@ -227,7 +225,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
+        <a class="tag-link" href="/tags/cloud/">cloud</a>
     </div>
 
                     </div>
@@ -238,51 +236,14 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/datastructuredb1.png?raw=true" alt="dbms"></p>
-<h3 id="Undo-log"><a href="#Undo-log" class="headerlink" title="Undo log"></a>Undo log</h3><ul>
-<li>Oracle和MySQL机制类似</li>
-<li>MS SQL Server里，称为transaction log</li>
-<li>PostgreSQL里没有undo log，它通过mvcc系统表实现，每一行存储多个版本</li>
+            <h2 id="Data-Flow"><a href="#Data-Flow" class="headerlink" title="Data Flow"></a>Data Flow</h2><p>consistent sampling</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">local log --&gt; Scribe --&gt; Hive --&gt; UberTrace --&gt; UI</div></pre></td></tr></table></figure>
+<h2 id="Log-Schema"><a href="#Log-Schema" class="headerlink" title="Log Schema"></a>Log Schema</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">request id</div><div class="line">host id</div><div class="line">host-local timestamp</div><div class="line">unique event label(event name, task name)</div></pre></td></tr></table></figure>
+<h2 id="Timestamp-Normalize"><a href="#Timestamp-Normalize" class="headerlink" title="Timestamp Normalize"></a>Timestamp Normalize</h2><ul>
+<li>不考虑local clock skew</li>
+<li>假设client/server间的RTT是对称的</li>
 </ul>
-<h3 id="Redo-log"><a href="#Redo-log" class="headerlink" title="Redo log"></a>Redo log</h3><ul>
-<li>Oracle和MySQL机制类似</li>
-<li>MS SQL Server里，称为transaction log</li>
-<li>PostgreSQL里称为WAL</li>
-</ul>
-<h2 id="Query-Optimization"><a href="#Query-Optimization" class="headerlink" title="Query Optimization"></a>Query Optimization</h2><p>大部分是基于Selinger的论文，动态规划算法，把这个问题拆解成3个子问题</p>
-<ul>
-<li>cost estimation<br>以I/O和CPU的成本衡量</li>
-<li>relational equivalences that define a search space</li>
-<li>cost-based search</li>
-</ul>
-<h2 id="Concurrency-Control"><a href="#Concurrency-Control" class="headerlink" title="Concurrency Control"></a>Concurrency Control</h2><p>Gray论文</p>
-<ul>
-<li>区分细粒度和粗粒度的锁<br>数据库是个分层结构 hierarchical structure</li>
-<li>提出了多种隔离级别<br>最初都是2PL实现的serializable isolation</li>
-</ul>
-<h2 id="Database-Recovery"><a href="#Database-Recovery" class="headerlink" title="Database Recovery"></a>Database Recovery</h2><p>IBM的ARIES算法(1992)，Algorithm for Recovery and Isolation Exploiting Semantics<br>ARIES can only update the data in-place after the log reaches storage<br>确保在恢复时，已经commit的事务要redo，未commit的事务要undo<br>redo log是物理的，undo log是逻辑的</p>
-<p>No Force, Steal</p>
-<ul>
-<li>database need not write dirty pages to disk at commit time<br>由于有redo log，update pages are written to disk lazily after commit<br>No Force</li>
-<li>database can flush dirty pages to disk at any time<br>由于有undo log，uncommitted(dirty) pages can be written to disk by the buffer manager<br>Steal</li>
-</ul>
-<p>ARIES为each page保存LSN，disk page是数据管理和恢复的基本单位，page write是原子的</p>
-<p>ARIES crash recovery分成3步</p>
-<ul>
-<li>analysis phase<br>从前向后，determine winners &amp; losers</li>
-<li>redo phase<br>如果是Force(在commit前刷dirty pages)，就不需要redo stage了<br>repeat history</li>
-<li>undo phase<br>从后向前，undo losers</li>
-</ul>
-<p>ARIES数据结构</p>
-<ul>
-<li>xaction table</li>
-<li>dirty page table</li>
-<li>checkpoint</li>
-</ul>
-<p>Example<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">After a crash, we find the following log:</div><div class="line">0   BEGIN CHECKPOINT</div><div class="line">5   END CHECKPOINT (EMPTY XACT TABLE AND DPT)</div><div class="line">10  T1: UPDATE P1 (OLD: YYY NEW: ZZZ)</div><div class="line">15  T1: UPDATE P2 (OLD: WWW NEW: XXX)</div><div class="line">20  T2: UPDATE P3 (OLD: UUU NEW: VVV)</div><div class="line">25  T1: COMMIT</div><div class="line">30  T2: UPDATE P1 (OLD: ZZZ NEW: TTT)</div><div class="line"></div><div class="line">Analysis phase:</div><div class="line">Scan forward through the log starting at LSN 0.</div><div class="line">LSN 5: Initialize XACT table and DPT to empty.</div><div class="line">LSN 10: Add (T1, LSN 10) to XACT table. Add (P1, LSN 10) to DPT.</div><div class="line">LSN 15: Set LastLSN=15 for T1 in XACT table. Add (P2, LSN 15) to DPT.</div><div class="line">LSN 20: Add (T2, LSN 20) to XACT table. Add (P3, LSN 20) to DPT.</div><div class="line">LSN 25: Change T1 status to &quot;Commit&quot; in XACT table</div><div class="line">LSN 30: Set LastLSN=30 for T2 in XACT table.</div><div class="line"></div><div class="line">Redo phase:</div><div class="line">Scan forward through the log starting at LSN 10.</div><div class="line">LSN 10: Read page P1, check PageLSN stored in the page. If PageLSN&lt;10, redo LSN 10 (set value to ZZZ) and set the page&apos;s PageLSN=10.</div><div class="line">LSN 15: Read page P2, check PageLSN stored in the page. If PageLSN&lt;15, redo LSN 15 (set value to XXX) and set the page&apos;s PageLSN=15.</div><div class="line">LSN 20: Read page P3, check PageLSN stored in the page. If PageLSN&lt;20, redo LSN 20 (set value to VVV) and set the page&apos;s PageLSN=20.</div><div class="line">LSN 30: Read page P1 if it has been flushed, check PageLSN stored in the page. It will be 10. Redo LSN 30 (set value to TTT) and set the page&apos;s PageLSN=30.</div><div class="line"></div><div class="line">Undo phase:</div><div class="line">T2 must be undone. Put LSN 30 in ToUndo.</div><div class="line">Write Abort record to log for T2</div><div class="line">LSN 30: Undo LSN 30 - write a CLR for P1 with &quot;set P1=ZZZ&quot; and undonextLSN=20. Write ZZZ into P1. Put LSN 20 in ToUndo.</div><div class="line">LSN 20: Undo LSN 20 - write a CLR for P3 with &quot;set P3=UUU&quot; and undonextLSN=NULL. Write UUU into P3.</div></pre></td></tr></table></figure></p>
-<p>ARIES是为传统硬盘设计的，顺序写，但成本也明显：修改1B，需要redo 1B+undo 1B+page 1B=3B<br>what if in-place update with SSD?</p>
-<h2 id="分布式"><a href="#分布式" class="headerlink" title="分布式"></a>分布式</h2><p>mid-1970s 2PC 一票否决</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://blog.acolyer.org/2016/01/08/aries/" target="_blank" rel="external">https://blog.acolyer.org/2016/01/08/aries/</a><br><a href="http://cseweb.ucsd.edu/~swanson/papers/SOSP2013-MARS.pdf" target="_blank" rel="external">http://cseweb.ucsd.edu/~swanson/papers/SOSP2013-MARS.pdf</a><br><a href="https://www.cs.berkeley.edu/~brewer/cs262/Aries.pdf" target="_blank" rel="external">https://www.cs.berkeley.edu/~brewer/cs262/Aries.pdf</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Client        Server</div><div class="line"> 1|------------&gt;|</div><div class="line">  |             |--+1.1</div><div class="line">  |             |  | logic</div><div class="line">  |             |&lt;-+1.2</div><div class="line"> 2|&lt;------------|</div><div class="line"></div><div class="line">1.2 - 1.1 = 0.1</div><div class="line">2 - 1 = 1.0</div><div class="line">RTT = (1.0 - 0.1)/2 = 0.45</div><div class="line"></div><div class="line">clock(1.1) = 1 + 0.45 = 1.45</div><div class="line">clock(1.2) = 1.45 + 0.1 = 1.55</div><div class="line"></div><div class="line">RTT是个经验值，根据大量的trace后稳定下来: 使用最小值</div></pre></td></tr></table></figure>
 
         
         </div>
@@ -346,7 +307,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/16/how-DBMS-works/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/how-DBMS-works/">Commentaires</a>
+        <a href="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/">Commentaires</a>
     
 
         </footer>
@@ -355,19 +316,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/17/kateway-replay-messages/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Plus récent</strong>
-            <div class="article-nav-title">
-                
-                    kateway replay messages
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/16/scalability-papers/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/02/storm-ack/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Plus ancien</strong>
-            <div class="article-nav-title">scalability papers</div>
+            <div class="article-nav-title">storm acker</div>
         </a>
     
 </nav>
@@ -498,9 +450,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/16/how-DBMS-works/';
+            this.page.url = 'http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/';
         
-        this.page.identifier = 'how-DBMS-works';
+        this.page.identifier = 'facebook-Mystery-Machine';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
