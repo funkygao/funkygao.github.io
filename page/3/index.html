@@ -141,11 +141,11 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                53
+                54
                 <span>posts</span>
             </div>
             <div class="article-info-block">
-                9
+                10
                 <span>tags</span>
             </div>
         </div>
@@ -194,6 +194,128 @@
 
             
             <section id="main">
+    <article id="post-kafka-redesign" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/24/kafka-redesign/">kafka redesign</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/24/kafka-redesign/">
+            <time datetime="2017-05-24T02:21:06.000Z" itemprop="datePublished">2017-05-24</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Goals"><a href="#Goals" class="headerlink" title="Goals"></a>Goals</h2><ul>
+<li>support many topics<ul>
+<li>needle in haystack</li>
+</ul>
+</li>
+<li>IO optimization<ul>
+<li>R/W isolation</li>
+<li>index file leads to random sync write</li>
+</ul>
+</li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+    <div class="jiathis_style">
+    <span class="jiathis_txt">分享到：</span>
+    <a class="jiathis_button_qzone">QQ空间</a>
+    <a class="jiathis_button_tsina">新浪微博</a>
+    <a class="jiathis_button_tqq">腾讯微博</a>
+    <a class="jiathis_button_weixin">微信</a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+    <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<style>
+    .jiathis_style div:first-child:not(.jiadiv_01) {
+        width: auto !important;
+        border: none !important;
+    }
+    .jiathis_style .jiadiv_01 {
+        margin: 10px 0;
+        border-radius: 4px;
+        border: #e1e1e1 solid 1px;
+    }
+    .jiathis_style .jiadiv_01 div:first-child {
+        display: none;
+    }
+    .jiathis_style .jiadiv_02 {
+        padding: 7px 0 !important;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle {
+        width: 85px;
+        border: none;
+        height: auto;
+        margin: 3px 10px;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:hover {
+        border: none;
+    }
+    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
+        margin-left: 0;
+    }
+    .jiathis_style .jtico:hover {
+        opacity: 1;
+    }
+    .jiathis_style .ckepopBottom,
+    .jiathis_style .centerBottom {
+        width: auto !important;
+        padding: 5px;
+        background: #f7f7f7;
+    }
+</style>
+
+
+
+</div>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/24/kafka-redesign/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/24/kafka-redesign/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-apache-bookeeper" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -1296,118 +1418,6 @@
 
 
 
-    <article id="post-https" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/19/https/">https</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/https/">
-            <time datetime="2017-05-19T00:21:27.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/protocol/">protocol</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>curl <a href="https://baidu.com" target="_blank" rel="external">https://baidu.com</a><br>How the 270ms passed<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">1 1  0.0721 (0.0721)  C&gt;S  Handshake</div><div class="line">      ClientHello</div><div class="line">        Version 3.1</div><div class="line">        cipher suites</div><div class="line">        TLS_EMPTY_RENEGOTIATION_INFO_SCSV</div><div class="line">        TLS_DHE_RSA_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</div><div class="line">        TLS_DHE_DSS_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_256_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_256_CBC_SHA256</div><div class="line">        TLS_DHE_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</div><div class="line">        TLS_DHE_DSS_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_RSA_WITH_RC4_128_SHA</div><div class="line">        TLS_RSA_WITH_RC4_128_MD5</div><div class="line">        TLS_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        TLS_RSA_WITH_AES_128_CBC_SHA256</div><div class="line">        TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA</div><div class="line">        TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA</div><div class="line">        TLS_RSA_WITH_3DES_EDE_CBC_SHA</div><div class="line">        compression methods</div><div class="line">                  NULL</div><div class="line">1 2  0.1202 (0.0480)  S&gt;C  Handshake</div><div class="line">      ServerHello</div><div class="line">        Version 3.1</div><div class="line">        session_id[32]=</div><div class="line">          b3 ea 99 ee 5a 4c 03 e8 e0 74 95 09 f1 11 09 2a</div><div class="line">          9d f5 8f 2a 26 7a d3 7f 71 ff dc 39 62 66 b0 f9</div><div class="line">        cipherSuite         TLS_RSA_WITH_AES_128_CBC_SHA</div><div class="line">        compressionMethod                   NULL</div><div class="line">1 3  0.1205 (0.0002)  S&gt;C  Handshake</div><div class="line">      Certificate</div><div class="line">1 4  0.1205 (0.0000)  S&gt;C  Handshake</div><div class="line">      ServerHelloDone</div><div class="line">1 5  0.1244 (0.0039)  C&gt;S  Handshake</div><div class="line">      ClientKeyExchange</div><div class="line">1 6  0.1244 (0.0000)  C&gt;S  ChangeCipherSpec</div><div class="line">1 7  0.1244 (0.0000)  C&gt;S  Handshake</div><div class="line">1 8  0.1737 (0.0492)  S&gt;C  ChangeCipherSpec</div><div class="line">1 9  0.1737 (0.0000)  S&gt;C  Handshake</div><div class="line">1 10 0.1738 (0.0001)  C&gt;S  application_data</div><div class="line">1 11 0.2232 (0.0493)  S&gt;C  application_data</div><div class="line">1 12 0.2233 (0.0001)  C&gt;S  Alert</div><div class="line">1    0.2234 (0.0000)  C&gt;S  TCP FIN</div><div class="line">1    0.2709 (0.0475)  S&gt;C  TCP FIN</div></pre></td></tr></table></figure></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-    <div class="jiathis_style">
-    <span class="jiathis_txt">分享到：</span>
-    <a class="jiathis_button_qzone">QQ空间</a>
-    <a class="jiathis_button_tsina">新浪微博</a>
-    <a class="jiathis_button_tqq">腾讯微博</a>
-    <a class="jiathis_button_weixin">微信</a>
-    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
-    <a class="jiathis_counter_style"></a>
-</div>
-<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
-<style>
-    .jiathis_style div:first-child:not(.jiadiv_01) {
-        width: auto !important;
-        border: none !important;
-    }
-    .jiathis_style .jiadiv_01 {
-        margin: 10px 0;
-        border-radius: 4px;
-        border: #e1e1e1 solid 1px;
-    }
-    .jiathis_style .jiadiv_01 div:first-child {
-        display: none;
-    }
-    .jiathis_style .jiadiv_02 {
-        padding: 7px 0 !important;
-    }
-    .jiathis_style .jiadiv_02 .jiatitle {
-        width: 85px;
-        border: none;
-        height: auto;
-        margin: 3px 10px;
-        padding: 6px 10px;
-        border-radius: 4px;
-    }
-    .jiathis_style .jiadiv_02 .jiatitle:hover {
-        border: none;
-    }
-    .jiathis_style .jiadiv_02 .jiatitle:nth-child(even) {
-        margin-left: 0;
-    }
-    .jiathis_style .jtico:hover {
-        opacity: 1;
-    }
-    .jiathis_style .ckepopBottom,
-    .jiathis_style .centerBottom {
-        width: auto !important;
-        padding: 5px;
-        background: #f7f7f7;
-    }
-</style>
-
-
-
-</div>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/19/https/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/19/https/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
     </nav>
@@ -1420,6 +1430,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/08/golang-pkg-github-pull-request/" class="title">golang pkg github pull request</a></p>
+                            <p class="item-date"><time datetime="2017-06-08T00:33:57.000Z" itemprop="datePublished">2017-06-08</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1457,15 +1476,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/02/storm-ack/" class="title">storm acker</a></p>
-                            <p class="item-date"><time datetime="2017-06-02T01:03:52.000Z" itemprop="datePublished">2017-06-02</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1475,7 +1485,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1484,7 +1494,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
@@ -1493,7 +1503,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 12.86px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 12.86px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 14.29px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 12.86px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 12.86px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 14.29px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
         </div>
     </div>
 
