@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>两段锁 2PL | Funky&#39;s Blog</title>
+    <title>两段锁 2PL | Just Some Memos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件 MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC MySQL 2PL提供2种锁  shared(read) exc">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
 <meta property="og:title" content="两段锁 2PL">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/11/2PL/index.html">
-<meta property="og:site_name" content="Funky&#39;s Blog">
+<meta property="og:site_name" content="Just Some Memos">
 <meta property="og:description" content="事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段 事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件 MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC MySQL 2PL提供2种锁  shared(read) exc">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true">
 <meta property="og:updated_time" content="2017-05-16T08:51:42.000Z">
@@ -21,7 +21,7 @@
     
 
     
-        <link rel="alternate" href="/" title="Funky&#39;s Blog" type="application/atom+xml" />
+        <link rel="alternate" href="/" title="Just Some Memos" type="application/atom+xml" />
     
 
     
@@ -54,7 +54,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 
-                <span class="site-title">Funky&#39;s Blog</span>
+                <span class="site-title">Just Some Memos</span>
             </a>
             <nav id="main-nav">
                 
