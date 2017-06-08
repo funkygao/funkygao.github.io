@@ -3,19 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>facebook Mystery Machine | Just Memos</title>
+    <title>socket recv buffer | Just Memos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Data Flowconsistent sampling 1local log --&amp;gt; Scribe --&amp;gt; Hive --&amp;gt; UberTrace --&amp;gt; UI Log Schema1234request idhost idhost-local timestampunique event label(event name, task name) Timestamp Norm">
-<meta name="keywords" content="cloud">
+    <meta name="description" content="1BDP * 4 / 3 use iperf for testing12iperf -s -w 200K   # serveriperf -c localhost # client">
+<meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="facebook Mystery Machine">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/index.html">
+<meta property="og:title" content="socket recv buffer">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/08/socket-recv-buffer/index.html">
 <meta property="og:site_name" content="Just Memos">
-<meta property="og:description" content="Data Flowconsistent sampling 1local log --&amp;gt; Scribe --&amp;gt; Hive --&amp;gt; UberTrace --&amp;gt; UI Log Schema1234request idhost idhost-local timestampunique event label(event name, task name) Timestamp Norm">
-<meta property="og:updated_time" content="2017-06-05T02:58:05.000Z">
+<meta property="og:description" content="1BDP * 4 / 3 use iperf for testing12iperf -s -w 200K   # serveriperf -c localhost # client">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/recvbuf.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/iperf.png?raw=true">
+<meta property="og:updated_time" content="2017-06-08T03:12:30.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="facebook Mystery Machine">
-<meta name="twitter:description" content="Data Flowconsistent sampling 1local log --&amp;gt; Scribe --&amp;gt; Hive --&amp;gt; UberTrace --&amp;gt; UI Log Schema1234request idhost idhost-local timestampunique event label(event name, task name) Timestamp Norm">
+<meta name="twitter:title" content="socket recv buffer">
+<meta name="twitter:description" content="1BDP * 4 / 3 use iperf for testing12iperf -s -w 200K   # serveriperf -c localhost # client">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/recvbuf.png?raw=true">
     
 
     
@@ -198,7 +201,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-facebook-Mystery-Machine" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-socket-recv-buffer" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -206,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            facebook Mystery Machine
+            socket recv buffer
         </h1>
     
 
@@ -215,8 +218,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/05/facebook-Mystery-Machine/">
-            <time datetime="2017-06-05T01:49:00.000Z" itemprop="datePublished">2017-06-05</time>
+        <a href="/2017/06/08/socket-recv-buffer/">
+            <time datetime="2017-06-08T03:03:16.000Z" itemprop="datePublished">2017-06-08</time>
         </a>
     </div>
 
@@ -225,7 +228,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/cloud/">cloud</a>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
     </div>
 
                     </div>
@@ -236,14 +239,10 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Data-Flow"><a href="#Data-Flow" class="headerlink" title="Data Flow"></a>Data Flow</h2><p>consistent sampling</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">local log --&gt; Scribe --&gt; Hive --&gt; UberTrace --&gt; UI</div></pre></td></tr></table></figure>
-<h2 id="Log-Schema"><a href="#Log-Schema" class="headerlink" title="Log Schema"></a>Log Schema</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">request id</div><div class="line">host id</div><div class="line">host-local timestamp</div><div class="line">unique event label(event name, task name)</div></pre></td></tr></table></figure>
-<h2 id="Timestamp-Normalize"><a href="#Timestamp-Normalize" class="headerlink" title="Timestamp Normalize"></a>Timestamp Normalize</h2><ul>
-<li>不考虑local clock skew</li>
-<li>假设client/server间的RTT是对称的</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Client        Server</div><div class="line"> 1|------------&gt;|</div><div class="line">  |             |--+1.1</div><div class="line">  |             |  | logic</div><div class="line">  |             |&lt;-+1.2</div><div class="line"> 2|&lt;------------|</div><div class="line"></div><div class="line">1.2 - 1.1 = 0.1</div><div class="line">2 - 1 = 1.0</div><div class="line">RTT = (1.0 - 0.1)/2 = 0.45</div><div class="line"></div><div class="line">clock(1.1) = 1 + 0.45 = 1.45</div><div class="line">clock(1.2) = 1.45 + 0.1 = 1.55</div><div class="line"></div><div class="line">RTT是个经验值，根据大量的trace后稳定下来: 使用最小值</div></pre></td></tr></table></figure>
+            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/recvbuf.png?raw=true" alt="SO_RCVBUF"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">BDP * 4 / 3</div></pre></td></tr></table></figure>
+<p>use iperf for testing<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">iperf -s -w 200K   # server</div><div class="line">iperf -c localhost # client</div></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/iperf.png?raw=true" alt="iperf"></p>
 
         
         </div>
@@ -254,7 +253,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/" data-id="cj3nuepat001uxh5bjglwxt8i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj3nuepbh002wxh5bu8d4acfj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -322,7 +321,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/08/socket-recv-buffer/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/">Comments</a>
     
 
         </footer>
@@ -331,19 +330,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/05/Kafka-vs-Kinesis-Redis/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    Kafka vs Kinesis vs Redis
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/06/02/storm-ack/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/08/golang-pkg-github-pull-request/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">storm acker</div>
+            <div class="article-nav-title">golang pkg github pull request</div>
         </a>
     
 </nav>
@@ -474,9 +464,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/';
+            this.page.url = 'http://funkygao.github.io/2017/06/08/socket-recv-buffer/';
         
-        this.page.identifier = 'facebook-Mystery-Machine';
+        this.page.identifier = 'socket-recv-buffer';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
