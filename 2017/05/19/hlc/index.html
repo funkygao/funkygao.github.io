@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>hybrid logical clock | Just Some Memos</title>
+    <title>hybrid logical clock | Just Memos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="分布式事务，为了性能，目前通常提供SI/SSI级别的isolation，通过乐观冲突检测而非2PC悲观方式实现，这就要求实现事务的causality，通常都是拿逻辑时钟实现total order例如vector clock就是一种，zab里的zxid也是；google percolator里的total order算是另外一种逻辑时钟，但这种方法由于有明显瓶颈，也增加了一次消息传递 但逻辑时钟无法">
 <meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hybrid logical clock">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/19/hlc/index.html">
-<meta property="og:site_name" content="Just Some Memos">
+<meta property="og:site_name" content="Just Memos">
 <meta property="og:description" content="分布式事务，为了性能，目前通常提供SI/SSI级别的isolation，通过乐观冲突检测而非2PC悲观方式实现，这就要求实现事务的causality，通常都是拿逻辑时钟实现total order例如vector clock就是一种，zab里的zxid也是；google percolator里的total order算是另外一种逻辑时钟，但这种方法由于有明显瓶颈，也增加了一次消息传递 但逻辑时钟无法">
 <meta property="og:updated_time" content="2017-05-27T00:07:48.000Z">
 <meta name="twitter:card" content="summary">
@@ -19,7 +19,7 @@
     
 
     
-        <link rel="alternate" href="/" title="Just Some Memos" type="application/atom+xml" />
+        <link rel="alternate" href="/" title="Just Memos" type="application/atom+xml" />
     
 
     
@@ -52,7 +52,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 
-                <span class="site-title">Just Some Memos</span>
+                <span class="site-title">Just Memos</span>
             </a>
             <nav id="main-nav">
                 

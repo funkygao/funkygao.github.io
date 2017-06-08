@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>PostgreSQL MVCC | Just Some Memos</title>
+    <title>PostgreSQL MVCC | Just Memos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="InternalsMySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure. 每个row有2个隐藏字段  Tmin insert时的trx id Tmax delete时的trx id  INSERT DELETE DELETE操作并不会马上物理删除，而是V">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PostgreSQL MVCC">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/index.html">
-<meta property="og:site_name" content="Just Some Memos">
+<meta property="og:site_name" content="Just Memos">
 <meta property="og:description" content="InternalsMySQL通过undo log记录uncommitted changes，与此不同，PostgreSQL store all row versions in table data structure. 每个row有2个隐藏字段  Tmin insert时的trx id Tmax delete时的trx id  INSERT DELETE DELETE操作并不会马上物理删除，而是V">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mvcc_insert.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mvcc_delete.png?raw=true">
@@ -23,7 +23,7 @@
     
 
     
-        <link rel="alternate" href="/" title="Just Some Memos" type="application/atom+xml" />
+        <link rel="alternate" href="/" title="Just Memos" type="application/atom+xml" />
     
 
     
@@ -56,7 +56,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 
-                <span class="site-title">Just Some Memos</span>
+                <span class="site-title">Just Memos</span>
             </a>
             <nav id="main-nav">
                 
