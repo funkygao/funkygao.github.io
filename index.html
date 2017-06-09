@@ -244,7 +244,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj3p8e5vq0016a05b5swgauac" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj3pk3axd0018it5b6a97m94c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -373,7 +373,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj3p8e5vi000ua05b3s023w13" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj3pk3ax3000wit5bu849qmw9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -504,7 +504,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj3p8e5xm0031a05bqq2uimfv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj3pk3az80033it5bciph6bhv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -631,7 +631,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj3p8e5wk0021a05bf9gu62x8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj3pk3ay60023it5b8zkohwgg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -763,7 +763,7 @@
 <ul>
 <li>scheduled periodically(1s)，也可手工 /_refresh</li>
 <li>在此触发merge逻辑</li>
-<li>refresh后，那么在此之前的所有变更就可以搜索了</li>
+<li>refresh后，那么在此之前的所有变更就可以搜索了，in-memory buffer的数据是不能搜索的</li>
 <li><img src="https://github.com/funkygao/blogassets/blob/master/img/elarefresh.png?raw=true" alt="refresh"><ul>
 <li>产生新segment，但不fsync(close不会触发fsync)，然后open(the new segment)</li>
 <li>不保证durability，那是由flush保证的</li>
@@ -772,13 +772,18 @@
 </li>
 </ul>
 </li>
-<li>flush/commit<ul>
-<li>30s by default</li>
+<li>flush<ul>
+<li>30s by default，会触发commit</li>
 <li>Any docs in the in-memory buffer are written to a new segment</li>
 <li>The buffer is cleared</li>
 <li>A commit point is written to disk</li>
 <li>The filesystem cache is flushed with an fsync</li>
 <li>The old translog is deleted</li>
+</ul>
+</li>
+<li>commit<ul>
+<li>把还没有fsync的segments，一一fsync</li>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elasticsearch-internals.png?raw=true" alt="commit"></li>
 </ul>
 </li>
 <li>merge<ul>
@@ -820,7 +825,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pjly6b0000fw5b5zkr3fiz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pk3awk0009it5b69e1lu8f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -952,7 +957,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/" data-id="cj3p8e5v0000aa05b3wbsgpp7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/" data-id="cj3pk3awp000cit5bh0ztsvrv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1086,7 +1091,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/" data-id="cj3p8e5wi001xa05baxn09du9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/" data-id="cj3pk3ay4001zit5b8cezixpj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1218,7 +1223,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj3p8e5xq0035a05brr9kt88i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj3pk3azc0037it5bgd827nga" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1346,7 +1351,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/monkey-patch-golang/" data-id="cj3p8e5x9002ka05bl6onguaf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/02/monkey-patch-golang/" data-id="cj3pk3ayv002mit5berjjrgnj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1505,7 +1510,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/KafkaSpout/" data-id="cj3p8e5v2000da05bl01k44hr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/KafkaSpout/" data-id="cj3pk3awq000eit5b70uag6xo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

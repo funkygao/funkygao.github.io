@@ -14,9 +14,10 @@
 <meta property="og:description" content="BasicsStorage Model一种特殊的LSM Tree，只是没有多level1234translog   WALbuffer     MemTablesegment    SSTablemerge      merge &amp;amp; compaction Defaults12345678node.master: truenode.data: trueindex.number_of_shar">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/eswrite1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elarefresh.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elasticsearch-internals.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/esread1.jpg?raw=true">
-<meta property="og:updated_time" content="2017-06-09T07:40:14.000Z">
+<meta property="og:updated_time" content="2017-06-09T07:54:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch internals">
 <meta name="twitter:description" content="BasicsStorage Model一种特殊的LSM Tree，只是没有多level1234translog   WALbuffer     MemTablesegment    SSTablemerge      merge &amp;amp; compaction Defaults12345678node.master: truenode.data: trueindex.number_of_shar">
@@ -257,7 +258,7 @@
 <ul>
 <li>scheduled periodically(1s)，也可手工 /_refresh</li>
 <li>在此触发merge逻辑</li>
-<li>refresh后，那么在此之前的所有变更就可以搜索了</li>
+<li>refresh后，那么在此之前的所有变更就可以搜索了，in-memory buffer的数据是不能搜索的</li>
 <li><img src="https://github.com/funkygao/blogassets/blob/master/img/elarefresh.png?raw=true" alt="refresh"><ul>
 <li>产生新segment，但不fsync(close不会触发fsync)，然后open(the new segment)</li>
 <li>不保证durability，那是由flush保证的</li>
@@ -266,13 +267,18 @@
 </li>
 </ul>
 </li>
-<li>flush/commit<ul>
-<li>30s by default</li>
+<li>flush<ul>
+<li>30s by default，会触发commit</li>
 <li>Any docs in the in-memory buffer are written to a new segment</li>
 <li>The buffer is cleared</li>
 <li>A commit point is written to disk</li>
 <li>The filesystem cache is flushed with an fsync</li>
 <li>The old translog is deleted</li>
+</ul>
+</li>
+<li>commit<ul>
+<li>把还没有fsync的segments，一一fsync</li>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elasticsearch-internals.png?raw=true" alt="commit"></li>
 </ul>
 </li>
 <li>merge<ul>
@@ -314,7 +320,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pjly6b0000fw5b5zkr3fiz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pk3awk0009it5b69e1lu8f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
