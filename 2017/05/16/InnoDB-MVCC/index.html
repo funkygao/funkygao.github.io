@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>InnoDB MVCC | Quick Notes</title>
+    <title>InnoDB MVCC | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="BasicInnoDB中通过Undo log实现了txn rollback和MVCC，而并发控制(isolation)通过锁来实现Undo log分为insert undo和update undo(delete是一种特殊的update)，回滚时  insert只要把insert undo log丢弃即可 update需要通过DB_ROLL_PTR DB_TRX_ID找到事务修改前的版本并恢复  与">
 <meta name="keywords" content="database">
 <meta property="og:type" content="article">
 <meta property="og:title" content="InnoDB MVCC">
 <meta property="og:url" content="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/index.html">
-<meta property="og:site_name" content="Quick Notes">
+<meta property="og:site_name" content="Notes">
 <meta property="og:description" content="BasicInnoDB中通过Undo log实现了txn rollback和MVCC，而并发控制(isolation)通过锁来实现Undo log分为insert undo和update undo(delete是一种特殊的update)，回滚时  insert只要把insert undo log丢弃即可 update需要通过DB_ROLL_PTR DB_TRX_ID找到事务修改前的版本并恢复  与">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undolog.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/undo1.jpg?raw=true">
@@ -24,7 +24,7 @@
     
 
     
-        <link rel="alternate" href="/" title="Quick Notes" type="application/atom+xml" />
+        <link rel="alternate" href="/" title="Notes" type="application/atom+xml" />
     
 
     
@@ -57,7 +57,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 
-                <span class="site-title">Quick Notes</span>
+                <span class="site-title">Notes</span>
             </a>
             <nav id="main-nav">
                 
