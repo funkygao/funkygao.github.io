@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elasticsearch-internals.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/esread1.jpg?raw=true">
-<meta property="og:updated_time" content="2017-06-09T08:18:13.000Z">
+<meta property="og:updated_time" content="2017-06-09T09:26:48.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch internals">
 <meta name="twitter:description" content="BasicsStorage Model一种特殊的LSM Tree，只是没有多level1234translog   WALbuffer     MemTablesegment    SSTablemerge      merge &amp;amp; compaction Defaults12345678node.master: truenode.data: trueindex.number_of_shar">
@@ -283,11 +283,17 @@
 </ul>
 </li>
 <li>merge<ul>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true" alt="merge"></li>
+<li>policy<ul>
+<li>tiered(default)</li>
+<li>log_byte_size</li>
+<li>log_doc</li>
+</ul>
+</li>
 <li>可能把committed和uncommitted segments一起merge</li>
 <li>异步，不影响indexing/query</li>
 <li>合并后，fsync the merged big segment，之前的small segments被删除</li>
 <li>ES内部有throttle机制控制merge进度，防止它占用过多资源: 20MB/s</li>
-<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true" alt="merge"></li>
 </ul>
 </li>
 <li>update<br>delete, then insert</li>
@@ -305,7 +311,7 @@
 </blockquote>
 <h3 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h3><p>每个document有version，乐观锁</p>
 <h3 id="Consistency"><a href="#Consistency" class="headerlink" title="Consistency"></a>Consistency</h3><ul>
-<li>quorum(by default)</li>
+<li>quorum(default)</li>
 <li>one</li>
 <li>all</li>
 </ul>
@@ -321,7 +327,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pj2rbp003ia05bn6c5asbo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pnebjm0005155byj7qjvf1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
