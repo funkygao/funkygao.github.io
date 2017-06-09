@@ -3,23 +3,25 @@
 <head>
     <meta charset="utf-8">
     
-    <title>raft | Just Memos</title>
+    <title>Swinging Door Trending | Quick Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="1985 FLP Impossibility Result [8].1988 Oki and Liskov’s Viewstamped Repication [26].1998 Lamport’s original Paxos paper “Part-Time Parliment” [8].2000 Brewer proposes CAP conjecture during Keynote at">
-<meta name="keywords" content="一致性">
+    <meta name="description" content="SDT旋转门流式压缩，有损算法，对于变化频率不高的时间序列数据，压缩比很高，但可能丢到峰值、波谷数据通过一条由起点和终点确定的直线代替一系列连续数据点通过线性差值“还原”数据，pref sample &amp;lt;–插值–&amp;gt; next sample  vs facebook gorillahttp://www.vldb.org/pvldb/vol8/p1816-teller.pdf">
+<meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="raft">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/06/raft/index.html">
-<meta property="og:site_name" content="Just Memos">
-<meta property="og:description" content="1985 FLP Impossibility Result [8].1988 Oki and Liskov’s Viewstamped Repication [26].1998 Lamport’s original Paxos paper “Part-Time Parliment” [8].2000 Brewer proposes CAP conjecture during Keynote at">
-<meta property="og:updated_time" content="2017-06-06T03:05:50.000Z">
+<meta property="og:title" content="Swinging Door Trending">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/08/SDT/index.html">
+<meta property="og:site_name" content="Quick Notes">
+<meta property="og:description" content="SDT旋转门流式压缩，有损算法，对于变化频率不高的时间序列数据，压缩比很高，但可能丢到峰值、波谷数据通过一条由起点和终点确定的直线代替一系列连续数据点通过线性差值“还原”数据，pref sample &amp;lt;–插值–&amp;gt; next sample  vs facebook gorillahttp://www.vldb.org/pvldb/vol8/p1816-teller.pdf">
+<meta property="og:image" content="https://github.com/digoal/blog/raw/master/201608/20160813_01_pic_003.png">
+<meta property="og:updated_time" content="2017-06-09T00:46:57.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="raft">
-<meta name="twitter:description" content="1985 FLP Impossibility Result [8].1988 Oki and Liskov’s Viewstamped Repication [26].1998 Lamport’s original Paxos paper “Part-Time Parliment” [8].2000 Brewer proposes CAP conjecture during Keynote at">
+<meta name="twitter:title" content="Swinging Door Trending">
+<meta name="twitter:description" content="SDT旋转门流式压缩，有损算法，对于变化频率不高的时间序列数据，压缩比很高，但可能丢到峰值、波谷数据通过一条由起点和终点确定的直线代替一系列连续数据点通过线性差值“还原”数据，pref sample &amp;lt;–插值–&amp;gt; next sample  vs facebook gorillahttp://www.vldb.org/pvldb/vol8/p1816-teller.pdf">
+<meta name="twitter:image" content="https://github.com/digoal/blog/raw/master/201608/20160813_01_pic_003.png">
     
 
     
-        <link rel="alternate" href="/" title="Just Memos" type="application/atom+xml" />
+        <link rel="alternate" href="/" title="Quick Notes" type="application/atom+xml" />
     
 
     
@@ -52,7 +54,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 
-                <span class="site-title">Just Memos</span>
+                <span class="site-title">Quick Notes</span>
             </a>
             <nav id="main-nav">
                 
@@ -198,7 +200,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-raft" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-SDT" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -206,7 +208,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            raft
+            Swinging Door Trending
         </h1>
     
 
@@ -215,8 +217,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/06/raft/">
-            <time datetime="2017-06-06T02:48:48.000Z" itemprop="datePublished">2017-06-06</time>
+        <a href="/2017/06/08/SDT/">
+            <time datetime="2017-06-08T06:52:01.000Z" itemprop="datePublished">2017-06-08</time>
         </a>
     </div>
 
@@ -225,7 +227,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
     </div>
 
                     </div>
@@ -236,7 +238,9 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p>1985 FLP Impossibility Result [8].<br>1988 Oki and Liskov’s Viewstamped Repication [26].<br>1998 Lamport’s original Paxos paper “Part-Time Parliment” [8].<br>2000 Brewer proposes CAP conjecture during Keynote at PODC [2].<br>2002 Proof of CAP by Gilbert and Lynch [10].<br>2005 Lamport’s Technical Report on Generalized Consensus &amp; Paxos [16]. 2013 Raft Consensus Paper first available online [28].</p>
+            <p>SDT旋转门流式压缩，有损算法，对于变化频率不高的时间序列数据，压缩比很高，但可能丢到峰值、波谷数据<br>通过一条由起点和终点确定的直线代替一系列连续数据点<br>通过线性差值“还原”数据，pref sample &lt;–插值–&gt; next sample</p>
+<p><img src="https://github.com/digoal/blog/raw/master/201608/20160813_01_pic_003.png" alt="用a点到e点之间的直线代替数据点(a,b,c,d,e)"></p>
+<p>vs facebook gorilla<br><a href="http://www.vldb.org/pvldb/vol8/p1816-teller.pdf" target="_blank" rel="external">http://www.vldb.org/pvldb/vol8/p1816-teller.pdf</a></p>
 
         
         </div>
@@ -247,7 +251,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/06/raft/" data-id="cj3nutd67002p4y5bkuit85ao" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj3o2f7m0003g825bnvuiakfq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -315,7 +319,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/06/raft/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/06/raft/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/08/SDT/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/08/SDT/">Comments</a>
     
 
         </footer>
@@ -324,19 +328,19 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/08/golang-pkg-github-pull-request/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2017/06/09/WOL/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    golang pkg github pull request
+                    Wake on LAN
                 
             </div>
         </a>
     
     
-        <a href="/2017/06/05/ElasticSearch/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/08/socket-recv-buffer/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">ElasticSearch</div>
+            <div class="article-nav-title">socket recv buffer</div>
         </a>
     
 </nav>
@@ -371,6 +375,24 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/09/WOL/" class="title">Wake on LAN</a></p>
+                            <p class="item-date"><time datetime="2017-06-09T00:11:10.000Z" itemprop="datePublished">2017-06-09</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/08/SDT/" class="title">Swinging Door Trending</a></p>
+                            <p class="item-date"><time datetime="2017-06-08T06:52:01.000Z" itemprop="datePublished">2017-06-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/08/socket-recv-buffer/" class="title">socket recv buffer</a></p>
                             <p class="item-date"><time datetime="2017-06-08T03:03:16.000Z" itemprop="datePublished">2017-06-08</time></p>
                         </div>
@@ -382,24 +404,6 @@
                             <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/08/golang-pkg-github-pull-request/" class="title">golang pkg github pull request</a></p>
                             <p class="item-date"><time datetime="2017-06-08T00:33:57.000Z" itemprop="datePublished">2017-06-08</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/06/raft/" class="title">raft</a></p>
-                            <p class="item-date"><time datetime="2017-06-06T02:48:48.000Z" itemprop="datePublished">2017-06-06</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/05/ElasticSearch/" class="title">ElasticSearch</a></p>
-                            <p class="item-date"><time datetime="2017-06-05T05:35:53.000Z" itemprop="datePublished">2017-06-05</time></p>
                         </div>
                     </li>
                 
@@ -430,7 +434,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
         </div>
     </div>
 
@@ -439,7 +443,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 14.29px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 12.86px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 14.29px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 15.71px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.29px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 12.86px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
         </div>
     </div>
 
@@ -467,9 +471,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/06/raft/';
+            this.page.url = 'http://funkygao.github.io/2017/06/08/SDT/';
         
-        this.page.identifier = 'raft';
+        this.page.identifier = 'SDT';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

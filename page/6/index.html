@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Just Memos</title>
+    <title>Quick Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta property="og:type" content="website">
-<meta property="og:title" content="Just Memos">
+<meta property="og:title" content="Quick Notes">
 <meta property="og:url" content="http://funkygao.github.io/page/6/index.html">
-<meta property="og:site_name" content="Just Memos">
+<meta property="og:site_name" content="Quick Notes">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Just Memos">
+<meta name="twitter:title" content="Quick Notes">
     
 
     
-        <link rel="alternate" href="/" title="Just Memos" type="application/atom+xml" />
+        <link rel="alternate" href="/" title="Quick Notes" type="application/atom+xml" />
     
 
     
@@ -47,7 +47,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 
-                <span class="site-title">Just Memos</span>
+                <span class="site-title">Quick Notes</span>
             </a>
             <nav id="main-nav">
                 
@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                54
+                55
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,133 @@
 
             
             <section id="main">
+    <article id="post-dual-write-conflict" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/12/dual-write-conflict/">dual write conflict</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/12/dual-write-conflict/">
+            <time datetime="2017-05-11T23:58:30.000Z" itemprop="datePublished">2017-05-12</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/一致性/">一致性</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true" alt="conflicts"></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj3nviizh001p825bvydz7kss" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-shard-scales" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -243,7 +370,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj3nvdy200031695bgw2wkotb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj3nvij0t002w825b1awoph48" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -428,7 +555,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj3nvdy1m002k695bhj9a2y7g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj3nvij0k002m825brzx3ayel" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -560,7 +687,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj3nvdy1r002p695b0guynt3x" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj3nvij0o002o825bbize45e9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -696,7 +823,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj3nvdxyo0002695b8dk2cowg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj3nviixl0002825b6n1yv04n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -791,6 +918,24 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/09/WOL/" class="title">Wake on LAN</a></p>
+                            <p class="item-date"><time datetime="2017-06-09T00:11:10.000Z" itemprop="datePublished">2017-06-09</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/08/SDT/" class="title">Swinging Door Trending</a></p>
+                            <p class="item-date"><time datetime="2017-06-08T06:52:01.000Z" itemprop="datePublished">2017-06-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/08/socket-recv-buffer/" class="title">socket recv buffer</a></p>
                             <p class="item-date"><time datetime="2017-06-08T03:03:16.000Z" itemprop="datePublished">2017-06-08</time></p>
                         </div>
@@ -809,26 +954,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/05/ElasticSearch/" class="title">ElasticSearch</a></p>
-                            <p class="item-date"><time datetime="2017-06-05T05:35:53.000Z" itemprop="datePublished">2017-06-05</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/05/Kafka-vs-Kinesis-Redis/" class="title">Kafka vs Kinesis vs Redis</a></p>
                             <p class="item-date"><time datetime="2017-06-05T03:15:08.000Z" itemprop="datePublished">2017-06-05</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/05/facebook-Mystery-Machine/" class="title">facebook Mystery Machine</a></p>
-                            <p class="item-date"><time datetime="2017-06-05T01:49:00.000Z" itemprop="datePublished">2017-06-05</time></p>
                         </div>
                     </li>
                 
@@ -841,7 +968,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -850,7 +977,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">7</span></li></ul>
         </div>
     </div>
 
@@ -859,7 +986,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 14.29px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 12.86px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 14.29px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 15.71px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.29px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 12.86px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
         </div>
     </div>
 
