@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elasticsearch-internals.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/esread1.jpg?raw=true">
-<meta property="og:updated_time" content="2017-06-09T07:54:09.000Z">
+<meta property="og:updated_time" content="2017-06-09T08:18:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch internals">
 <meta name="twitter:description" content="BasicsStorage Model一种特殊的LSM Tree，只是没有多level1234translog   WALbuffer     MemTablesegment    SSTablemerge      merge &amp;amp; compaction Defaults12345678node.master: truenode.data: trueindex.number_of_shar">
@@ -250,6 +250,7 @@
 <ul>
 <li>每个shard一个translog，即每个index一个translog</li>
 <li>它提供实时的CRUD by docID，先translog然后再segments</li>
+<li>默认5s刷盘</li>
 <li>translog存放在path.data，可以stripe，但存在与segments竞争资源问题<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ls nodes/0/indices/twitter/1/</div><div class="line">drwxr-xr-x  3 funky  wheel   102B  6  8 17:23 _state</div><div class="line">drwxr-xr-x  5 funky  wheel   170B  6  8 17:23 index</div><div class="line">drwxr-xr-x  3 funky  wheel   102B  6  8 17:23 translog</div></pre></td></tr></table></figure>
 </li>
 </ul>
@@ -320,7 +321,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pk3awk0009it5b69e1lu8f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3pj2rbp003ia05bn6c5asbo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
