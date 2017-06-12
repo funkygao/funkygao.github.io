@@ -3,18 +3,24 @@
 <head>
     <meta charset="utf-8">
     
-    <title>dual write conflict | Notes</title>
+    <title>kafka ext4 | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="一致性">
+    <meta name="description" content="big file我目前使用ext4作为kafka存储，每个segment 1GB Ext4针对大文件顺序访问的主要优化  replace indirect blocks with extent(盘区)  ext3采用多层间接地址映射，操作大文件时产生很多随机访问 one extra block read(seek) every 1024 blocks(4MB)    ext4 extent是一组连">
+<meta name="keywords" content="PubSub">
 <meta property="og:type" content="article">
-<meta property="og:title" content="dual write conflict">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/12/dual-write-conflict/index.html">
+<meta property="og:title" content="kafka ext4">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/12/kafka-ext4/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true">
-<meta property="og:updated_time" content="2017-05-27T02:39:14.000Z">
+<meta property="og:description" content="big file我目前使用ext4作为kafka存储，每个segment 1GB Ext4针对大文件顺序访问的主要优化  replace indirect blocks with extent(盘区)  ext3采用多层间接地址映射，操作大文件时产生很多随机访问 one extra block read(seek) every 1024 blocks(4MB)    ext4 extent是一组连">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/ext2-3.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/extentmap.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/fsbench.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/ext3-vs-ext4.png?raw=true">
+<meta property="og:updated_time" content="2017-06-12T03:05:10.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="dual write conflict">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true">
+<meta name="twitter:title" content="kafka ext4">
+<meta name="twitter:description" content="big file我目前使用ext4作为kafka存储，每个segment 1GB Ext4针对大文件顺序访问的主要优化  replace indirect blocks with extent(盘区)  ext3采用多层间接地址映射，操作大文件时产生很多随机访问 one extra block read(seek) every 1024 blocks(4MB)    ext4 extent是一组连">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/ext2-3.png?raw=true">
     
 
     
@@ -197,7 +203,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-dual-write-conflict" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-kafka-ext4" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -205,7 +211,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            dual write conflict
+            kafka ext4
         </h1>
     
 
@@ -214,8 +220,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/12/dual-write-conflict/">
-            <time datetime="2017-05-11T23:58:30.000Z" itemprop="datePublished">2017-05-12</time>
+        <a href="/2017/06/12/kafka-ext4/">
+            <time datetime="2017-06-12T02:03:31.000Z" itemprop="datePublished">2017-06-12</time>
         </a>
     </div>
 
@@ -224,7 +230,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
     </div>
 
                     </div>
@@ -235,7 +241,34 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true" alt="conflicts"></p>
+            <h2 id="big-file"><a href="#big-file" class="headerlink" title="big file"></a>big file</h2><p>我目前使用ext4作为kafka存储，每个segment 1GB</p>
+<p>Ext4针对大文件顺序访问的主要优化</p>
+<ul>
+<li><p>replace indirect blocks with extent(盘区)</p>
+<ul>
+<li>ext3采用多层间接地址映射，操作大文件时产生很多随机访问<ul>
+<li>one extra block read(seek) every 1024 blocks(4MB)</li>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/ext2-3.png?raw=true" alt="ext2/3"></li>
+</ul>
+</li>
+<li><p>ext4 extent是一组连续的数据块</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">+---------+--------+----------+</div><div class="line">| logical | length | physical |</div><div class="line">+---------+--------+----------+</div><div class="line">+ 0       | 1000   | 200      |</div><div class="line">+---------+--------+----------+</div><div class="line"></div><div class="line">type ext4_extent struct &#123;</div><div class="line">  block    uint32 // first logical block extent covers</div><div class="line">  len      uint16 // number of blocks covered by extent</div><div class="line">  start_hi uint16 // high 16 bits of physical block</div><div class="line">  start    uint32 // low 32 bits of physical block</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/extentmap.png?raw=true" alt="ext4"></p>
+</li>
+</ul>
+</li>
+<li>inode prealloc<br>inode有很好的locality，同一目录下文件的inode尽量存放一起，加速了目录寻址性能</li>
+<li>Multiblock Allocator(MBAlloc)<ul>
+<li>ext3每次只能分配一个4KB(block size)的block</li>
+<li>ext4支持一次性分配多个block</li>
+</ul>
+</li>
+<li>延迟分配<br>defer block allocation to writeback time</li>
+<li>online defregmentation e4defrag<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">allocate more contiguous blocks in a temporary inode</div><div class="line"></div><div class="line">read a data block from the original inode</div><div class="line">move the corresponding block number from the temporary inode to the original inode</div><div class="line">write out the page</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/fsbench.png?raw=true" alt="benchmark"></p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/ext3-vs-ext4.png?raw=true" alt="ext3 vs ext4"></p>
 
         
         </div>
@@ -246,7 +279,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj3thvnsd001v5h5b0dzwlqqx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj3thvnst002e5h5bawm5xppk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -314,7 +347,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/12/kafka-ext4/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/12/kafka-ext4/">Comments</a>
     
 
         </footer>
@@ -323,19 +356,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/12/repeatable-read-write-skew/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    mysql repeatable read write skew
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/12/shard-scales/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/12/fs-atomic-and-ordering/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">shard scales</div>
+            <div class="article-nav-title">fs atomic and ordering</div>
         </a>
     
 </nav>
@@ -466,9 +490,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/12/dual-write-conflict/';
+            this.page.url = 'http://funkygao.github.io/2017/06/12/kafka-ext4/';
         
-        this.page.identifier = 'dual-write-conflict';
+        this.page.identifier = 'kafka-ext4';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

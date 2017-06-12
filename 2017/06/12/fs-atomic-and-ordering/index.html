@@ -3,18 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>dual write conflict | Notes</title>
+    <title>fs atomic and ordering | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="一致性">
+    <meta name="description" content="应用层通过POSIX系统调用接口访问文件系统，但POSIX只规定了结果，底层的guarantee并没有提供，开发者只能去猜。不同的文件系统的实现不同，那些不“可见”的部分，会造成很大的差异；同时，每个文件系统又有些配置，这些配置也造成理解的困难。 Example12write(f1, &amp;quot;pp&amp;quot;)write(f2, &amp;quot;qq&amp;quot;) 如果write不是原子的，那么可">
+<meta name="keywords" content="architecture">
 <meta property="og:type" content="article">
-<meta property="og:title" content="dual write conflict">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/12/dual-write-conflict/index.html">
+<meta property="og:title" content="fs atomic and ordering">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true">
-<meta property="og:updated_time" content="2017-05-27T02:39:14.000Z">
+<meta property="og:description" content="应用层通过POSIX系统调用接口访问文件系统，但POSIX只规定了结果，底层的guarantee并没有提供，开发者只能去猜。不同的文件系统的实现不同，那些不“可见”的部分，会造成很大的差异；同时，每个文件系统又有些配置，这些配置也造成理解的困难。 Example12write(f1, &amp;quot;pp&amp;quot;)write(f2, &amp;quot;qq&amp;quot;) 如果write不是原子的，那么可">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/fs-crash.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/fs-persistence.png?raw=true">
+<meta property="og:updated_time" content="2017-06-12T03:37:17.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="dual write conflict">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true">
+<meta name="twitter:title" content="fs atomic and ordering">
+<meta name="twitter:description" content="应用层通过POSIX系统调用接口访问文件系统，但POSIX只规定了结果，底层的guarantee并没有提供，开发者只能去猜。不同的文件系统的实现不同，那些不“可见”的部分，会造成很大的差异；同时，每个文件系统又有些配置，这些配置也造成理解的困难。 Example12write(f1, &amp;quot;pp&amp;quot;)write(f2, &amp;quot;qq&amp;quot;) 如果write不是原子的，那么可">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/fs-crash.png?raw=true">
     
 
     
@@ -197,7 +201,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-dual-write-conflict" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-fs-atomic-and-ordering" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -205,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            dual write conflict
+            fs atomic and ordering
         </h1>
     
 
@@ -214,8 +218,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/12/dual-write-conflict/">
-            <time datetime="2017-05-11T23:58:30.000Z" itemprop="datePublished">2017-05-12</time>
+        <a href="/2017/06/12/fs-atomic-and-ordering/">
+            <time datetime="2017-06-12T01:46:26.000Z" itemprop="datePublished">2017-06-12</time>
         </a>
     </div>
 
@@ -224,7 +228,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
+        <a class="tag-link" href="/tags/architecture/">architecture</a>
     </div>
 
                     </div>
@@ -235,8 +239,26 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true" alt="conflicts"></p>
-
+            <p>应用层通过POSIX系统调用接口访问文件系统，但POSIX只规定了结果，底层的guarantee并没有提供，开发者只能去猜。<br>不同的文件系统的实现不同，那些不“可见”的部分，会造成很大的差异；同时，每个文件系统又有些配置，这些配置也造成理解的困难。</p>
+<h2 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">write(f1, &quot;pp&quot;)</div><div class="line">write(f2, &quot;qq&quot;)</div></pre></td></tr></table></figure>
+<p>如果write不是原子的，那么可能造成文件大小变化了，但内容没变(State#A)<br>乱序造成State#C<br><img src="https://github.com/funkygao/blogassets/blob/master/img/fs-crash.png?raw=true" alt="fs"></p>
+<ul>
+<li>size atomicity</li>
+<li>content atomicity</li>
+<li>calls out of order</li>
+</ul>
+<h2 id="Facts"><a href="#Facts" class="headerlink" title="Facts"></a>Facts</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/fs-persistence.png?raw=true" alt="persistence"></p>
+<h3 id="atomicity"><a href="#atomicity" class="headerlink" title="atomicity"></a>atomicity</h3><ul>
+<li>atomic single-sector overwrite<br>目前绝大部分文件系统提供了atomic single-sector overwrite，主要是底层硬盘就已经提供了</li>
+<li>atomic append<ul>
+<li>需要原子地修改inode+data block</li>
+<li>ext3/ext4/reiserfs writeback不支持</li>
+</ul>
+</li>
+<li>multi-block append<br>目前绝大部分文件系统没有支持</li>
+<li>rename/link<br>这类directory operation，基本上是原子的</li>
+</ul>
+<h3 id="ordering"><a href="#ordering" class="headerlink" title="ordering"></a>ordering</h3>
         
         </div>
         <footer class="article-footer">
@@ -246,7 +268,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj3thvnsd001v5h5b0dzwlqqx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj3thvnsi00215h5bf02fjtm0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -314,7 +336,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/">Comments</a>
     
 
         </footer>
@@ -323,19 +345,19 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/12/repeatable-read-write-skew/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2017/06/12/kafka-ext4/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    mysql repeatable read write skew
+                    kafka ext4
                 
             </div>
         </a>
     
     
-        <a href="/2017/05/12/shard-scales/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/09/WOL/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">shard scales</div>
+            <div class="article-nav-title">Wake on LAN</div>
         </a>
     
 </nav>
@@ -466,9 +488,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/12/dual-write-conflict/';
+            this.page.url = 'http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/';
         
-        this.page.identifier = 'dual-write-conflict';
+        this.page.identifier = 'fs-atomic-and-ordering';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
