@@ -3,23 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>storm acker | Notes</title>
+    <title>OpenStack storage | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta name="keywords" content="PubSub">
+    <meta name="description" content="对象存储 Swift 块存储 EBS/RBD Cinder, Ceph, Sheepdog RDS Trove">
+<meta name="keywords" content="storage,cloud">
 <meta property="og:type" content="article">
-<meta property="og:title" content="storm acker">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/02/storm-ack/index.html">
+<meta property="og:title" content="OpenStack storage">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/14/OpenStack-storage/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true">
-<meta property="og:updated_time" content="2017-06-02T06:36:42.000Z">
+<meta property="og:description" content="对象存储 Swift 块存储 EBS/RBD Cinder, Ceph, Sheepdog RDS Trove">
+<meta property="og:updated_time" content="2017-06-14T03:10:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="storm acker">
-<meta name="twitter:description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true">
+<meta name="twitter:title" content="OpenStack storage">
+<meta name="twitter:description" content="对象存储 Swift 块存储 EBS/RBD Cinder, Ceph, Sheepdog RDS Trove">
     
 
     
@@ -202,7 +198,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-storm-ack" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-OpenStack-storage" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +206,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            storm acker
+            OpenStack storage
         </h1>
     
 
@@ -219,8 +215,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/02/storm-ack/">
-            <time datetime="2017-06-02T01:03:52.000Z" itemprop="datePublished">2017-06-02</time>
+        <a href="/2017/06/14/OpenStack-storage/">
+            <time datetime="2017-06-14T02:43:35.000Z" itemprop="datePublished">2017-06-14</time>
         </a>
     </div>
 
@@ -229,7 +225,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+        <a class="tag-link" href="/tags/cloud/">cloud</a>, <a class="tag-link" href="/tags/storage/">storage</a>
     </div>
 
                     </div>
@@ -240,12 +236,11 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Acker"><a href="#Acker" class="headerlink" title="Acker"></a>Acker</h2><p>对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆</p>
-<p>当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现</p>
-<p>tuple tree，中间任意一个edge fail，会理解触发Spout的fail，但后面的Bolt的执行不受影响。做无用功？</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true" alt="backtype.storm.daemon.acker"></p>
-<h2 id="Spout-Executor"><a href="#Spout-Executor" class="headerlink" title="Spout Executor"></a>Spout Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true" alt="spout executor"></p>
-<h2 id="Bolt-Executor"><a href="#Bolt-Executor" class="headerlink" title="Bolt Executor"></a>Bolt Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true" alt="bolt executor"></p>
+            <ul>
+<li>对象存储 Swift</li>
+<li>块存储 EBS/RBD Cinder, Ceph, Sheepdog</li>
+<li>RDS Trove</li>
+</ul>
 
         
         </div>
@@ -256,7 +251,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj3wg7cpp003ima5b0o0d90ys" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj3wg7co4001cma5b2vrab5xx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -324,7 +319,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/02/storm-ack/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/02/storm-ack/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/14/OpenStack-storage/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/">Comments</a>
     
 
         </footer>
@@ -333,19 +328,19 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/05/facebook-Mystery-Machine/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2017/06/14/HDD-Stats-Q1-2017/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    facebook Mystery Machine
+                    HDD Stats Q1 2017
                 
             </div>
         </a>
     
     
-        <a href="/2017/06/02/monkey-patch-golang/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/14/erasure-coding/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">monkey patch golang</div>
+            <div class="article-nav-title">Reed-Solomon erasure code</div>
         </a>
     
 </nav>
@@ -476,9 +471,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/02/storm-ack/';
+            this.page.url = 'http://funkygao.github.io/2017/06/14/OpenStack-storage/';
         
-        this.page.identifier = 'storm-ack';
+        this.page.identifier = 'OpenStack-storage';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

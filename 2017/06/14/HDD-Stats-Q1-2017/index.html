@@ -3,23 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>storm acker | Notes</title>
+    <title>HDD Stats Q1 2017 | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta name="keywords" content="PubSub">
+    <meta name="description" content="生产环境下游8万个磁盘，其中1800个是启动盘，即1800台服务器，每台服务器挂40个盘每个磁盘3~8TB  Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517">
+<meta name="keywords" content="storage">
 <meta property="og:type" content="article">
-<meta property="og:title" content="storm acker">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/02/storm-ack/index.html">
+<meta property="og:title" content="HDD Stats Q1 2017">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true">
-<meta property="og:updated_time" content="2017-06-02T06:36:42.000Z">
+<meta property="og:description" content="生产环境下游8万个磁盘，其中1800个是启动盘，即1800台服务器，每台服务器挂40个盘每个磁盘3~8TB  Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
+<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg">
+<meta property="og:updated_time" content="2017-06-14T03:39:30.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="storm acker">
-<meta name="twitter:description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true">
+<meta name="twitter:title" content="HDD Stats Q1 2017">
+<meta name="twitter:description" content="生产环境下游8万个磁盘，其中1800个是启动盘，即1800台服务器，每台服务器挂40个盘每个磁盘3~8TB  Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
     
 
     
@@ -202,7 +201,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-storm-ack" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-HDD-Stats-Q1-2017" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            storm acker
+            HDD Stats Q1 2017
         </h1>
     
 
@@ -219,8 +218,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/02/storm-ack/">
-            <time datetime="2017-06-02T01:03:52.000Z" itemprop="datePublished">2017-06-02</time>
+        <a href="/2017/06/14/HDD-Stats-Q1-2017/">
+            <time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time>
         </a>
     </div>
 
@@ -229,7 +228,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+        <a class="tag-link" href="/tags/storage/">storage</a>
     </div>
 
                     </div>
@@ -240,12 +239,11 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Acker"><a href="#Acker" class="headerlink" title="Acker"></a>Acker</h2><p>对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆</p>
-<p>当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现</p>
-<p>tuple tree，中间任意一个edge fail，会理解触发Spout的fail，但后面的Bolt的执行不受影响。做无用功？</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true" alt="backtype.storm.daemon.acker"></p>
-<h2 id="Spout-Executor"><a href="#Spout-Executor" class="headerlink" title="Spout Executor"></a>Spout Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true" alt="spout executor"></p>
-<h2 id="Bolt-Executor"><a href="#Bolt-Executor" class="headerlink" title="Bolt Executor"></a>Bolt Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true" alt="bolt executor"></p>
+            <p>生产环境下游8万个磁盘，其中1800个是启动盘，即1800台服务器，每台服务器挂40个盘<br>每个磁盘3~8TB</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true" alt="HDD Fail Rate"></p>
+<h2 id="Backblaze-Storage-Pod"><a href="#Backblaze-Storage-Pod" class="headerlink" title="Backblaze Storage Pod"></a>Backblaze Storage Pod</h2><p>把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS<br>没有iSCSI，没有NFS，没有Fibre Channel<br>180TB成本$9,305，即每GB $0.0517</p>
+<p><img src="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg" alt="storage pod"></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
 
         
         </div>
@@ -256,7 +254,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj3wg7cpp003ima5b0o0d90ys" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj3wg7cn70009ma5b2fgqq84y" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -324,7 +322,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/02/storm-ack/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/02/storm-ack/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/">Comments</a>
     
 
         </footer>
@@ -333,19 +331,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/05/facebook-Mystery-Machine/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    facebook Mystery Machine
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/06/02/monkey-patch-golang/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/14/OpenStack-storage/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">monkey patch golang</div>
+            <div class="article-nav-title">OpenStack storage</div>
         </a>
     
 </nav>
@@ -476,9 +465,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/02/storm-ack/';
+            this.page.url = 'http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/';
         
-        this.page.identifier = 'storm-ack';
+        this.page.identifier = 'HDD-Stats-Q1-2017';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
