@@ -14,7 +14,7 @@
 <meta property="og:description" content="Intro纠错码在RAID、备份、冷数据、历史数据存储方面使用广泛也有人利用它把一份数据分散到多个cloud provider(e,g. S3,Azure,Rackspace)，消除某个供应商的依赖: cloud of cloud Usage一份文件，大小x，分成n个数据块+k个校验块，能容忍任意k个数据块或者校验块错误，即至少要n个块是有效的123456789101112131415161718">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/ec.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/ec1.png?raw=true">
-<meta property="og:updated_time" content="2017-06-14T03:06:50.000Z">
+<meta property="og:updated_time" content="2017-06-14T05:28:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Reed-Solomon erasure code">
 <meta name="twitter:description" content="Intro纠错码在RAID、备份、冷数据、历史数据存储方面使用广泛也有人利用它把一份数据分散到多个cloud provider(e,g. S3,Azure,Rackspace)，消除某个供应商的依赖: cloud of cloud Usage一份文件，大小x，分成n个数据块+k个校验块，能容忍任意k个数据块或者校验块错误，即至少要n个块是有效的123456789101112131415161718">
@@ -241,7 +241,6 @@
             
             <h2 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h2><p>纠错码在RAID、备份、冷数据、历史数据存储方面使用广泛<br>也有人利用它把一份数据分散到多个cloud provider(e,g. S3,Azure,Rackspace)，消除某个供应商的依赖: cloud of cloud</p>
 <h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>一份文件，大小x，分成n个数据块+k个校验块，能容忍任意k个数据块或者校验块错误，即至少要n个块是有效的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">$encode -data 4 -par 2 README.md # n=4 k=2</div><div class="line">Opening README.md</div><div class="line">File split into 6 data+parity shards with 358 bytes/shard.</div><div class="line">Writing to README.md.0</div><div class="line">Writing to README.md.1</div><div class="line">Writing to README.md.2</div><div class="line">Writing to README.md.3</div><div class="line">Writing to README.md.4 # README.md.4 and README.md5 are parity shards</div><div class="line">Writing to README.md.5</div><div class="line"></div><div class="line">$rm -f README.md.4 README.md.5 # remove the 2 parity shards</div><div class="line"></div><div class="line">$decode -out x README.md</div><div class="line">Opening README.md.0</div><div class="line">Opening README.md.1</div><div class="line">Opening README.md.2</div><div class="line">Opening README.md.3</div><div class="line">Opening README.md.4</div><div class="line">Error reading file open README.md.4: no such file or directory</div><div class="line">Opening README.md.5</div><div class="line">Error reading file open README.md.5: no such file or directory</div><div class="line">Verification failed. Reconstructing data</div><div class="line">Writing data to x</div><div class="line"></div><div class="line">$diff x README.md</div><div class="line">$ # all the same</div></pre></td></tr></table></figure></p>
-<h3 id="Prod-Use-Case"><a href="#Prod-Use-Case" class="headerlink" title="Prod Use Case"></a>Prod Use Case</h3><p>一个文件，被等分成17个shards+3个校验块，共计20块，容忍任意3块错误，而成本只增加了3/17=17%</p>
 <h2 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h2><p>文件内容‘ABCDEFGHIJKLMNOP’，4+2<br>给定n和k，encoding矩阵是不变的</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/ec.png?raw=true" alt="coding 4=&gt;4+2"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/ec1.png?raw=true" alt="deocde after lost 2 shards"></p>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://pages.cs.wisc.edu/~yadi/papers/yadi-infocom2013-paper.pdf" target="_blank" rel="external">http://pages.cs.wisc.edu/~yadi/papers/yadi-infocom2013-paper.pdf</a></p>
@@ -255,7 +254,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj3wg7cpd002vma5bokmn0ml6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj3wl5syx001zz15b6mxf2k2m" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

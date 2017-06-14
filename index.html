@@ -236,7 +236,10 @@
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true" alt="HDD Fail Rate"></p>
 <h2 id="Backblaze-Storage-Pod"><a href="#Backblaze-Storage-Pod" class="headerlink" title="Backblaze Storage Pod"></a>Backblaze Storage Pod</h2><p>把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS<br>没有iSCSI，没有NFS，没有Fibre Channel<br>180TB成本$9,305，即每GB $0.0517</p>
 <p><img src="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg" alt="storage pod"></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
+<h2 id="Backblze-Vaults-cloud-backup-service"><a href="#Backblze-Vaults-cloud-backup-service" class="headerlink" title="Backblze Vaults cloud backup service"></a>Backblze Vaults cloud backup service</h2><p>99.999999% annual durability<br>已经存储150PB，由1000个Storage Pod组成，40,000块盘，每天有10块盘损坏</p>
+<p>每个Vault由20个Storage Pod组成，每个Pod有45块盘，即每个Vault有900块盘，一块盘如果是4TB，那么每个Vault可以存3.6PB<br>每个磁盘使用ext4文件系统，每个Vault有个7位数字id，例如555-1021，前3位代表data center id，后4位是vault id<br>有个类似name service的服务，client备份前先request name service获取vault id，之后client直接与相应的vault进行backup IO(https)<br><img src="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg" alt="pod"></p>
+<p>每个文件被分成20 shards = 17 data shars + 3 parity shards，存放在ext4<br>每个shard有checksum，如果损坏，可以从其他17个shards恢复<br>如果某个Vault有1个pod crash了，backup write的parity会变成2，如果3个pod坏了，那么也可以写，但parity就不存在了，如果此时再坏一个pod，数据无法恢复了</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/vault-cloud-storage-architecture/" target="_blank" rel="external">https://www.backblaze.com/blog/vault-cloud-storage-architecture/</a><br><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
 
         
         </div>
@@ -247,7 +250,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj3wg7cn70009ma5b2fgqq84y" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj3wl5swu000az15byv3pzxwe" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -378,7 +381,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj3wg7co4001cma5b2vrab5xx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj3wl5sxd000tz15bp01zfomm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -496,7 +499,6 @@
             
             <h2 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h2><p>纠错码在RAID、备份、冷数据、历史数据存储方面使用广泛<br>也有人利用它把一份数据分散到多个cloud provider(e,g. S3,Azure,Rackspace)，消除某个供应商的依赖: cloud of cloud</p>
 <h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>一份文件，大小x，分成n个数据块+k个校验块，能容忍任意k个数据块或者校验块错误，即至少要n个块是有效的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">$encode -data 4 -par 2 README.md # n=4 k=2</div><div class="line">Opening README.md</div><div class="line">File split into 6 data+parity shards with 358 bytes/shard.</div><div class="line">Writing to README.md.0</div><div class="line">Writing to README.md.1</div><div class="line">Writing to README.md.2</div><div class="line">Writing to README.md.3</div><div class="line">Writing to README.md.4 # README.md.4 and README.md5 are parity shards</div><div class="line">Writing to README.md.5</div><div class="line"></div><div class="line">$rm -f README.md.4 README.md.5 # remove the 2 parity shards</div><div class="line"></div><div class="line">$decode -out x README.md</div><div class="line">Opening README.md.0</div><div class="line">Opening README.md.1</div><div class="line">Opening README.md.2</div><div class="line">Opening README.md.3</div><div class="line">Opening README.md.4</div><div class="line">Error reading file open README.md.4: no such file or directory</div><div class="line">Opening README.md.5</div><div class="line">Error reading file open README.md.5: no such file or directory</div><div class="line">Verification failed. Reconstructing data</div><div class="line">Writing data to x</div><div class="line"></div><div class="line">$diff x README.md</div><div class="line">$ # all the same</div></pre></td></tr></table></figure></p>
-<h3 id="Prod-Use-Case"><a href="#Prod-Use-Case" class="headerlink" title="Prod Use Case"></a>Prod Use Case</h3><p>一个文件，被等分成17个shards+3个校验块，共计20块，容忍任意3块错误，而成本只增加了3/17=17%</p>
 <h2 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h2><p>文件内容‘ABCDEFGHIJKLMNOP’，4+2<br>给定n和k，encoding矩阵是不变的</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/ec.png?raw=true" alt="coding 4=&gt;4+2"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/ec1.png?raw=true" alt="deocde after lost 2 shards"></p>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://pages.cs.wisc.edu/~yadi/papers/yadi-infocom2013-paper.pdf" target="_blank" rel="external">http://pages.cs.wisc.edu/~yadi/papers/yadi-infocom2013-paper.pdf</a></p>
@@ -510,7 +512,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj3wg7cpd002vma5bokmn0ml6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj3wl5syx001zz15b6mxf2k2m" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -664,7 +666,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj3wg7cp4002jma5bafkv7hr3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj3wl5szc002kz15bhjz60lvi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -809,7 +811,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj3wg7cov0026ma5bxwvhzbw1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj3wl5sz40027z15bdq7692bd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -937,7 +939,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj3wg7co00019ma5b7tf24u35" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj3wl5sxx001az15ba4v0xutj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1066,7 +1068,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj3wg7cns000xma5bs6s6owuh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj3wl5sxk0011z15bw65wb6mw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1197,7 +1199,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj3wg7cpn003ema5bxzqyvnxi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj3wl5szz003dz15b3rjbmtcs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1324,7 +1326,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj3wg7cow0028ma5by5n5z517" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj3wl5sz7002bz15bhytoisce" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1536,7 +1538,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3wg7cn40008ma5bvfv9loji" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj3wl5swo0009z15btj8frwvq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
