@@ -240,6 +240,7 @@
 </ul>
 <p>其实跟<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>的设计差不多</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">JsonDeserializer&lt;Purchase&gt; purchaseJsonDeserializer = new JsonDeserializer&lt;&gt;(Purchase.class);</div><div class="line">JsonSerializer&lt;Purchase&gt; purchaseJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">JsonSerializer&lt;RewardAccumulator&gt; rewardAccumulatorJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">JsonSerializer&lt;PurchasePattern&gt; purchasePatternJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">StringDeserializer stringDeserializer = new StringDeserializer();</div><div class="line">StringSerializer stringSerializer = new StringSerializer();</div><div class="line"></div><div class="line">TopologyBuilder topologyBuilder = new TopologyBuilder();</div><div class="line">topologyBuilder.addSource(&quot;SOURCE&quot;, stringDeserializer, purchaseJsonDeserializer, &quot;src-topic&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS&quot;, CreditCardAnonymizer::new, &quot;SOURCE&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS2&quot;, PurchasePatterns::new, &quot;PROCESS&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS3&quot;, CustomerRewards::new, &quot;PROCESS&quot;)</div><div class="line"></div><div class="line">    // kafka(src-topic) -&gt; SOURCE -&gt; PROCESS -+-&gt; PROCESS2 </div><div class="line">    //                                        +-&gt; PROCESS3</div><div class="line"></div><div class="line">    .addSink(&quot;SINK&quot;, &quot;patterns&quot;, stringSerializer, purchasePatternJsonSerializer, &quot;PROCESS2&quot;)</div><div class="line">    .addSink(&quot;SINK2&quot;, &quot;rewards&quot;, stringSerializer, rewardAccumulatorJsonSerializer, &quot;PROCESS3&quot;)</div><div class="line">    .addSink(&quot;SINK3&quot;, &quot;purchases&quot;, stringSerializer, purchaseJsonSerializer, &quot;PROCESS&quot;);</div><div class="line"></div><div class="line">KafkaStreams streaming = new KafkaStreams(topologyBuilder, streamingConfig);</div><div class="line">streaming.start();</div></pre></td></tr></table></figure>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://cwiki.apache.org/confluence/display/KAFKA/KIP-28+-+Add+a+processor+client" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/KAFKA/KIP-28+-+Add+a+processor+client</a></p>
 
         
         </div>
@@ -250,7 +251,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/22/KafkaStreams/" data-id="cj484ic42000mc25btjp7axfq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/22/KafkaStreams/" data-id="cj484nzg8000lfp5bkh24wiui" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -393,7 +394,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/2PC-failures/" data-id="cj484ic3e0002c25brne0wdax" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/2PC-failures/" data-id="cj484nzfl0002fp5bal7780g1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -520,7 +521,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/graph-database/" data-id="cj484ic66002hc25btfyner53" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/graph-database/" data-id="cj484nzhl002gfp5b89rbojmj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -653,7 +654,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj484ic3x000ec25b848mhkw6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj484nzg3000cfp5bk89ws27l" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -784,7 +785,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj484ic4c000yc25be0q4m9g3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj484nzgg000xfp5bzj162oxo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -915,7 +916,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj484ic5x0025c25bmu07sv4u" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj484nzhh0028fp5bc9ht2g8n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1069,7 +1070,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj484ic6d002qc25brq4q4sxt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj484nzhs002pfp5bvsgrsvws" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1214,7 +1215,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj484ic62002bc25bjcxxsqj3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj484nzhf0026fp5bobga5ich" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1342,7 +1343,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj484ic5b001ic25bh6mde94y" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj484nzgw001hfp5b2t2ubwjc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1471,7 +1472,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj484ic4x0016c25b8zrxf88p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj484nzgm0015fp5brw7ffmkk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

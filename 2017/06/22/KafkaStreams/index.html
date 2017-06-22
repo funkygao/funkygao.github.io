@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/06/22/KafkaStreams/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="Kafka 0.10提供，可以部分替代SparkStreaming/Storm/Samza/Flink，好处是仅仅依赖kafka，全部通过SDK实现流式处理 通过KeyValueStore interface实现stateful processor，目前有2个实现  in memory RocksDB  其实跟dbus的设计差不多 123456789101112131415161718192021">
-<meta property="og:updated_time" content="2017-06-22T07:44:52.000Z">
+<meta property="og:updated_time" content="2017-06-22T07:46:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kafka Streams">
 <meta name="twitter:description" content="Kafka 0.10提供，可以部分替代SparkStreaming/Storm/Samza/Flink，好处是仅仅依赖kafka，全部通过SDK实现流式处理 通过KeyValueStore interface实现stateful processor，目前有2个实现  in memory RocksDB  其实跟dbus的设计差不多 123456789101112131415161718192021">
@@ -244,6 +244,7 @@
 </ul>
 <p>其实跟<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>的设计差不多</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">JsonDeserializer&lt;Purchase&gt; purchaseJsonDeserializer = new JsonDeserializer&lt;&gt;(Purchase.class);</div><div class="line">JsonSerializer&lt;Purchase&gt; purchaseJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">JsonSerializer&lt;RewardAccumulator&gt; rewardAccumulatorJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">JsonSerializer&lt;PurchasePattern&gt; purchasePatternJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">StringDeserializer stringDeserializer = new StringDeserializer();</div><div class="line">StringSerializer stringSerializer = new StringSerializer();</div><div class="line"></div><div class="line">TopologyBuilder topologyBuilder = new TopologyBuilder();</div><div class="line">topologyBuilder.addSource(&quot;SOURCE&quot;, stringDeserializer, purchaseJsonDeserializer, &quot;src-topic&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS&quot;, CreditCardAnonymizer::new, &quot;SOURCE&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS2&quot;, PurchasePatterns::new, &quot;PROCESS&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS3&quot;, CustomerRewards::new, &quot;PROCESS&quot;)</div><div class="line"></div><div class="line">    // kafka(src-topic) -&gt; SOURCE -&gt; PROCESS -+-&gt; PROCESS2 </div><div class="line">    //                                        +-&gt; PROCESS3</div><div class="line"></div><div class="line">    .addSink(&quot;SINK&quot;, &quot;patterns&quot;, stringSerializer, purchasePatternJsonSerializer, &quot;PROCESS2&quot;)</div><div class="line">    .addSink(&quot;SINK2&quot;, &quot;rewards&quot;, stringSerializer, rewardAccumulatorJsonSerializer, &quot;PROCESS3&quot;)</div><div class="line">    .addSink(&quot;SINK3&quot;, &quot;purchases&quot;, stringSerializer, purchaseJsonSerializer, &quot;PROCESS&quot;);</div><div class="line"></div><div class="line">KafkaStreams streaming = new KafkaStreams(topologyBuilder, streamingConfig);</div><div class="line">streaming.start();</div></pre></td></tr></table></figure>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://cwiki.apache.org/confluence/display/KAFKA/KIP-28+-+Add+a+processor+client" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/KAFKA/KIP-28+-+Add+a+processor+client</a></p>
 
         
         </div>
@@ -254,7 +255,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/22/KafkaStreams/" data-id="cj484ic42000mc25btjp7axfq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/22/KafkaStreams/" data-id="cj484nzg8000lfp5bkh24wiui" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
