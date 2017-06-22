@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                64
+                65
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,140 @@
 
             
             <section id="main">
+    <article id="post-KafkaStreams" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/22/KafkaStreams/">Kafka Streams</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/22/KafkaStreams/">
+            <time datetime="2017-06-22T07:24:10.000Z" itemprop="datePublished">2017-06-22</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>Kafka 0.10提供，可以部分替代SparkStreaming/Storm/Samza/Flink，好处是仅仅依赖kafka，全部通过SDK实现流式处理</p>
+<p>通过KeyValueStore interface实现stateful processor，目前有2个实现</p>
+<ul>
+<li>in memory</li>
+<li>RocksDB</li>
+</ul>
+<p>其实跟<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>的设计差不多</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">JsonDeserializer&lt;Purchase&gt; purchaseJsonDeserializer = new JsonDeserializer&lt;&gt;(Purchase.class);</div><div class="line">JsonSerializer&lt;Purchase&gt; purchaseJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">JsonSerializer&lt;RewardAccumulator&gt; rewardAccumulatorJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">JsonSerializer&lt;PurchasePattern&gt; purchasePatternJsonSerializer = new JsonSerializer&lt;&gt;();</div><div class="line">StringDeserializer stringDeserializer = new StringDeserializer();</div><div class="line">StringSerializer stringSerializer = new StringSerializer();</div><div class="line"></div><div class="line">TopologyBuilder topologyBuilder = new TopologyBuilder();</div><div class="line">topologyBuilder.addSource(&quot;SOURCE&quot;, stringDeserializer, purchaseJsonDeserializer, &quot;src-topic&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS&quot;, CreditCardAnonymizer::new, &quot;SOURCE&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS2&quot;, PurchasePatterns::new, &quot;PROCESS&quot;)</div><div class="line">    .addProcessor(&quot;PROCESS3&quot;, CustomerRewards::new, &quot;PROCESS&quot;)</div><div class="line"></div><div class="line">    // kafka(src-topic) -&gt; SOURCE -&gt; PROCESS -+-&gt; PROCESS2 </div><div class="line">    //                                        +-&gt; PROCESS3</div><div class="line"></div><div class="line">    .addSink(&quot;SINK&quot;, &quot;patterns&quot;, stringSerializer, purchasePatternJsonSerializer, &quot;PROCESS2&quot;)</div><div class="line">    .addSink(&quot;SINK2&quot;, &quot;rewards&quot;, stringSerializer, rewardAccumulatorJsonSerializer, &quot;PROCESS3&quot;)</div><div class="line">    .addSink(&quot;SINK3&quot;, &quot;purchases&quot;, stringSerializer, purchaseJsonSerializer, &quot;PROCESS&quot;);</div><div class="line"></div><div class="line">KafkaStreams streaming = new KafkaStreams(topologyBuilder, streamingConfig);</div><div class="line">streaming.start();</div></pre></td></tr></table></figure>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/22/KafkaStreams/" data-id="cj484ic42000mc25btjp7axfq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/22/KafkaStreams/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/22/KafkaStreams/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-2PC-failures" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -259,7 +393,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/2PC-failures/" data-id="cj482yvs40002wq5b38weait7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/2PC-failures/" data-id="cj484ic3e0002c25brne0wdax" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -386,7 +520,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/graph-database/" data-id="cj482yvv2002ewq5bryc96dip" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/graph-database/" data-id="cj484ic66002hc25btfyner53" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -519,7 +653,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj482yvss000cwq5b0ju663z7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj484ic3x000ec25b848mhkw6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -650,7 +784,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj482yvtp000xwq5bo8ry71v7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/OpenStack-storage/" data-id="cj484ic4c000yc25be0q4m9g3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -781,7 +915,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj482yvut0024wq5b6ux8cnid" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj484ic5x0025c25bmu07sv4u" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -935,7 +1069,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj482yvvc002rwq5bh1tchb6k" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj484ic6d002qc25brq4q4sxt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1080,7 +1214,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj482yvuv0026wq5bi14iocl9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj484ic62002bc25bjcxxsqj3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1208,7 +1342,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj482yvu6001ewq5bdg3knrkh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj484ic5b001ic25bh6mde94y" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1337,7 +1471,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj482yvtu0012wq5bu7287cvh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj484ic4x0016c25b8zrxf88p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1415,137 +1549,6 @@
 
 
 
-    <article id="post-socket-recv-buffer" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/08/socket-recv-buffer/">socket recv buffer</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/08/socket-recv-buffer/">
-            <time datetime="2017-06-08T03:03:16.000Z" itemprop="datePublished">2017-06-08</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/recvbuf.png?raw=true" alt="SO_RCVBUF"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">BDP * 4 / 3</div></pre></td></tr></table></figure>
-<p>use iperf for testing<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">iperf -s -w 200K   # server</div><div class="line">iperf -c localhost # client</div></pre></td></tr></table></figure></p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/iperf.png?raw=true" alt="iperf"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">ethtool -k eth0 # segment offload makes tcpdump see a packet bigger than MTU</div><div class="line">net.ipv4.tcp_available_congestion_control</div><div class="line">net.ipv4.tcp_congestion_control</div><div class="line">net.ipv4.tcp_moderate_rcvbuf</div></pre></td></tr></table></figure>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj482yvvx003iwq5bflj144ev" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/08/socket-recv-buffer/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
@@ -1558,6 +1561,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/22/KafkaStreams/" class="title">Kafka Streams</a></p>
+                            <p class="item-date"><time datetime="2017-06-22T07:24:10.000Z" itemprop="datePublished">2017-06-22</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1595,15 +1607,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/erasure-coding/" class="title">Reed-Solomon erasure code</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T01:20:19.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1613,7 +1616,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">23</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1622,7 +1625,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
