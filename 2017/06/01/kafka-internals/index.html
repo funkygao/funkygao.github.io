@@ -3,22 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>LSM for SSD | Notes</title>
+    <title>kafka internals | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Basics  (immutable)memtable: sorted skiplist SSTable: sorted string table L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的  SSTable file123+-------------------+-------------------------+-----">
-<meta name="keywords" content="storage">
+    <meta name="description" content="Overview Controller负责  leadership change of a partitioneach leader can independently update ISR new topics; deleted topics replica re-assignment  1234567class KafkaController &amp;#123;    partitionStateM">
+<meta name="keywords" content="PubSub">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LSM for SSD">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/16/LSM/index.html">
+<meta property="og:title" content="kafka internals">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/01/kafka-internals/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Basics  (immutable)memtable: sorted skiplist SSTable: sorted string table L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的  SSTable file123+-------------------+-------------------------+-----">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/ioamplification.png?raw=true">
-<meta property="og:updated_time" content="2017-06-01T11:37:56.000Z">
+<meta property="og:description" content="Overview Controller负责  leadership change of a partitioneach leader can independently update ISR new topics; deleted topics replica re-assignment  1234567class KafkaController &amp;#123;    partitionStateM">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/kafkaserver.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/replicastate.png?raw=true">
+<meta property="og:updated_time" content="2017-06-22T04:48:03.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="LSM for SSD">
-<meta name="twitter:description" content="Basics  (immutable)memtable: sorted skiplist SSTable: sorted string table L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的  SSTable file123+-------------------+-------------------------+-----">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true">
+<meta name="twitter:title" content="kafka internals">
+<meta name="twitter:description" content="Overview Controller负责  leadership change of a partitioneach leader can independently update ISR new topics; deleted topics replica re-assignment  1234567class KafkaController &amp;#123;    partitionStateM">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/kafkaserver.png?raw=true">
     
 
     
@@ -201,7 +201,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-LSM" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-kafka-internals" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -209,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            LSM for SSD
+            kafka internals
         </h1>
     
 
@@ -218,8 +218,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/16/LSM/">
-            <time datetime="2017-05-16T01:33:59.000Z" itemprop="datePublished">2017-05-16</time>
+        <a href="/2017/06/01/kafka-internals/">
+            <time datetime="2017-06-01T03:24:34.000Z" itemprop="datePublished">2017-06-01</time>
         </a>
     </div>
 
@@ -228,7 +228,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
     </div>
 
                     </div>
@@ -239,28 +239,51 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true" alt="leveldb"></p>
+            <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/kafkaserver.png?raw=true" alt="overview"></p>
+<h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><p>负责</p>
 <ul>
-<li>(immutable)memtable: sorted skiplist</li>
-<li>SSTable: sorted string table</li>
-<li>L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的</li>
+<li>leadership change of a partition<br>each leader can independently update ISR</li>
+<li>new topics; deleted topics</li>
+<li>replica re-assignment</li>
 </ul>
-<h3 id="SSTable-file"><a href="#SSTable-file" class="headerlink" title="SSTable file"></a>SSTable file</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+-------------------+-------------------------+------------+</div><div class="line">| index block(16KB) | bloom-filter block(4KB) | data block |</div><div class="line">+-------------------+-------------------------+------------+</div></pre></td></tr></table></figure>
-<h3 id="Get-key"><a href="#Get-key" class="headerlink" title="Get(key)"></a>Get(key)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">locate key in memtable</div><div class="line">if found then return</div><div class="line">locate key in immutable memtable</div><div class="line">if found then return</div><div class="line">for level:=0; level&lt;=6; level++ &#123;</div><div class="line">    // 对于level0，需要遍历所有SSTable，因为keys overlap</div><div class="line">    // 但leveldb为了解决这个问题，除了Bloomfilter，也限制了L0的文件数量，一旦超过8，就compact(L0-&gt;L1)</div><div class="line">    // 对于其他level，由于已经sorted，可以直接定位SSTable</div><div class="line">    //</div><div class="line">    // 最坏情况下，Get(key)需要读8个L0以及L1-L6，共14个文件</div><div class="line">    locate key in SSTable in $level </div><div class="line">    if found then return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="SSD"><a href="#SSD" class="headerlink" title="SSD"></a>SSD</h2><p>主流SSD，例如<a href="http://www.anandtech.com/show/10754/samsung-960-pro-ssd-review" target="_blank" rel="external">Samsung 960 Pro</a>，可以提供440K/s random read<br>with block size=4KB</p>
-<p>LSM是为传统硬盘设计的，在SSD下，可以做优化，不必过分担心随机读</p>
-<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h2><p>LSM-Tree的主要成本都在compaction(merge sort)，造成IO放大(50倍)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class KafkaController &#123;</div><div class="line">    partitionStateMachine PartitionStateMachine</div><div class="line">    replicaStateMachine ReplicaStateMachine</div><div class="line"></div><div class="line">    // controller选举，并LeaderChangeListener</div><div class="line">    controllerElector ZookeeperLeaderElector </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="ControllerContext"><a href="#ControllerContext" class="headerlink" title="ControllerContext"></a>ControllerContext</h3><p>一个全局变量。在选举为controller时，一次性从zk里读入所有状态信息KafkaController.initializeControllerContext</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">class ControllerContext &#123;</div><div class="line">    epoch, epochZkVersion, correlationId</div><div class="line">    controllerChannelManager // 维护controller与每个broker之间的socket conn</div><div class="line"></div><div class="line">    // 初始化时从/brokers/ids里取得的，并在BrokerChangeListener里修改</div><div class="line">    liveBrokersUnderlying: Set[Broker]</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics里取得的，并在TopicChangeListener里修改</div><div class="line">    allTopics: Set[String]</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics/$topic里一一取得，并在如下情况下修改</div><div class="line">    // - assignReplicasToPartitions.assignReplicasToPartitions</div><div class="line">    // - updateAssignedReplicasForPartition</div><div class="line">    // - TopicChangeListener</div><div class="line">    // - ReplicaStateMachine.handleStateChange</div><div class="line">    partitionReplicaAssignment: mutable.Map[TopicAndPartition, Seq[Int]] // AR</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics/$topic/$partitionID/state一一取得，如下情况下修改</div><div class="line">    // - PartitionStateMachine.initializeLeaderAndIsrForPartition</div><div class="line">    // - PartitionStateMachine.electLeaderForPartition</div><div class="line">    partitionLeadershipInfo: mutable.Map[TopicAndPartition, LeaderIsrAndControllerEpoch]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="ControllerChannelManager"><a href="#ControllerChannelManager" class="headerlink" title="ControllerChannelManager"></a>ControllerChannelManager</h4><p>controller为每个broker建立一个socket(BlockingChannel)连接和一个thread用于从内存batch取request进行逐条socket send/receive<br>e,g. 1个8节点的机器，controller上为这部分工作，需要建立(7个线程 + 7个socket conn)<br>与每个broker的连接是并发的，互不干扰；对于某一个broker，请求是完全串行的</p>
+<h5 id="config"><a href="#config" class="headerlink" title="config"></a>config</h5><ul>
+<li>controller.socket.timeout.ms<br>default 30s, socket connect/io timeout</li>
+</ul>
+<h5 id="broker-shutdown-startup-crash"><a href="#broker-shutdown-startup-crash" class="headerlink" title="broker shutdown/startup/crash?"></a>broker shutdown/startup/crash?</h5><p>zk.watch(“/brokers/ids”), BrokerChangeListener会调用ControllerChannelManager.addBroker/removeBroker</p>
+<h5 id="conn-broken-timeout"><a href="#conn-broken-timeout" class="headerlink" title="conn broken/timeout?"></a>conn broken/timeout?</h5><p>如果socket send/receive失败，那么自动重连重发，backoff=300ms，死循环<br>但如果broker长时间无法reach，它会触发zk.watch(“/brokers/ids”)，removeBroker，死循环退出</p>
+<h3 id="ControllerBrokerRequestBatch"><a href="#ControllerBrokerRequestBatch" class="headerlink" title="ControllerBrokerRequestBatch"></a>ControllerBrokerRequestBatch</h3><p>controller -&gt; broker，这里的圣旨请求有3种，都满足幂等性</p>
 <ul>
-<li>读很多文件到内存</li>
-<li>排序</li>
-<li>再写回到磁盘</li>
+<li>LeaderAndIsrRequest</li>
+<li>UpdateMetadataRequest</li>
+<li>StopReplicaRequest<br>删除topic</li>
 </ul>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/ioamplification.png?raw=true" alt="io"></p>
-<p>要优化compaction，可以把LSM Tree变小，RocksDB是通过压缩实现的</p>
-<p>在SSD下，可以考虑把key和value分离，在LSM Tree里只保存sorted key和pointer(value)，value直接保存在WAL里</p>
-<p>key: 16B<br>pointer(value): 16B</p>
-<p>2M个k/v，需要64MB<br>2B个k/v，需要64GB</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf" target="_blank" rel="external">https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf</a></p>
+<h3 id="onBrokerStartup"><a href="#onBrokerStartup" class="headerlink" title="onBrokerStartup"></a>onBrokerStartup</h3><p>由BrokerChangeListener触发<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">sendUpdateMetadataRequest(newBrokers)</div><div class="line"></div><div class="line">// 告诉它它上面的所有partitions</div><div class="line">replicaStateMachine.handleStateChanges(allReplicasOnNewBrokers, OnlineReplica)</div><div class="line"></div><div class="line">// 让所有的NewPartition/OfflinePartition进行leader election</div><div class="line">partitionStateMachine.triggerOnlinePartitionStateChange()</div></pre></td></tr></table></figure></p>
+<h3 id="onBrokerFailure"><a href="#onBrokerFailure" class="headerlink" title="onBrokerFailure"></a>onBrokerFailure</h3><p>由BrokerChangeListener触发</p>
+<h3 id="StateMachine"><a href="#StateMachine" class="headerlink" title="StateMachine"></a>StateMachine</h3><p>只有controller那台机器的state machine才会启动</p>
+<h4 id="PartitionStateMachine"><a href="#PartitionStateMachine" class="headerlink" title="PartitionStateMachine"></a>PartitionStateMachine</h4><p>每个partition的状态，控制partion的leader<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class PartitionStateMachine &#123;</div><div class="line">    partitionState: mutable.Map[TopicAndPartition, PartitionState] = mutable.Map.empty</div><div class="line"></div><div class="line">    topicChangeListener   // childChanges(&quot;/brokers/topics&quot;)</div><div class="line">    addPartitionsListener // all.dataChanges(&quot;/brokers/topics/$topic&quot;)</div><div class="line">    deleteTopicsListener  // childChanges(&quot;/admin/delete_topics&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>NonExistentPartition</li>
+<li>NewPartition</li>
+<li>OnlinePartition</li>
+<li>OfflinePartition</li>
+</ul>
+<h4 id="ReplicaStateMachine"><a href="#ReplicaStateMachine" class="headerlink" title="ReplicaStateMachine"></a>ReplicaStateMachine</h4><p>每个partition在assigned replic(AR)上的状态，track每个broker的存活<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class ReplicaStateMachine &#123;</div><div class="line">    replicaState: mutable.Map[PartitionAndReplica, ReplicaState] = mutable.Map.empty</div><div class="line">    brokerRequestBatch = new ControllerBrokerRequestBatch</div><div class="line"></div><div class="line">    // 只有controller关心每个broker的存活，broker自己是不关心的</div><div class="line">    // 而且broker die只有2种标准，不会因为conn broken认为broker死</div><div class="line">    // 1. broker id ephemeral znode deleted</div><div class="line">    // 2. broker controlled shutdown</div><div class="line">    brokerChangeListener  // childChanges(&quot;/brokers/ids&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/replicastate.png?raw=true" alt="replica state transition"></p>
+<h5 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h5><p>对所有replica，如果其对应的broker活，那么就置为OnlineReplica，否则ReplicaDeletionIneligible</p>
+<h5 id="state-transition"><a href="#state-transition" class="headerlink" title="state transition"></a>state transition</h5><ul>
+<li>校验当前状态与目标状态</li>
+<li>维护内存replicaState</li>
+<li>必要时通过brokerRequestBatch广播给所有broker</li>
+</ul>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><p>ReplicationUtils.updateLeaderAndIsr</p>
+<h2 id="Failover"><a href="#Failover" class="headerlink" title="Failover"></a>Failover</h2><h3 id="broker-failover"><a href="#broker-failover" class="headerlink" title="broker failover"></a>broker failover</h3><p>每个broker有KafkaHealthcheck，它向/brokers/ids/$id这个ephemeral znode写数据，session expire就会重写，其中timestamp置为当前时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;jmx_port&quot;:-1,&quot;timestamp&quot;:&quot;1460677527837&quot;,&quot;host&quot;:&quot;10.1.1.1&quot;,&quot;version&quot;:1,&quot;port&quot;:9002&#125;</div></pre></td></tr></table></figure></p>
+<p>参考 onBrokerStartup， onBrokerFailure</p>
+<h3 id="controller-failover"><a href="#controller-failover" class="headerlink" title="controller failover"></a>controller failover</h3><p>controller session expire<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">broker1，是controller</div><div class="line">  在sessionTimeout*2/3=4s内还没有收到response，就会try next zk server</div><div class="line">  zk connected，发现session(0x35c1876461ec9d3)已经expire了</div><div class="line">  触发KafkaController.SessionExpirationListener &#123;</div><div class="line">      onControllerResignation()</div><div class="line">      brokerState设置为RunningAsBroker // 之前是RunningAsController</div><div class="line">      controllerElector.elect &#123;</div><div class="line">          switch write(&quot;/controller&quot;) &#123;</div><div class="line">              case ok:</div><div class="line">                  onBecomingLeader &#123;</div><div class="line">                      // 1 successfully elected as leader</div><div class="line">                      // Broker 1 starting become controller state transition</div><div class="line">                      controllerEpoch.increment()</div><div class="line">                      register listeners</div><div class="line">                      replicaStateMachine.startup()</div><div class="line">                      partitionStateMachine.startup()</div><div class="line">                      brokerState = RunningAsController</div><div class="line">                      sendUpdateMetadataRequest(to all live brokers)</div><div class="line">                  &#125;</div><div class="line">              case ZkNodeExistsException:</div><div class="line">                  read(&quot;/controller&quot;) and get leaderID</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">broker0:</div><div class="line">  ZookeeperLeaderElector.LeaderChangeListener被触发，它watch(&quot;/controller&quot;) &#123;</div><div class="line">      elect</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://issues.apache.org/jira/browse/KAFKA-1460" target="_blank" rel="external">https://issues.apache.org/jira/browse/KAFKA-1460</a><br><a href="https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3</a></p>
 
         
         </div>
@@ -271,7 +294,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj4294wzc000nf05bu7o4u4ls" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj47yfz4e0000kf5b92fxkthr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -339,7 +362,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/16/LSM/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/LSM/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/01/kafka-internals/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/kafka-internals/">Comments</a>
     
 
         </footer>
@@ -348,19 +371,19 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/16/VNC-protocol/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2017/06/01/ssd-vs-hdd/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    VNC protocol
+                    SSD vs HDD
                 
             </div>
         </a>
     
     
-        <a href="/2017/05/16/InnoDB-MVCC/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/01/scale/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">InnoDB MVCC</div>
+            <div class="article-nav-title">scale</div>
         </a>
     
 </nav>
@@ -491,9 +514,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/16/LSM/';
+            this.page.url = 'http://funkygao.github.io/2017/06/01/kafka-internals/';
         
-        this.page.identifier = 'LSM';
+        this.page.identifier = 'kafka-internals';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

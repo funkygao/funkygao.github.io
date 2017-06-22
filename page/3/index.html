@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                63
+                64
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,177 @@
 
             
             <section id="main">
+    <article id="post-kafka-internals" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/01/kafka-internals/">kafka internals</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/01/kafka-internals/">
+            <time datetime="2017-06-01T03:24:34.000Z" itemprop="datePublished">2017-06-01</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/kafkaserver.png?raw=true" alt="overview"></p>
+<h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><p>负责</p>
+<ul>
+<li>leadership change of a partition<br>each leader can independently update ISR</li>
+<li>new topics; deleted topics</li>
+<li>replica re-assignment</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class KafkaController &#123;</div><div class="line">    partitionStateMachine PartitionStateMachine</div><div class="line">    replicaStateMachine ReplicaStateMachine</div><div class="line"></div><div class="line">    // controller选举，并LeaderChangeListener</div><div class="line">    controllerElector ZookeeperLeaderElector </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="ControllerContext"><a href="#ControllerContext" class="headerlink" title="ControllerContext"></a>ControllerContext</h3><p>一个全局变量。在选举为controller时，一次性从zk里读入所有状态信息KafkaController.initializeControllerContext</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">class ControllerContext &#123;</div><div class="line">    epoch, epochZkVersion, correlationId</div><div class="line">    controllerChannelManager // 维护controller与每个broker之间的socket conn</div><div class="line"></div><div class="line">    // 初始化时从/brokers/ids里取得的，并在BrokerChangeListener里修改</div><div class="line">    liveBrokersUnderlying: Set[Broker]</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics里取得的，并在TopicChangeListener里修改</div><div class="line">    allTopics: Set[String]</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics/$topic里一一取得，并在如下情况下修改</div><div class="line">    // - assignReplicasToPartitions.assignReplicasToPartitions</div><div class="line">    // - updateAssignedReplicasForPartition</div><div class="line">    // - TopicChangeListener</div><div class="line">    // - ReplicaStateMachine.handleStateChange</div><div class="line">    partitionReplicaAssignment: mutable.Map[TopicAndPartition, Seq[Int]] // AR</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics/$topic/$partitionID/state一一取得，如下情况下修改</div><div class="line">    // - PartitionStateMachine.initializeLeaderAndIsrForPartition</div><div class="line">    // - PartitionStateMachine.electLeaderForPartition</div><div class="line">    partitionLeadershipInfo: mutable.Map[TopicAndPartition, LeaderIsrAndControllerEpoch]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="ControllerChannelManager"><a href="#ControllerChannelManager" class="headerlink" title="ControllerChannelManager"></a>ControllerChannelManager</h4><p>controller为每个broker建立一个socket(BlockingChannel)连接和一个thread用于从内存batch取request进行逐条socket send/receive<br>e,g. 1个8节点的机器，controller上为这部分工作，需要建立(7个线程 + 7个socket conn)<br>与每个broker的连接是并发的，互不干扰；对于某一个broker，请求是完全串行的</p>
+<h5 id="config"><a href="#config" class="headerlink" title="config"></a>config</h5><ul>
+<li>controller.socket.timeout.ms<br>default 30s, socket connect/io timeout</li>
+</ul>
+<h5 id="broker-shutdown-startup-crash"><a href="#broker-shutdown-startup-crash" class="headerlink" title="broker shutdown/startup/crash?"></a>broker shutdown/startup/crash?</h5><p>zk.watch(“/brokers/ids”), BrokerChangeListener会调用ControllerChannelManager.addBroker/removeBroker</p>
+<h5 id="conn-broken-timeout"><a href="#conn-broken-timeout" class="headerlink" title="conn broken/timeout?"></a>conn broken/timeout?</h5><p>如果socket send/receive失败，那么自动重连重发，backoff=300ms，死循环<br>但如果broker长时间无法reach，它会触发zk.watch(“/brokers/ids”)，removeBroker，死循环退出</p>
+<h3 id="ControllerBrokerRequestBatch"><a href="#ControllerBrokerRequestBatch" class="headerlink" title="ControllerBrokerRequestBatch"></a>ControllerBrokerRequestBatch</h3><p>controller -&gt; broker，这里的圣旨请求有3种，都满足幂等性</p>
+<ul>
+<li>LeaderAndIsrRequest</li>
+<li>UpdateMetadataRequest</li>
+<li>StopReplicaRequest<br>删除topic</li>
+</ul>
+<h3 id="onBrokerStartup"><a href="#onBrokerStartup" class="headerlink" title="onBrokerStartup"></a>onBrokerStartup</h3><p>由BrokerChangeListener触发<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">sendUpdateMetadataRequest(newBrokers)</div><div class="line"></div><div class="line">// 告诉它它上面的所有partitions</div><div class="line">replicaStateMachine.handleStateChanges(allReplicasOnNewBrokers, OnlineReplica)</div><div class="line"></div><div class="line">// 让所有的NewPartition/OfflinePartition进行leader election</div><div class="line">partitionStateMachine.triggerOnlinePartitionStateChange()</div></pre></td></tr></table></figure></p>
+<h3 id="onBrokerFailure"><a href="#onBrokerFailure" class="headerlink" title="onBrokerFailure"></a>onBrokerFailure</h3><p>由BrokerChangeListener触发</p>
+<h3 id="StateMachine"><a href="#StateMachine" class="headerlink" title="StateMachine"></a>StateMachine</h3><p>只有controller那台机器的state machine才会启动</p>
+<h4 id="PartitionStateMachine"><a href="#PartitionStateMachine" class="headerlink" title="PartitionStateMachine"></a>PartitionStateMachine</h4><p>每个partition的状态，控制partion的leader<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class PartitionStateMachine &#123;</div><div class="line">    partitionState: mutable.Map[TopicAndPartition, PartitionState] = mutable.Map.empty</div><div class="line"></div><div class="line">    topicChangeListener   // childChanges(&quot;/brokers/topics&quot;)</div><div class="line">    addPartitionsListener // all.dataChanges(&quot;/brokers/topics/$topic&quot;)</div><div class="line">    deleteTopicsListener  // childChanges(&quot;/admin/delete_topics&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>NonExistentPartition</li>
+<li>NewPartition</li>
+<li>OnlinePartition</li>
+<li>OfflinePartition</li>
+</ul>
+<h4 id="ReplicaStateMachine"><a href="#ReplicaStateMachine" class="headerlink" title="ReplicaStateMachine"></a>ReplicaStateMachine</h4><p>每个partition在assigned replic(AR)上的状态，track每个broker的存活<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class ReplicaStateMachine &#123;</div><div class="line">    replicaState: mutable.Map[PartitionAndReplica, ReplicaState] = mutable.Map.empty</div><div class="line">    brokerRequestBatch = new ControllerBrokerRequestBatch</div><div class="line"></div><div class="line">    // 只有controller关心每个broker的存活，broker自己是不关心的</div><div class="line">    // 而且broker die只有2种标准，不会因为conn broken认为broker死</div><div class="line">    // 1. broker id ephemeral znode deleted</div><div class="line">    // 2. broker controlled shutdown</div><div class="line">    brokerChangeListener  // childChanges(&quot;/brokers/ids&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/replicastate.png?raw=true" alt="replica state transition"></p>
+<h5 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h5><p>对所有replica，如果其对应的broker活，那么就置为OnlineReplica，否则ReplicaDeletionIneligible</p>
+<h5 id="state-transition"><a href="#state-transition" class="headerlink" title="state transition"></a>state transition</h5><ul>
+<li>校验当前状态与目标状态</li>
+<li>维护内存replicaState</li>
+<li>必要时通过brokerRequestBatch广播给所有broker</li>
+</ul>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><p>ReplicationUtils.updateLeaderAndIsr</p>
+<h2 id="Failover"><a href="#Failover" class="headerlink" title="Failover"></a>Failover</h2><h3 id="broker-failover"><a href="#broker-failover" class="headerlink" title="broker failover"></a>broker failover</h3><p>每个broker有KafkaHealthcheck，它向/brokers/ids/$id这个ephemeral znode写数据，session expire就会重写，其中timestamp置为当前时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;jmx_port&quot;:-1,&quot;timestamp&quot;:&quot;1460677527837&quot;,&quot;host&quot;:&quot;10.1.1.1&quot;,&quot;version&quot;:1,&quot;port&quot;:9002&#125;</div></pre></td></tr></table></figure></p>
+<p>参考 onBrokerStartup， onBrokerFailure</p>
+<h3 id="controller-failover"><a href="#controller-failover" class="headerlink" title="controller failover"></a>controller failover</h3><p>controller session expire<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">broker1，是controller</div><div class="line">  在sessionTimeout*2/3=4s内还没有收到response，就会try next zk server</div><div class="line">  zk connected，发现session(0x35c1876461ec9d3)已经expire了</div><div class="line">  触发KafkaController.SessionExpirationListener &#123;</div><div class="line">      onControllerResignation()</div><div class="line">      brokerState设置为RunningAsBroker // 之前是RunningAsController</div><div class="line">      controllerElector.elect &#123;</div><div class="line">          switch write(&quot;/controller&quot;) &#123;</div><div class="line">              case ok:</div><div class="line">                  onBecomingLeader &#123;</div><div class="line">                      // 1 successfully elected as leader</div><div class="line">                      // Broker 1 starting become controller state transition</div><div class="line">                      controllerEpoch.increment()</div><div class="line">                      register listeners</div><div class="line">                      replicaStateMachine.startup()</div><div class="line">                      partitionStateMachine.startup()</div><div class="line">                      brokerState = RunningAsController</div><div class="line">                      sendUpdateMetadataRequest(to all live brokers)</div><div class="line">                  &#125;</div><div class="line">              case ZkNodeExistsException:</div><div class="line">                  read(&quot;/controller&quot;) and get leaderID</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">broker0:</div><div class="line">  ZookeeperLeaderElector.LeaderChangeListener被触发，它watch(&quot;/controller&quot;) &#123;</div><div class="line">      elect</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://issues.apache.org/jira/browse/KAFKA-1460" target="_blank" rel="external">https://issues.apache.org/jira/browse/KAFKA-1460</a><br><a href="https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj47yfz4e0000kf5b92fxkthr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/01/kafka-internals/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/kafka-internals/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-scale" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -243,7 +414,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj3wcfewl0035zu5b22hrb0hp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj4294x1t003jf05b74467nfw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -373,7 +544,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj3wcfevp0023zu5bwblxd032" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj4294x0t002df05bycqskkg0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -523,7 +694,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/microservice-gateway/" data-id="cj3wcfew7002ozu5bu3klj1iu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/microservice-gateway/" data-id="cj4294x1i0030f05b8bsjj7ao" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -651,7 +822,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/" data-id="cj3wcfets0006zu5bgejoodxo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/" data-id="cj4294wyz0009f05bj9k5nkat" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -782,7 +953,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj3wcfetp0005zu5byia9lij6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj4294wyu0005f05bjt2zm67z" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -944,7 +1115,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/Cassandra/" data-id="cj3wcfetm0004zu5bhpdsbh8j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/Cassandra/" data-id="cj4294wyx0006f05bxk7knkad" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1107,7 +1278,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/" data-id="cj3wcfevm001xzu5b10htqud9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/" data-id="cj4294x0r0029f05bxt7np635" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1236,7 +1407,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/25/2017-kafka-report/" data-id="cj3wcfetb0000zu5b0fobypqh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/25/2017-kafka-report/" data-id="cj4294wyg0000f05bfav8v29w" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1367,7 +1538,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/25/zookeeper-processor/" data-id="cj3wcfex3003fzu5bjk51x203" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/25/zookeeper-processor/" data-id="cj4294x1y003pf05b0lggrs8j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1445,143 +1616,6 @@
 
 
 
-    <article id="post-kafka-redesign" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/24/kafka-redesign/">kafka redesign</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/24/kafka-redesign/">
-            <time datetime="2017-05-24T02:21:06.000Z" itemprop="datePublished">2017-05-24</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Goals"><a href="#Goals" class="headerlink" title="Goals"></a>Goals</h2><ul>
-<li>support many topics<ul>
-<li>needle in haystack</li>
-</ul>
-</li>
-<li>IO optimization<ul>
-<li>R/W isolation</li>
-<li>index file leads to random sync write</li>
-</ul>
-</li>
-</ul>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/24/kafka-redesign/" data-id="cj3wcfew0002izu5byiy13om0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/24/kafka-redesign/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/24/kafka-redesign/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
     </nav>
@@ -1649,7 +1683,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">21</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1658,7 +1692,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
