@@ -272,7 +272,16 @@
 <li>维护内存replicaState</li>
 <li>必要时通过brokerRequestBatch广播给所有broker</li>
 </ul>
-<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><p>ReplicationUtils.updateLeaderAndIsr</p>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><ul>
+<li>ReplicationUtils.updateLeaderAndIsr</li>
+<li>PartitionLeaderSelector.selectLeader<ul>
+<li>OfflinePartitionLeaderSelector</li>
+<li>ReassignedPartitionLeaderSelector</li>
+<li>PreferredReplicaPartitionLeaderSelector</li>
+<li>ControlledShutdownLeaderSelector</li>
+</ul>
+</li>
+</ul>
 <h2 id="Failover"><a href="#Failover" class="headerlink" title="Failover"></a>Failover</h2><h3 id="broker-failover"><a href="#broker-failover" class="headerlink" title="broker failover"></a>broker failover</h3><p>每个broker有KafkaHealthcheck，它向/brokers/ids/$id这个ephemeral znode写数据，session expire就会重写，其中timestamp置为当前时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;jmx_port&quot;:-1,&quot;timestamp&quot;:&quot;1460677527837&quot;,&quot;host&quot;:&quot;10.1.1.1&quot;,&quot;version&quot;:1,&quot;port&quot;:9002&#125;</div></pre></td></tr></table></figure></p>
 <p>参考 onBrokerStartup， onBrokerFailure</p>
 <h3 id="controller-failover"><a href="#controller-failover" class="headerlink" title="controller failover"></a>controller failover</h3><p>controller session expire<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">broker1，是controller</div><div class="line">  在sessionTimeout*2/3=4s内还没有收到response，就会try next zk server</div><div class="line">  zk connected，发现session(0x35c1876461ec9d3)已经expire了</div><div class="line">  触发KafkaController.SessionExpirationListener &#123;</div><div class="line">      onControllerResignation()</div><div class="line">      brokerState设置为RunningAsBroker // 之前是RunningAsController</div><div class="line">      controllerElector.elect &#123;</div><div class="line">          switch write(&quot;/controller&quot;) &#123;</div><div class="line">              case ok:</div><div class="line">                  onBecomingLeader &#123;</div><div class="line">                      // 1 successfully elected as leader</div><div class="line">                      // Broker 1 starting become controller state transition</div><div class="line">                      controllerEpoch.increment()</div><div class="line">                      register listeners</div><div class="line">                      replicaStateMachine.startup()</div><div class="line">                      partitionStateMachine.startup()</div><div class="line">                      brokerState = RunningAsController</div><div class="line">                      sendUpdateMetadataRequest(to all live brokers)</div><div class="line">                  &#125;</div><div class="line">              case ZkNodeExistsException:</div><div class="line">                  read(&quot;/controller&quot;) and get leaderID</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">broker0:</div><div class="line">  ZookeeperLeaderElector.LeaderChangeListener被触发，它watch(&quot;/controller&quot;) &#123;</div><div class="line">      elect</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
@@ -287,7 +296,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj47ygmz7002oly5bghyhawlz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj47zdvm9002ppp5bgswmckwi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -414,7 +423,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj47ygmzz003dly5b17uu4l3q" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj47zdvn1003epp5bztp8c3o7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -544,7 +553,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj47ygmyy0029ly5bunvr7xoj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj47zdvm0002app5bhcnd6dfe" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -694,7 +703,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/microservice-gateway/" data-id="cj47ygmzo002wly5bf1jqwkll" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/microservice-gateway/" data-id="cj47zdvme002xpp5bgo5wlgbd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -822,7 +831,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/" data-id="cj47ygmxa0008ly5bamiaf3o1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/" data-id="cj47zdvkc0008pp5bcygtmlhw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -953,7 +962,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj47ygmx80005ly5b4ajp1oc5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj47zdvk90005pp5b28r7aqx7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1115,7 +1124,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/Cassandra/" data-id="cj47ygmx50004ly5bwd961zym" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/Cassandra/" data-id="cj47zdvk70004pp5b4poy0086" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1278,7 +1287,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/" data-id="cj47ygmys0023ly5b4qo1bjrm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/25/etcd3-vs-zookeeper/" data-id="cj47zdvlv0024pp5b0rn7iqm0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1407,7 +1416,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/25/2017-kafka-report/" data-id="cj47ygmwu0000ly5bih4i41n9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/25/2017-kafka-report/" data-id="cj47zdvk00001pp5bhph5jm7s" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1538,7 +1547,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/25/zookeeper-processor/" data-id="cj47ygn08003nly5bs2sn6mka" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/25/zookeeper-processor/" data-id="cj47zdvna003opp5bf90nwggw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

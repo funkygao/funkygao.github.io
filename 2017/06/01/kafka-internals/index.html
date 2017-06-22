@@ -14,7 +14,7 @@
 <meta property="og:description" content="Overview Controller负责  leadership change of a partitioneach leader can independently update ISR new topics; deleted topics replica re-assignment  1234567class KafkaController &amp;#123;    partitionStateM">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/kafkaserver.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/replicastate.png?raw=true">
-<meta property="og:updated_time" content="2017-06-22T04:48:03.000Z">
+<meta property="og:updated_time" content="2017-06-22T05:21:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="kafka internals">
 <meta name="twitter:description" content="Overview Controller负责  leadership change of a partitioneach leader can independently update ISR new topics; deleted topics replica re-assignment  1234567class KafkaController &amp;#123;    partitionStateM">
@@ -279,7 +279,16 @@
 <li>维护内存replicaState</li>
 <li>必要时通过brokerRequestBatch广播给所有broker</li>
 </ul>
-<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><p>ReplicationUtils.updateLeaderAndIsr</p>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><ul>
+<li>ReplicationUtils.updateLeaderAndIsr</li>
+<li>PartitionLeaderSelector.selectLeader<ul>
+<li>OfflinePartitionLeaderSelector</li>
+<li>ReassignedPartitionLeaderSelector</li>
+<li>PreferredReplicaPartitionLeaderSelector</li>
+<li>ControlledShutdownLeaderSelector</li>
+</ul>
+</li>
+</ul>
 <h2 id="Failover"><a href="#Failover" class="headerlink" title="Failover"></a>Failover</h2><h3 id="broker-failover"><a href="#broker-failover" class="headerlink" title="broker failover"></a>broker failover</h3><p>每个broker有KafkaHealthcheck，它向/brokers/ids/$id这个ephemeral znode写数据，session expire就会重写，其中timestamp置为当前时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;jmx_port&quot;:-1,&quot;timestamp&quot;:&quot;1460677527837&quot;,&quot;host&quot;:&quot;10.1.1.1&quot;,&quot;version&quot;:1,&quot;port&quot;:9002&#125;</div></pre></td></tr></table></figure></p>
 <p>参考 onBrokerStartup， onBrokerFailure</p>
 <h3 id="controller-failover"><a href="#controller-failover" class="headerlink" title="controller failover"></a>controller failover</h3><p>controller session expire<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">broker1，是controller</div><div class="line">  在sessionTimeout*2/3=4s内还没有收到response，就会try next zk server</div><div class="line">  zk connected，发现session(0x35c1876461ec9d3)已经expire了</div><div class="line">  触发KafkaController.SessionExpirationListener &#123;</div><div class="line">      onControllerResignation()</div><div class="line">      brokerState设置为RunningAsBroker // 之前是RunningAsController</div><div class="line">      controllerElector.elect &#123;</div><div class="line">          switch write(&quot;/controller&quot;) &#123;</div><div class="line">              case ok:</div><div class="line">                  onBecomingLeader &#123;</div><div class="line">                      // 1 successfully elected as leader</div><div class="line">                      // Broker 1 starting become controller state transition</div><div class="line">                      controllerEpoch.increment()</div><div class="line">                      register listeners</div><div class="line">                      replicaStateMachine.startup()</div><div class="line">                      partitionStateMachine.startup()</div><div class="line">                      brokerState = RunningAsController</div><div class="line">                      sendUpdateMetadataRequest(to all live brokers)</div><div class="line">                  &#125;</div><div class="line">              case ZkNodeExistsException:</div><div class="line">                  read(&quot;/controller&quot;) and get leaderID</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">broker0:</div><div class="line">  ZookeeperLeaderElector.LeaderChangeListener被触发，它watch(&quot;/controller&quot;) &#123;</div><div class="line">      elect</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
@@ -294,7 +303,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj47ygmz7002oly5bghyhawlz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj47zdvm9002ppp5bgswmckwi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
