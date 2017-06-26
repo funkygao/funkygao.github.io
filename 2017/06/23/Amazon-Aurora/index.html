@@ -3,22 +3,25 @@
 <head>
     <meta charset="utf-8">
     
-    <title>LSM for SSD | Notes</title>
+    <title>Amazon Aurora | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Basics  (immutable)memtable: sorted skiplist SSTable: sorted string table L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的  SSTable file123+-------------------+-------------------------+-----">
-<meta name="keywords" content="storage">
+    <meta name="description" content="BackgroundLaunched in 2014 for MySQL, and in 2016 for PostgreSQL. Aurora基于shared disk的架构，storage共享来解决一致性问题，把计算节点与存储节点解耦，MySQL本身无状态，一写多读，S3做备份，本质上还是单机数据库  无法访问其binlog automatic storage scaling up to 64">
+<meta name="keywords" content="cloud,database">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LSM for SSD">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/16/LSM/index.html">
+<meta property="og:title" content="Amazon Aurora">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/23/Amazon-Aurora/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Basics  (immutable)memtable: sorted skiplist SSTable: sorted string table L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的  SSTable file123+-------------------+-------------------------+-----">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/ioamplification.png?raw=true">
-<meta property="og:updated_time" content="2017-06-01T11:37:56.000Z">
+<meta property="og:description" content="BackgroundLaunched in 2014 for MySQL, and in 2016 for PostgreSQL. Aurora基于shared disk的架构，storage共享来解决一致性问题，把计算节点与存储节点解耦，MySQL本身无状态，一写多读，S3做备份，本质上还是单机数据库  无法访问其binlog automatic storage scaling up to 64">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/auroraoverview.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/aurora.jpg?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/auroraio.jpg?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/groupcommit.jpg?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/threadpool.jpg?raw=true">
+<meta property="og:updated_time" content="2017-06-26T03:32:19.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="LSM for SSD">
-<meta name="twitter:description" content="Basics  (immutable)memtable: sorted skiplist SSTable: sorted string table L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的  SSTable file123+-------------------+-------------------------+-----">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true">
+<meta name="twitter:title" content="Amazon Aurora">
+<meta name="twitter:description" content="BackgroundLaunched in 2014 for MySQL, and in 2016 for PostgreSQL. Aurora基于shared disk的架构，storage共享来解决一致性问题，把计算节点与存储节点解耦，MySQL本身无状态，一写多读，S3做备份，本质上还是单机数据库  无法访问其binlog automatic storage scaling up to 64">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/auroraoverview.png?raw=true">
     
 
     
@@ -201,7 +204,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-LSM" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Amazon-Aurora" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -209,7 +212,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            LSM for SSD
+            Amazon Aurora
         </h1>
     
 
@@ -218,8 +221,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/16/LSM/">
-            <time datetime="2017-05-16T01:33:59.000Z" itemprop="datePublished">2017-05-16</time>
+        <a href="/2017/06/23/Amazon-Aurora/">
+            <time datetime="2017-06-23T09:30:31.000Z" itemprop="datePublished">2017-06-23</time>
         </a>
     </div>
 
@@ -228,7 +231,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
+        <a class="tag-link" href="/tags/cloud/">cloud</a>, <a class="tag-link" href="/tags/database/">database</a>
     </div>
 
                     </div>
@@ -239,28 +242,46 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true" alt="leveldb"></p>
+            <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>Launched in 2014 for MySQL, and in 2016 for PostgreSQL.</p>
+<h2 id="Aurora"><a href="#Aurora" class="headerlink" title="Aurora"></a>Aurora</h2><p>基于shared disk的架构，storage共享来解决一致性问题，把计算节点与存储节点解耦，MySQL本身无状态，一写多读，S3做备份，本质上还是单机数据库</p>
 <ul>
-<li>(immutable)memtable: sorted skiplist</li>
-<li>SSTable: sorted string table</li>
-<li>L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的</li>
+<li>无法访问其binlog</li>
+<li>automatic storage scaling up to 64 TB, SSD</li>
+<li>数据传输通过SSL(AES-256)</li>
+<li>支持 100,000 writes/s, 500,000 read/s</li>
+<li>费用<ul>
+<li>8 vCPU/61GB  $1.16/h</li>
+<li>16vCPU/122GB $2.32/h</li>
+<li>32vCPU/244GB $4.62/h<br>每个月相当于2万多人民币</li>
 </ul>
-<h3 id="SSTable-file"><a href="#SSTable-file" class="headerlink" title="SSTable file"></a>SSTable file</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+-------------------+-------------------------+------------+</div><div class="line">| index block(16KB) | bloom-filter block(4KB) | data block |</div><div class="line">+-------------------+-------------------------+------------+</div></pre></td></tr></table></figure>
-<h3 id="Get-key"><a href="#Get-key" class="headerlink" title="Get(key)"></a>Get(key)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">locate key in memtable</div><div class="line">if found then return</div><div class="line">locate key in immutable memtable</div><div class="line">if found then return</div><div class="line">for level:=0; level&lt;=6; level++ &#123;</div><div class="line">    // 对于level0，需要遍历所有SSTable，因为keys overlap</div><div class="line">    // 但leveldb为了解决这个问题，除了Bloomfilter，也限制了L0的文件数量，一旦超过8，就compact(L0-&gt;L1)</div><div class="line">    // 对于其他level，由于已经sorted，可以直接定位SSTable</div><div class="line">    //</div><div class="line">    // 最坏情况下，Get(key)需要读8个L0以及L1-L6，共14个文件</div><div class="line">    locate key in SSTable in $level </div><div class="line">    if found then return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="SSD"><a href="#SSD" class="headerlink" title="SSD"></a>SSD</h2><p>主流SSD，例如<a href="http://www.anandtech.com/show/10754/samsung-960-pro-ssd-review" target="_blank" rel="external">Samsung 960 Pro</a>，可以提供440K/s random read<br>with block size=4KB</p>
-<p>LSM是为传统硬盘设计的，在SSD下，可以做优化，不必过分担心随机读</p>
-<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h2><p>LSM-Tree的主要成本都在compaction(merge sort)，造成IO放大(50倍)</p>
+</li>
+</ul>
+<h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/auroraoverview.png?raw=true" alt="Aurora Overview(HM is RDS agent)"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/aurora.jpg?raw=true" alt="Aurora IO"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/auroraio.jpg?raw=true" alt="IO"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/groupcommit.jpg?raw=true" alt="Group Commit"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/threadpool.jpg?raw=true" alt="ThreadPool"></p>
+<h3 id="Why-not-R-2-W-2-gt-N-3-quorum"><a href="#Why-not-R-2-W-2-gt-N-3-quorum" class="headerlink" title="Why not R(2)+W(2)&gt;N(3) quorum?"></a>Why not R(2)+W(2)&gt;N(3) quorum?</h3><p>Aurora采用的是R(3)+W(4)&gt;N(6) 3个AZ(但必须在同一个region)，每个AZ上复制2份<br>它保证</p>
 <ul>
-<li>读很多文件到内存</li>
-<li>排序</li>
-<li>再写回到磁盘</li>
+<li>read与write集合是相交的</li>
+<li>W&gt;N/2，防止写冲突</li>
 </ul>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/ioamplification.png?raw=true" alt="io"></p>
-<p>要优化compaction，可以把LSM Tree变小，RocksDB是通过压缩实现的</p>
-<p>在SSD下，可以考虑把key和value分离，在LSM Tree里只保存sorted key和pointer(value)，value直接保存在WAL里</p>
-<p>key: 16B<br>pointer(value): 16B</p>
-<p>2M个k/v，需要64MB<br>2B个k/v，需要64GB</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf" target="_blank" rel="external">https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf</a></p>
+<p>原因</p>
+<ul>
+<li>写<ul>
+<li>2+2&gt;3<br>只能容忍一个AZ crash</li>
+<li>3+4&gt;6<br>只能容忍一个AZ crash</li>
+</ul>
+</li>
+<li>读<ul>
+<li>2+2&gt;3<br>只能容忍一个AZ crash</li>
+<li>3+4&gt;6<br>能容忍一个AZ crash，此外允许另外一个node crash，即AZ+1<br>为什么这个重要？因为data durability是指写进去的数据能读出来，它提高了durability</li>
+</ul>
+</li>
+</ul>
+<h3 id="Why-segmented-storage"><a href="#Why-segmented-storage" class="headerlink" title="Why segmented storage"></a>Why segmented storage</h3><p>如果一个AZ crash了，就会破坏write quorum，降低availability，为了提高availability(99.99%)，他们采用的方法是降低MTTR</p>
+<p>类似ES，数据存储(ibdata)被segment化，each 10GB，total max 64TB，每个segment复制6份(3 AZ)，10GB是为了能控制MTTR在10s<br>segment就成为了independent background noise failure and repair，后台有应用不停地检查、修复segment错误，如果不segment，那么修复成本很高<br>同时，是考虑到底层存储机制，做线性扩容方便</p>
+<h3 id="Scale"><a href="#Scale" class="headerlink" title="Scale"></a>Scale</h3><ul>
+<li>scale write<br>只能把master机器升级到更高的ec2: scale up, not scale out</li>
+<li>scale read<br>add more read replicas</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.allthingsdistributed.com/files/p1041-verbitski.pdf" target="_blank" rel="external">http://www.allthingsdistributed.com/files/p1041-verbitski.pdf</a><br><a href="https://www.percona.com/blog/2016/05/26/aws-aurora-benchmarking-part-2/" target="_blank" rel="external">https://www.percona.com/blog/2016/05/26/aws-aurora-benchmarking-part-2/</a><br><a href="http://www.tusacentral.net/joomla/index.php/mysql-blogs/175-aws-aurora-benchmarking-blast-or-splash.html" target="_blank" rel="external">http://www.tusacentral.net/joomla/index.php/mysql-blogs/175-aws-aurora-benchmarking-blast-or-splash.html</a></p>
 
         
         </div>
@@ -271,7 +292,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj4dl89oo000sl85b20iwv77c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/23/Amazon-Aurora/" data-id="cj4dl89ns0000l85bzxet1lub" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -339,7 +360,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/16/LSM/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/LSM/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/23/Amazon-Aurora/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/23/Amazon-Aurora/">Comments</a>
     
 
         </footer>
@@ -348,19 +369,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/16/VNC-protocol/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    VNC protocol
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/16/InnoDB-MVCC/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/23/nagles-and-delayed-ack/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">InnoDB MVCC</div>
+            <div class="article-nav-title">nagles and delayed ack</div>
         </a>
     
 </nav>
@@ -491,9 +503,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/16/LSM/';
+            this.page.url = 'http://funkygao.github.io/2017/06/23/Amazon-Aurora/';
         
-        this.page.identifier = 'LSM';
+        this.page.identifier = 'Amazon-Aurora';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

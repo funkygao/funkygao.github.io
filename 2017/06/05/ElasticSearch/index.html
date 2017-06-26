@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/esread1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/scalees.png?raw=true">
-<meta property="og:updated_time" content="2017-06-22T04:55:09.000Z">
+<meta property="og:updated_time" content="2017-06-22T09:05:14.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch internals">
 <meta name="twitter:description" content="BasicsStorage Model一种特殊的LSM Tree123456ES         LSM========   ==========translog   WALbuffer     MemTablesegment    SSTablemerge      merge &amp;amp; compaction Defaults123456node.master: truenode.data:">
@@ -153,7 +153,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                65
+                68
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -333,6 +333,7 @@
 <p>在一个已经创立的集群里，shard的分布总是均匀的。但是当你扩容节点的时候，你会发现，它总是先移动replica shard到新节点。<br>这样就导致新节点全部分布的全是副本，主shard几乎全留在了老的节点上。</p>
 <p>cluster.routing.allocation.balance参数，比较难找到合适的比例。</p>
 <h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">master通过ClusterState分配一个新shard</div><div class="line">node初始化一个空shard，并notify master</div><div class="line">master mark the shard as started</div><div class="line">if this is the first shard with a specific id, it is marked as primary</div></pre></td></tr></table></figure>
+<h4 id="Shrink-Index"><a href="#Shrink-Index" class="headerlink" title="Shrink Index"></a>Shrink Index</h4><p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-shrink-index.html" target="_blank" rel="external">https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-shrink-index.html</a><br>并不是resharding，开始时可以创建很多shard(e,g. 30)，用来灌数据，等数据好了，可以shrink到5<br>它只是hard link segments，执行时要先把index置为readonly<br>场景，例如tsdb，按照月份建索引，过了这个月，就可以shrink了</p>
 <h3 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h3><p>zen discovery(unicast/multicast)，存在脑裂问题，没有去解决，而是通过3台专用master机器，优化master逻辑，减少由于no reponse造成的partition可能性<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">node1, node2(master), node3</div><div class="line">2-3不通，但1-2, 2-3都通，minimum_master_nodes=2，node3会重新选举自己成为master，而1同意了，2个master</div></pre></td></tr></table></figure></p>
 <p>默认ping_interval=1s ping_timeout=3s ping_retries=3 join_timeout=20*ping_interval</p>
 <p>没有使用Paxos(zk)的原因:</p>
@@ -353,7 +354,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj484nzg0000afp5bkz6gzwcg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj4dl89oe000bl85btnxs9yma" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -477,6 +478,33 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/23/Amazon-Aurora/" class="title">Amazon Aurora</a></p>
+                            <p class="item-date"><time datetime="2017-06-23T09:30:31.000Z" itemprop="datePublished">2017-06-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/23/nagles-and-delayed-ack/" class="title">nagles and delayed ack</a></p>
+                            <p class="item-date"><time datetime="2017-06-23T07:23:47.000Z" itemprop="datePublished">2017-06-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/22/DB-Storage-Structures/" class="title">DB Storage Structures</a></p>
+                            <p class="item-date"><time datetime="2017-06-22T09:13:42.000Z" itemprop="datePublished">2017-06-22</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/22/KafkaStreams/" class="title">Kafka Streams</a></p>
                             <p class="item-date"><time datetime="2017-06-22T07:24:10.000Z" itemprop="datePublished">2017-06-22</time></p>
                         </div>
@@ -491,33 +519,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/graph-database/" class="title">graph database</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T06:33:50.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/HDD-Stats-Q1-2017/" class="title">HDD Stats Q1 2017</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/OpenStack-storage/" class="title">OpenStack storage</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T02:43:35.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -527,7 +528,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">23</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">26</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -536,7 +537,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
@@ -545,7 +546,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 14.29px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 14.29px;">architecture</a> <a href="/tags/cloud/" style="font-size: 12.86px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 15.71px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 16.67px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.67px;">一致性</a>
         </div>
     </div>
 

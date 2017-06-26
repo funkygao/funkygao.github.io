@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                65
+                68
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,427 @@
 
             
             <section id="main">
+    <article id="post-RocketMQ" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/17/RocketMQ/">RocketMQ解读</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/17/RocketMQ/">
+            <time datetime="2017-05-17T02:38:32.000Z" itemprop="datePublished">2017-05-17</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h2><ul>
+<li>Producer Group<br>发送事务消息时，作为TC，要多机，保存事务状态表{offset: P/C/R}</li>
+<li>Broker tag-based message filter </li>
+<li>定时消息，不支持任意精度，只是特定level: 5s, 10s, 1m等 queueID=delayLevel-1<br>因此，应该不支持message revoke</li>
+<li>区分commit log和consume log，有点类似WAL和table关系<br>可以把它们放在不同FS下，但没有更细粒度的<br>增加了一个分发步骤的好处：可以不分发</li>
+</ul>
+<h2 id="Commit-Log"><a href="#Commit-Log" class="headerlink" title="Commit Log"></a>Commit Log</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$&#123;rocketmq.home&#125;\store\commitlog\$&#123;fileName&#125;</div><div class="line"></div><div class="line">fileName[n] = fileName[n-1] + mappedFileSize</div><div class="line">为了保证mappedFileSize相同，在每个file tail加padding，默认1GB</div></pre></td></tr></table></figure>
+<p>每条消息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">QueueOffset针对普通消息，存的是consume log里的offset；如果事务消息，是事务状态表的offset</div><div class="line">+---------+-------+-----+---------+------+-------------+----------------+----------------+</div><div class="line">| MsgSize | Magic | CRC | QueueID | Flag | QueueOffset | PhysicalOffset | SysFlag(P/C/R) |</div><div class="line">+---------+-------+-----+---------+------+-------------+----------------+----------------+</div><div class="line"></div><div class="line">+--------------+------------------+-----------+---------------+----+------+-------+------+</div><div class="line">| ProducedTime | ProduderHostPort | StoreTime | StoreHostPort | .. | Body | Topic | Prop |</div><div class="line">+--------------+------------------+-----------+---------------+----+------+-------+------+</div></pre></td></tr></table></figure></p>
+<p>每次append commit log，会同步调用dispatch分发到consume queue和索引服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">new DispatchRequest(topic, queueId, </div><div class="line">    result.getWroteOffset(), result.getWroteBytes(),</div><div class="line">    tagsCode, msg.getStoreTimestamp(), </div><div class="line">    result.getLogicsOffset(), msg.getKeys(),</div><div class="line">    // Transaction</div><div class="line">    msg.getSysFlag(),</div><div class="line">    msg.getPreparedTransactionOffset());</div></pre></td></tr></table></figure></p>
+<h3 id="queue"><a href="#queue" class="headerlink" title="queue"></a>queue</h3><p>仅仅是逻辑概念，可以通过它来参与producer balance，类似一致哈希里的虚拟节点<br>每台broker上的commitlog被本机所有的queue共享，不做任何区分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">broker1: queue0, queue2</div><div class="line">broker2: queue0, </div><div class="line"></div><div class="line">then, topicA has 3 queues:</div><div class="line">broker1_queue0, broker1_queue2, broker2_queue0</div><div class="line"></div><div class="line">producer.selectOneMessageQueue(&quot;topicA&quot;, &quot;broker1&quot;, &quot;queue0&quot;)</div></pre></td></tr></table></figure>
+<p>消息的局部顺序由producer client保证</p>
+<h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><ul>
+<li>如何实现retention by topic: 没有实现<br>仅仅根据commit log file的mtime来判断是否过期，虽然里面混杂多topics</li>
+<li>如何I/O balancing</li>
+<li>如何压缩</li>
+<li>如果CRC出错，那么所有topic都受影响?</li>
+<li>为什么要存StoreHostPort？如何迁移topic：无法迁移</li>
+<li>写commit log需要加锁，这个锁粒度太大，相当于db level lock，而非table level</li>
+<li>broker的脑裂问题</li>
+<li>failover</li>
+<li>topic的commit log是分散在所有broker上的</li>
+</ul>
+<h2 id="Consume-Queue"><a href="#Consume-Queue" class="headerlink" title="Consume Queue"></a>Consume Queue</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$&#123;rocketmq.home&#125;/store/consumequeue/$&#123;topicName&#125;/$&#123;queueId&#125;/$&#123;fileName&#125;</div></pre></td></tr></table></figure>
+<p>读一条消息，先读consume queue(类似mysql的secondary index)，再读commit log(clustered index)</p>
+<p>没有采用sendfile，而是通过mmap：因为random read</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+---------------------+-----------------+------------------------+</div><div class="line">| CommitLogOffset(8B) | MessageSize(4B) | MessageTagHashcode(8B) |</div><div class="line">+---------------------+-----------------+------------------------+</div></pre></td></tr></table></figure>
+<p>虽然消费时，consume queue是顺序的，但接下来的commit log几乎都是random read，此外<br>如何优化压缩？光靠pagecache+readahead是远远不够的</p>
+<h2 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">TopicPublishInfo topicPublishInfo = this.tryToFindTopicPublishInfo(msg.getTopic()); // from local cache or name server</div><div class="line">MessageQueue mq = topicPublishInfo.selectOneMessageQueue(lastBrokerName);</div><div class="line">sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, timeout);</div></pre></td></tr></table></figure>
+<h2 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">// 2PC，2 messages</div><div class="line"></div><div class="line">// Phase1</div><div class="line">producer group write redolog</div><div class="line">producer group send a message(type=TransactionPreparedType) to broker</div><div class="line">broker append it to CommitLog and return MessageId</div><div class="line">broker will not append it to consume queue</div><div class="line"></div><div class="line">// Phase2</div><div class="line">producer group write redolog</div><div class="line">producer group send a message(type=TransactionCommitType, msgId=$msgId) to broker</div><div class="line">broker find the message with msgId in CommitLog and clone it and append it to CommitLog(type=TransactionCommitType|TransactionRollbackType)</div><div class="line">if type == TransactionCommitType &#123;</div><div class="line">    broker append commit log offset to consume queue</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="State-Table"><a href="#State-Table" class="headerlink" title="State Table"></a>State Table</h3><p>保存在broker，默认1m扫一次</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">24B, mmap</div><div class="line"></div><div class="line">+-----------------+------+-----------+-----------------------+--------------+</div><div class="line">| CommitLogOffset | Size | Timestamp | ProducerGroupHashcode | State(P/C/R) |</div><div class="line">+-----------------+------+-----------+-----------------------+--------------+</div><div class="line"></div><div class="line">prepare消息，insert table</div><div class="line">commit/rollback消息，update table</div></pre></td></tr></table></figure>
+<p>对于未决事务，根据随机向Producer Group里的一台发请求CHECK_TRANSACTION_STATE<br>Producer Group根据redolog(mmap)定位状态<br>Producer Group信息存放在namesvr</p>
+<h3 id="Problems"><a href="#Problems" class="headerlink" title="Problems"></a>Problems</h3><ul>
+<li>Producer不再是普通的client，它已经变成server(TC)，而且要求不能随便shutdown</li>
+<li>Producer Group里写redolog的机器死了怎么办</li>
+</ul>
+<h2 id="HA"><a href="#HA" class="headerlink" title="HA"></a>HA</h2><p>粒度只控制在Broker，而kafka是在partition上</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/17/RocketMQ/" data-id="cj4dl89p20019l85b5624h1yf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/17/RocketMQ/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/RocketMQ/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-architecture-design-checklist" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/17/architecture-design-checklist/">architecture design checklist</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/17/architecture-design-checklist/">
+            <time datetime="2017-05-17T01:00:00.000Z" itemprop="datePublished">2017-05-17</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/architecture/">architecture</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p><a href="https://github.com/funkygao/archeck" target="_blank" rel="external">archeck</a></p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true" alt="demo"></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/17/architecture-design-checklist/" data-id="cj4dl89pj001sl85b2bpso204" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/17/architecture-design-checklist/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/architecture-design-checklist/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-kateway-replay-messages" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/17/kateway-replay-messages/">kateway replay messages</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/17/kateway-replay-messages/">
+            <time datetime="2017-05-16T23:52:34.000Z" itemprop="datePublished">2017-05-17</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Issue"><a href="#Issue" class="headerlink" title="Issue"></a>Issue</h2><p>consumer有需求回放/快进消息，目前<a href="https://github.com/funkygao/gafka/tree/master/cmd/kateway" target="_blank" rel="external">kateway</a>具有该功能：<br>用户在web console上把offset设置到指定位置</p>
+<p>但由于机器里<a href="https://github.com/funkygao/gafka/tree/master/cmd/kateway" target="_blank" rel="external">kateway</a>正在消费源源不断的消息，checkpoint会overwrite这个指定的offset<br>这就要求用户先关闭消费进程，然后web console上操作，再启动消费进程: not user friendly<br>在不影响性能前提下，对其进行改进</p>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">_, stat, err := cg.kz.conn.Get(path)</div><div class="line">if cg.lastVer == -1 &#123;</div><div class="line">    // 第一次commit offset</div><div class="line">    cg.lastVer = stat.Version</div><div class="line">&#125; else if cg.lastVer != stat.Version &#123;</div><div class="line">    // user manually reset the offset checkpoint</div><div class="line">    return ErrRestartConsumerGroup</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 也可能在Get后，用户恰好操作了“回放”，通过CAS解决这个问题</div><div class="line"></div><div class="line">switch err &#123;</div><div class="line">case zk.ErrNoNode:</div><div class="line">    return cg.kz.create(path, data, false)</div><div class="line"></div><div class="line">case nil: </div><div class="line">    newStat, err := cg.kz.conn.Set(path, data, stat.Version)</div><div class="line">    if err != nil &#123;</div><div class="line">        cg.lastVer = newStat.Version</div><div class="line">    &#125;</div><div class="line">    return err</div><div class="line"></div><div class="line">default:</div><div class="line">    return err</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/17/kateway-replay-messages/" data-id="cj4dl89s8003al85b26da5qd3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/17/kateway-replay-messages/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/kateway-replay-messages/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-how-DBMS-works" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -287,7 +708,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/how-DBMS-works/" data-id="cj484nzhm002jfp5b69xw9f1p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/how-DBMS-works/" data-id="cj4dl89s0002yl85bfctzxx5x" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -414,7 +835,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/scalability-papers/" data-id="cj484nzih003efp5ba8ji8egq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/scalability-papers/" data-id="cj4dl89sn003sl85bfdtv3kux" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -550,7 +971,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/" data-id="cj484nzgh0010fp5bcbuirqez" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/PostgreSQL-MVCC/" data-id="cj4dl89oy0014l85bmw4xfjik" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -690,7 +1111,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/VNC-protocol/" data-id="cj484nzgu001efp5bfnwa53q6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/VNC-protocol/" data-id="cj4dl89pb001jl85befrd4d82" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -838,7 +1259,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj484nzga000nfp5bdkcp5ac3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj4dl89oo000sl85b20iwv77c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -992,7 +1413,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj484nzg3000efp5b8612p59h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj4dl89og000gl85b6un2dy7b" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1119,7 +1540,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj484nzhy0031fp5blwqr38f7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj4dl89sd003el85bslvjn8sq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1197,493 +1618,6 @@
 
 
 
-    <article id="post-zookeeper" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/15/zookeeper/">zookeeper internals</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/15/zookeeper/">
-            <time datetime="2017-05-15T02:26:14.000Z" itemprop="datePublished">2017-05-15</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><h3 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h3><p>File api without partial R/W<br>No rename operation</p>
-<p>zab通过TCP+zxid实现事务的totally order</p>
-<h3 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h3><p>ZKDatabase<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// zk的内存数据库</div><div class="line">class ZKDatabase &#123;</div><div class="line">    DataTree dataTree</div><div class="line">    LinkedList&lt;Proposal&gt; committedLog</div><div class="line">    FileTxnSnapLog snapLog</div><div class="line">    ConcurrentHashMap&lt;Long, Integer&gt; sessionsWithTimeouts // &#123;sessionID: timeout&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>DataTree<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">class DataTree &#123;</div><div class="line">    ConcurrentHashMap&lt;String, DataNode&gt; nodes // &#123;path: znode&#125;, flat</div><div class="line">    ConcurrentHashMap&lt;Long, HashSet&lt;String&gt;&gt; ephemerals // &#123;sessionID: [path, ]&#125;</div><div class="line">    WatchManager dataWatches, childWatches</div><div class="line"></div><div class="line">    func createNode(path, data) &#123;</div><div class="line">        parent = nodes.get(parentPath)</div><div class="line">        parent.Lock()</div><div class="line">        // check NodeExistsException</div><div class="line">        // set stat of the new znode and its parent</div><div class="line">        child = new DataNode(parent, data, stat) // the new znode</div><div class="line">        parent.addChild(child)</div><div class="line">        nodes.put(path, child)</div><div class="line">        if ephemeralOwner != nil &#123;</div><div class="line">            ephemerals.get(ephemeralOwner).add(path)</div><div class="line">        &#125;</div><div class="line">        parent.Unlock()</div><div class="line"></div><div class="line">        dataWatches.triggerWatch(path, NodeCreated)</div><div class="line">        childWatches.triggerWatch(parentPath, NodeChildrenChanged)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>DataNode<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class DataNode &#123;</div><div class="line">    DataNode parent</div><div class="line">    Set&lt;String&gt; children</div><div class="line"></div><div class="line">    StatPersisted stat</div><div class="line">    []byte data</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h3 id="n-n-1-2-conns"><a href="#n-n-1-2-conns" class="headerlink" title="n(n-1)/2 conns"></a>n(n-1)/2 conns</h3><p>只允许id比较大的server发起主动连接：由于任意server在启动时都会主动向其他server发起连接，如果这样，任意两台server之间就拥有两条连接，这明显是没有必要的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">======= ======= ======= ======= ======= ========</div><div class="line">sid     1       2       3       4       5</div><div class="line">======= ======= ======= ======= ======= ========</div><div class="line">1       &lt;&gt;      &lt;       &lt;       &lt;       &lt;</div><div class="line">2               &lt;&gt;      &lt;       &lt;       &lt;</div><div class="line">3                       &lt;&gt;      &lt;       &lt;</div><div class="line">4                               &lt;&gt;      &lt;</div><div class="line">5                                       &lt;&gt;</div><div class="line">======= ======= ======= ======= ======= ========</div></pre></td></tr></table></figure></p>
-<h3 id="成为-leader-的条件"><a href="#成为-leader-的条件" class="headerlink" title="成为 leader 的条件"></a>成为 leader 的条件</h3><ol>
-<li>选epoch最大的</li>
-<li>epoch相等，选 zxid 最大的</li>
-<li>epoch和zxid都相等，选择server id最大的</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">(newEpoch &gt; curEpoch) ||</div><div class="line">	((newEpoch == curEpoch) &amp;&amp;</div><div class="line">		((newZxid &gt; curZxid) ||</div><div class="line">			((newZxid == curZxid) &amp;&amp; (newId &gt; curId))))</div></pre></td></tr></table></figure>
-<h3 id="何时选举"><a href="#何时选举" class="headerlink" title="何时选举"></a>何时选举</h3><p>进入LOOKING状态</p>
-<ul>
-<li>刚启动时</li>
-<li>稳定运行中，任何的异常都会让本机进入LOOKING态<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">catch (Exception e) &#123;</div><div class="line">    setPeerState(LOOKING)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h3 id="Constraints"><a href="#Constraints" class="headerlink" title="Constraints"></a>Constraints</h3><p>Many ZooKeeper write requests are conditional in nature:</p>
-<ul>
-<li>a znode can only be deleted if it does not have any children</li>
-<li>a znode can be created with a name and a sequence number appended to it</li>
-<li>a change to data will only be applied if it is at an expected version</li>
-</ul>
-<h3 id="Quorum"><a href="#Quorum" class="headerlink" title="Quorum"></a>Quorum</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">func isQuorum(type) &#123;</div><div class="line">    // zk的请求有2种 1. 事务请求 2. 只读请求</div><div class="line">    switch (type) &#123;</div><div class="line">    case OpCode.exists, getACL, getChildren, getChildren2, getData:</div><div class="line">        // 本地执行，不需要proposal</div><div class="line">        return false</div><div class="line"></div><div class="line">    case OpCode.error, closeSession, create, createSession, delete, setACL, setData, check, multi:</div><div class="line">        return true</div><div class="line"></div><div class="line">    default:</div><div class="line">        return false</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>注意：session部分，也会走txn</p>
-<h3 id="multi"><a href="#multi" class="headerlink" title="multi"></a>multi</h3><p>是原子操作，multi里的每个op都使用相同的zxid</p>
-<h3 id="Watch"><a href="#Watch" class="headerlink" title="Watch"></a>Watch</h3><p>Watches are maintained locally at the ZooKeeper server to which the client is connected.<br>它是不走proposal quorum的</p>
-<p>Watcher只会告诉客户端发生了什么类型的事件，而不会说明事件的具体内容<br>例如，NodeDataChanged，watcher只会通知client：<br>在你watch的path上，发生了NodeDataChanged这个事件<br>但最新的数据是什么，不在event里，而需要client主动重新去get</p>
-<p>Watch的通知，由WatchManager完成，它先从内存里删除这个watcher，然后回调watcher.process<br>后者在NIOServerCnxn，即watches are sent asynchronously to watchers(client).<br>But ZooKeeper guarantees that a client will see a watch event for a znode it is watching before seeing the new data that corresponds to that znode. </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">class WatchManager &#123;</div><div class="line">    HashMap&lt;String, HashSet&lt;Watcher&gt;&gt; watchTable</div><div class="line"></div><div class="line">    func triggerWatch(path, event) &#123;</div><div class="line">        synchronized(this) &#123; </div><div class="line">            watchers = watchTable.remove(path) // so one time trigger</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Watch机制本身是非常轻量级的，对服务器不会有多大开销：</div><div class="line">        // 它都是local zk server在内存中处理</div><div class="line">        // 但如果一个path的watcher很多，那么这个O(n)循环</div><div class="line">        for watcher = range watchers &#123;</div><div class="line">            w.process(event)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">func process(WatchedEvent event) &#123;</div><div class="line">    h = new ReplyHeader(-1, -1L, 0)</div><div class="line">    sendResponse(h, event) // if IOException, close the client conn</div><div class="line">                           // sock.write(非阻塞) async write</div><div class="line">                           // sendResponse对同一个client是串行的，顺序的</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="顺序"><a href="#顺序" class="headerlink" title="顺序"></a>顺序</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">client.get(path, watch=true)</div><div class="line">// 此时数据发生变化</div><div class="line"></div><div class="line">zk保证的顺序：</div><div class="line">client先拿到watch event，之后才能看到最新的数据</div><div class="line">client如果watch很多时间，那么得到这些event的顺序与server端发生的顺序是完全一致的</div></pre></td></tr></table></figure>
-<h4 id="watch的保持"><a href="#watch的保持" class="headerlink" title="watch的保持"></a>watch的保持</h4><p>zk client连接zk1, 并get with watch，突然zk1 crash，client连接到zk2，那么watch<br>是如何保持的?<br>这是client端实现的，内存里记录watches，在pick new server后，sendSetWatches</p>
-<h4 id="watch的事件会丢吗"><a href="#watch的事件会丢吗" class="headerlink" title="watch的事件会丢吗"></a>watch的事件会丢吗</h4><p>client2能获取到每次的set事件吗?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">client1不停地set(node, newValue)</div><div class="line">client2 get with watch</div></pre></td></tr></table></figure></p>
-<p>不一定：因为是one time trigger<br>获取event后，要重新watch，在此过程中可能产生新的事件: 期间事件lost</p>
-<p>此外，zk与client的conn断开后，client会连接下一个zk，在此期间的事件lost<br>例如，watch NodeCreated事件，在client重新连接期间，该node created，那么client将永远无法获取该事件</p>
-<h4 id="watch同一个znode多次，会收到几条event"><a href="#watch同一个znode多次，会收到几条event" class="headerlink" title="watch同一个znode多次，会收到几条event?"></a>watch同一个znode多次，会收到几条event?</h4><p>由于WatchManager的实现，相同类型的watch在一个path上被set多次，只会触发一次</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">create(&quot;/foo&quot;, EPHEMERAL_SEQUENTIAL)</div><div class="line">exists(&quot;/foo&quot;, watcher) // 那么这个watch事件是永远不会trigger的，因为path不同，见WatchManager的实现</div></pre></td></tr></table></figure>
-<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><p>recvLoop里任意的错误，都会pick next server and authentication，进入新的循环</p>
-<ul>
-<li>conn reset by peer</li>
-<li>conn EOF</li>
-<li>receive packet timeout</li>
-<li>session expire</li>
-</ul>
-<h4 id="time"><a href="#time" class="headerlink" title="time"></a>time</h4><ul>
-<li>conn.recvTimeout = sessionTimeout * 2 / 3</li>
-<li>ping interval = sessionTimeout / 3</li>
-</ul>
-<p>例如，sessionTimeout=30s，那么client在等待20s还得不到response，就会try next server<br>恰好赶在ping的窗口期 10+20=30</p>
-<h2 id="Q-A"><a href="#Q-A" class="headerlink" title="Q/A"></a>Q/A</h2><h3 id="client-ping是如何保持住session的"><a href="#client-ping是如何保持住session的" class="headerlink" title="client ping是如何保持住session的?"></a>client ping是如何保持住session的?</h3><p>client连接s1，定期ping，但s1 crash后client连接s2，为什么session能保持住?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">connect(s2)</div><div class="line">send(ConnectRequest&#123;LastZxidSeen, SessionID&#125;) // SessionID是s1当时分配的</div><div class="line">var r ConnectResponse = recv()</div><div class="line">if r.SessionID == 0 &#123;</div><div class="line">    // session expire</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>createSession会通过txn，因此client可以failover<br>server在sessionTimeout内没有收到ping，就会closeSession，它也通过txn</p>
-<h3 id="session-id"><a href="#session-id" class="headerlink" title="session id"></a>session id</h3><p>zk session id assigned by server, global unique</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">func initializeNextSession(id=1) &#123;</div><div class="line">    long nextSid = 0;</div><div class="line">    nextSid = (System.currentTimeMillis() &lt;&lt; 24) &gt;&gt;&gt; 8;</div><div class="line">    nextSid =  nextSid | (id &lt;&lt;56);</div><div class="line">    return nextSid;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>后面的session id就是这个种子基础上 increment by 1</p>
-<h2 id="Snapshot"><a href="#Snapshot" class="headerlink" title="Snapshot"></a>Snapshot</h2><p>dataLogDir(txn log) and dataDir(snapshot) should be placed in 2 disk devices<br>如果txn log和snapshot处于同一块硬盘，异步的snapshot可能会block txn log，连锁反应就是把proposal阻塞，进而造成follower重新选举</p>
-<h3 id="when"><a href="#when" class="headerlink" title="when"></a>when</h3><ul>
-<li>System.getProperty(“zookeeper.snapCount”), 默认值100,000</li>
-<li>takeSnapshot的时间在50,000 ~ 100,0000 之间的随机值</li>
-<li>txn数量超过snapCount+随机数<ul>
-<li>roll txn log</li>
-<li>创建一个线程，异步执行takeSnapshot。但前面的takeSnapshot线程未完成，则放弃<br>Too busy to snap, skipping</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">Request si = getRequest()</div><div class="line">if (zks.getZKDatabase().append(si)) &#123; // txn log ok</div><div class="line">    logCount++; // logCount就是txn的数量</div><div class="line">    if (logCount &gt; (snapCount / 2 + randRoll)) &#123;</div><div class="line">        randRoll = r.nextInt(snapCount/2); // 为了防止集群内所有节点同时takeSnapshot加入随机</div><div class="line">        zks.getZKDatabase().rollLog(); // txn log will roll</div><div class="line">        if (snapInProcess != null &amp;&amp; snapInProcess.isAlive()) &#123;</div><div class="line">            LOG.warn(&quot;Too busy to snap, skipping&quot;);</div><div class="line">        &#125; else &#123;</div><div class="line">            snapInProcess = new Thread(&quot;Snapshot Thread&quot;) &#123;</div><div class="line">                public void run() &#123;</div><div class="line">                    try &#123;</div><div class="line">                        zks.takeSnapshot();</div><div class="line">                    &#125; catch(Exception e) &#123;</div><div class="line">                        LOG.warn(&quot;Unexpected exception&quot;, e);</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;;</div><div class="line">            snapInProcess.start();</div><div class="line">        &#125;</div><div class="line">        logCount = 0;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="size"><a href="#size" class="headerlink" title="size"></a>size</h3><p>每个znode meta data至少76+path+data，如果1M znodes，平均size(path+data)=100，那么snapshot文件长度至少200MB<br>我的一个生产环境zk，znode 3万，snapshot文件15MB；即，如果300万个znodes，那么snapshot文件将是1.5GB</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">path(len4, path)</div><div class="line">node</div><div class="line">  data(len4, data)</div><div class="line">  acl8</div><div class="line">  meta60</div><div class="line">    czxid8, mzxid8, ctime8, mtime8, version4, cversion4, aversion4, ephemeralOwner8, pzxid8</div></pre></td></tr></table></figure>
-<h3 id="checksum"><a href="#checksum" class="headerlink" title="checksum"></a>checksum</h3><p>Adler32</p>
-<h2 id="Edge-cases"><a href="#Edge-cases" class="headerlink" title="Edge cases"></a>Edge cases</h2><h3 id="leader-election"><a href="#leader-election" class="headerlink" title="leader election"></a>leader election</h3><p>LOOKING后，把自己的zxid广播，是得到大多数同意就成为leader?<br>是，不需要等全部ack</p>
-<h3 id="async-commit"><a href="#async-commit" class="headerlink" title="async commit"></a>async commit</h3><p>[S1(leader), S2, S3]<br>S1 Propose set(a)=5，在得到majority Ack(proposal)后，向所有机器发送Commit，<br>Q1. S1需要在得到majority Ack(commit)后才return OK to client?<br>Q2. 如果S1发送Commit给所有机器前恰好挂了，new leader会恢复这个事务吗？</p>
-<p>leader在得到majority Ack(proposal)后，majority servers已经记录下了txnlog，leader发送Commit只是为了让servers<br>make the txn visibile to client，Commit消息是不会记录txnlog的<br>leader处理Commit是异步的，不需要等待Commit的ack，即Q1: no，Q2: yes</p>
-<p>ZAB makes the guarantee that a proposal which has been logged by a quorum of followers will eventually be committed<br>any uncommited proposals from a previous epoch seen by a new leader will be committed by that leader before it becomes active.</p>
-<p>换个角度看这个问题：<br>S1得到请求set(a)=5，commit locally，但commit还没有发送给S2，S3，crash!<br>这时候，一个client可能发请求 get(a)，如果它连接的是S1，在S1 crash前，get(a)=2<br>所以，这个commit必须让新leader知道</p>
-<h3 id="sync-proposal"><a href="#sync-proposal" class="headerlink" title="sync proposal"></a>sync proposal</h3><p>[S1(leader), S2, S3, S4, S5]<br>S1 Propose set(a)=2，发送给了S2 Proposal，但S3-5还没有收到Proposal，此时S1 crash，那么这个proposal在new leader<br>上会被恢复吗? 即重新选举后，get(a)=2?</p>
-<p>不一定！</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">S1(leader), S2, S3, S4, S5</div><div class="line"></div><div class="line">现在propose set(a)=b，S1确认了，但其他还没有确认，此时全部crash</div><div class="line">然后启动S2-S5，等一会儿再启动S1，那么S2-S5他们的txid相同，会选出S5 leader</div><div class="line">等S1启动时，它的txid是最大的，a=b可能会丢：</div><div class="line">如果S1启动慢了200ms内，可能不会丢；否则，例如慢了1分钟，则丢了，S1变成follower后</div><div class="line">会把该txid truncate: txnlog seek</div></pre></td></tr></table></figure>
-<p>FastLeaderElection.java<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">finalizeWait=200ms // 在得到majority确认后，但还没有得到全部确认，wait before make leader</div><div class="line"></div><div class="line">sendNotifications()</div><div class="line">for i.am.looking &#123;</div><div class="line">    n = recvqueue.poll()</div><div class="line">    switch n.state &#123;</div><div class="line">        case LOOKING:</div><div class="line">            compare my proposal with n and update my proposal</div><div class="line">            if every node agrees &#123;</div><div class="line">                // got the leader!</div><div class="line">                return</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            if quorum agrees &#123;</div><div class="line">                // Verify if there is any change in the proposed leader</div><div class="line">                for &#123;</div><div class="line">                    n = recvqueue.poll(200ms)</div><div class="line">                    if n == nil &#123;</div><div class="line">                        break</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        case FOLLOWING, LEADING:</div><div class="line">            if leader is not me &#123;</div><div class="line">                // confirm I have recv notification from leader</div><div class="line">                // stating that he is leader</div><div class="line">            &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1813" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-1813</a><br><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-417" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-417</a><br><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1674" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-1674</a><br><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1642" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-1642</a><br><a href="http://blog.csdn.net/pwlazy/article/details/8080626" target="_blank" rel="external">http://blog.csdn.net/pwlazy/article/details/8080626</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj484nziv003qfp5bzlz1ok6p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/15/zookeeper/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/zookeeper/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
-    <article id="post-delay-and-schedule-message-delivery" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/15/delay-and-schedule-message-delivery/">delay and schedule message delivery</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/15/delay-and-schedule-message-delivery/">
-            <time datetime="2017-05-15T00:11:24.000Z" itemprop="datePublished">2017-05-15</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><ul>
-<li>业务需要</li>
-<li>通过它可以实现XA的prepare/commit/rollback，从而实现与其他系统的原子提交</li>
-</ul>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><h3 id="kateway"><a href="#kateway" class="headerlink" title="kateway"></a><a href="https://github.com/funkygao/gafka/tree/master/cmd/kateway" target="_blank" rel="external">kateway</a></h3><p>通过mysql作为WAL，并通过background worker(actor)来实现调度/commit/rollback</p>
-<h3 id="优先队列"><a href="#优先队列" class="headerlink" title="优先队列"></a>优先队列</h3><p>以message due time作为优先级进行存储，配合worker<br>message rollback可以通过发送一个tombstone message实现<br>但由于worker的async，无法在rollback时判断是否真正rollback成功：<br>一条消息要5分钟后发送，在5分钟到达时，client可能恰好要取消，这时候，rollback与worker<br>之间存在race condition，需要正常处理这个一致性：<br>要么，取消失败，消息被发出<br>要么，取消成功，消息不发出<br>不能，取消成功，消息被发出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">// worker</div><div class="line">for &#123;</div><div class="line">    if msg := peek(queue); msg.due() &#123;</div><div class="line">        msg = pop(queue)</div><div class="line">        if msg.isTombstone() &#123;</div><div class="line">            // the msg is cancelled</div><div class="line">        &#125; else &#123;</div><div class="line">            publish(msg)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj484nzha001yfp5bv8nw6x6g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
-    <article id="post-repeatable-read-write-skew" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/12/repeatable-read-write-skew/">mysql repeatable read write skew</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/12/repeatable-read-write-skew/">
-            <time datetime="2017-05-12T01:18:24.000Z" itemprop="datePublished">2017-05-12</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Isolation"><a href="#Isolation" class="headerlink" title="Isolation"></a>Isolation</h2><p>教科书里的4种isolation</p>
-<ul>
-<li>read uncommitted: 即dirty read，可能读到其他rollback的数据</li>
-<li>read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同</li>
-<li>repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read)</li>
-<li>serialized</li>
-</ul>
-<p>但它只是从锁的实现来描述的，不适用于MVCC。<br>各个数据库产品，虽然采用了这些isolation名字，但语义各不相同，很多与教科书里的定义不符</p>
-<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><p>不会出现phantom read。<br>MySQL里的RR其实是Snapshot Isolation，只有Serialized是完全基于锁</p>
-<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><p>实际上只有2个隔离级别：Read Committed和Serialized<br>而Serialized是基于MVCC的无锁实现，即Serialized Snapshot</p>
-<h2 id="MVCC-Snapshot"><a href="#MVCC-Snapshot" class="headerlink" title="MVCC Snapshot"></a>MVCC Snapshot</h2><p>存在write skew问题</p>
-<p>甲在一个银行有两张信用卡，分别是A和B。银行给这两张卡总的信用额度是2000，即A透支的额度和B透支的额度相加必须不大于2000：A+B&lt;=2000。</p>
-<p>A账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update a set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
-<p>B账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update b set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
-<p>假设现在credit(a)=1000, credit(b)=500, 1500&lt;=2000<br>甲同时用a账号消费400，b账号消费300<br>在mysql RR下，2个事务都成功，但2个事务结束后<br>credit(a)=1400, credit(b)=700, 2100&gt;2000</p>
-<p>如果是serialized隔离级别，则没有问题：一个事务会失败</p>
-<p>在mysql RR下，可以通过应用层加约束来避免write skew</p>
-<h2 id="结论for-mysql"><a href="#结论for-mysql" class="headerlink" title="结论for mysql"></a>结论for mysql</h2><p>不能期望加了一个事务就万事大吉，而要了解每种隔离级别的语义。</p>
-<ul>
-<li>涉及单行数据事务的话，只要 Read Committed ＋ 乐观锁就足够保证不丢写</li>
-<li>涉及多行数据的事务的话，Serializable 隔离环境的话不会出错，但是你不会开</li>
-<li>如果开 Repeatable Read （Snapshot）隔离级别，那么可能会因为 Write Skew 而丢掉写</li>
-</ul>
-<p>如果是金融业务，尽量不要用MySQL</p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj484nzig003cfp5ba3xlz92m" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
     </nav>
@@ -1696,6 +1630,33 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/23/Amazon-Aurora/" class="title">Amazon Aurora</a></p>
+                            <p class="item-date"><time datetime="2017-06-23T09:30:31.000Z" itemprop="datePublished">2017-06-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/23/nagles-and-delayed-ack/" class="title">nagles and delayed ack</a></p>
+                            <p class="item-date"><time datetime="2017-06-23T07:23:47.000Z" itemprop="datePublished">2017-06-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/22/DB-Storage-Structures/" class="title">DB Storage Structures</a></p>
+                            <p class="item-date"><time datetime="2017-06-22T09:13:42.000Z" itemprop="datePublished">2017-06-22</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1715,33 +1676,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/graph-database/" class="title">graph database</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T06:33:50.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/HDD-Stats-Q1-2017/" class="title">HDD Stats Q1 2017</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/OpenStack-storage/" class="title">OpenStack storage</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T02:43:35.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1751,7 +1685,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">23</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">26</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1760,7 +1694,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
@@ -1769,7 +1703,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 14.29px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 14.29px;">architecture</a> <a href="/tags/cloud/" style="font-size: 12.86px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 15.71px;">storage</a> <a href="/tags/一致性/" style="font-size: 17.14px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 16.67px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.67px;">一致性</a>
         </div>
     </div>
 
