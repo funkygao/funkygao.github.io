@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                71
+                72
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,146 @@
 
             
             <section id="main">
+    <article id="post-VNC-protocol" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/16/VNC-protocol/">VNC protocol</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/16/VNC-protocol/">
+            <time datetime="2017-05-16T02:32:46.000Z" itemprop="datePublished">2017-05-16</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/protocol/">protocol</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="WebRTC"><a href="#WebRTC" class="headerlink" title="WebRTC"></a>WebRTC</h2><p>WebRTC提供了direct data and media stream transfer between two browsers without external server involved: P2P</p>
+<p>浏览器上点击“Screen share”按钮后</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// sender</div><div class="line">利用OS的API获取screenshot，并以一定的FPS来进行发送</div><div class="line">// 优化：把屏幕分成chunk，在把timer之间有变化的chunk生成frame</div><div class="line">发送时，frame被编码成H.264或VP8</div><div class="line">通过HTTPS发送</div><div class="line"></div><div class="line">// receiver</div><div class="line">对接收到的frame解码并显示</div></pre></td></tr></table></figure>
+<p>通过WebRTC实现的是只读的屏幕分享，receiver不能控制sender屏幕</p>
+<p>实现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">&lt;body&gt;</div><div class="line">  &lt;p&gt;&lt;input type=&quot;button&quot; id=&quot;share&quot; value=&quot;Screen share&quot; /&gt;&lt;/p&gt;</div><div class="line">  &lt;p&gt;&lt;video id=&quot;video&quot; autoplay /&gt;&lt;/p&gt;</div><div class="line">&lt;/body&gt;</div><div class="line"></div><div class="line">&lt;script&gt;</div><div class="line">navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.getUserMedia;</div><div class="line">$(&apos;#share&apos;).click(function() &#123;</div><div class="line">    navigator.getUserMedia(&#123;</div><div class="line">         audio: false ,</div><div class="line">         video: &#123;</div><div class="line">            mandatory: &#123;</div><div class="line">                chromeMediaSource: &apos;screen&apos; ,</div><div class="line">                maxWidth: 1280 ,</div><div class="line">                maxHeight: 720</div><div class="line">            &#125; ,</div><div class="line">            optional: [ ]</div><div class="line">         &#125;</div><div class="line">    &#125;, function(stream) &#123;</div><div class="line">       // we&apos;ve got media stream</div><div class="line">       // so the received stream can be transmitted via WebRTC the same way as web camera and easily played in &lt;video&gt; component on the other side</div><div class="line">       document.getElementById(&apos;video&apos;).src = window.URL.createObjectURL(stream);</div><div class="line">    &#125; , function() &#123;</div><div class="line">       alert(&apos;Error. Try in latest Chrome with Screen sharing enabled in about:flags.&apos;);</div><div class="line">    &#125;)</div><div class="line">&#125;)</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure></p>
+<h2 id="VNC"><a href="#VNC" class="headerlink" title="VNC"></a>VNC</h2><p>Remote Frame Buffer，支持X11, Windows, Mac<br>远程终端用户使用机器（比如显示器、键盘、鼠标）的叫做客户端，提供帧缓存变化的被称为服务器</p>
+<h3 id="显示协议"><a href="#显示协议" class="headerlink" title="显示协议"></a>显示协议</h3><p>pixel(x, y)  =&gt; 像素数据编码</p>
+<h3 id="C-gt-S消息类型"><a href="#C-gt-S消息类型" class="headerlink" title="C-&gt;S消息类型"></a>C-&gt;S消息类型</h3><h4 id="SetEncodings"><a href="#SetEncodings" class="headerlink" title="SetEncodings"></a>SetEncodings</h4><p>Raw, CopyRect, RRE, Hextile, TRLE, ZRLE</p>
+<h4 id="FramebufferUpdateRequest"><a href="#FramebufferUpdateRequest" class="headerlink" title="FramebufferUpdateRequest"></a>FramebufferUpdateRequest</h4><p>最重要的显示消息，表示client要server传回哪些区域的图像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">client.send(messageType, incremental, x, y, width, height) =&gt; server</div><div class="line">// incremental&gt;0，表示该区域内容变化了才发给client；没有变化，就不用发</div><div class="line"></div><div class="line">server.reply(messageType, rectangleN, [&#123;x, y, with, height, color&#125;, ...]) =&gt; client</div></pre></td></tr></table></figure>
+<h4 id="KeyEvent"><a href="#KeyEvent" class="headerlink" title="KeyEvent"></a>KeyEvent</h4><p>client端的键盘动作</p>
+<h4 id="PointerEvent"><a href="#PointerEvent" class="headerlink" title="PointerEvent"></a>PointerEvent</h4><p>client端的鼠标动作</p>
+<h3 id="vnc-browser"><a href="#vnc-browser" class="headerlink" title="vnc browser"></a>vnc browser</h3><p><a href="http://guacamole.incubator.apache.org/" target="_blank" rel="external">http://guacamole.incubator.apache.org/</a><br><a href="https://github.com/novnc/noVNC" target="_blank" rel="external">https://github.com/novnc/noVNC</a></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.tuicool.com/articles/Rzqumu" target="_blank" rel="external">http://www.tuicool.com/articles/Rzqumu</a><br><a href="https://github.com/macton/hterm" target="_blank" rel="external">https://github.com/macton/hterm</a><br>chrome://flags/#enable-usermedia-screen-capture</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/16/VNC-protocol/" data-id="cj4e1kmv1001qc65byis2e0hk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/16/VNC-protocol/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/VNC-protocol/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-LSM" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -264,7 +404,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj4dxuu5n000w0d5bwdr2xps2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj4e1kmua000wc65bp8ct2f6g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -418,7 +558,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj4dxuu58000i0d5bfdh20pcg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj4e1kmtm000nc65bgdbszvmr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -545,7 +685,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj4dxuu7n003c0d5bgyaa6b8l" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj4e1kmwc003dc65bi8v1fs5j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -750,7 +890,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj4dxuu8700450d5byy0ccsrr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj4e1kmx00046c65bvh3iu3id" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -882,7 +1022,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj4dxuu6n00290d5bf9tcs5z7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj4e1kmvk002bc65bx68702wb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1032,7 +1172,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj4dxuu7x003p0d5b1jus61rz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj4e1kmwo003qc65bn26sfzvc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1164,7 +1304,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj4dxuu6q002d0d5bgj1tg8q0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj4e1kmvm002fc65bhp8xikw8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1291,7 +1431,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj4dxuu80003v0d5b7l5k38xn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj4e1kmws003wc65bbygcm084" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1476,7 +1616,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj4dxuu7p003g0d5bzhcdf6bn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj4e1kmwh003hc65b3qbqpzv7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1554,138 +1694,6 @@
 
 
 
-    <article id="post-osc" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/11/osc/">mysql在线alter table设计</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/11/osc/">
-            <time datetime="2017-05-11T07:42:46.000Z" itemprop="datePublished">2017-05-11</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="主要逻辑"><a href="#主要逻辑" class="headerlink" title="主要逻辑"></a>主要逻辑</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">// 合法性检查</div><div class="line">// 包括：是否有外键、用户权限、表是否合法、是否有唯一键等</div><div class="line"></div><div class="line">// 创建变更记录表</div><div class="line">CREATE /* changelog table */ TABLE _tbs_c</div><div class="line"></div><div class="line">// 创建影子表</div><div class="line">CREATE /* shadow table */ TABLE _tbl_s LIKE tbl</div><div class="line"></div><div class="line">// 在影子表上应用alter语句</div><div class="line">ALTER TABLE _tbl_s STATEMENT</div><div class="line"></div><div class="line">// 开始行拷贝线程 tbl -&gt; _tbl_s</div><div class="line">// 开始binlog接收和应用线程 binlog -&gt; _tbl_s</div><div class="line"></div><div class="line">// 等待行拷贝线程完成</div><div class="line">// 通知binlog线程收工</div><div class="line">// 等待binlog线程结束</div><div class="line"></div><div class="line">// 开始切换</div><div class="line">LOCK TABLES tbl WRITE</div><div class="line">RENAME TABLE tbl TO _tbl_old, _tbl_s TO tbl </div><div class="line">UNLOCK TABLES</div></pre></td></tr></table></figure>
-<h3 id="确定行拷贝chunk范围"><a href="#确定行拷贝chunk范围" class="headerlink" title="确定行拷贝chunk范围"></a>确定行拷贝chunk范围</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">select id from </div><div class="line">   (select id from a where id&gt;=0 and id&lt;=3001 order by id asc limit 1000) select_osc_chunk </div><div class="line">order by id desc limit 1;</div></pre></td></tr></table></figure>
-<h3 id="行拷贝in-chunk"><a href="#行拷贝in-chunk" class="headerlink" title="行拷贝in chunk"></a>行拷贝in chunk</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">insert ignore into `a`.`_a_gho` (`id`, `value`)</div><div class="line">  (select `id`, `value` from `a`.`a` force index (`PRIMARY`)</div><div class="line">      where (((`id` &gt; ?) or ((`id` = ?))) and ((`id` &lt; ?) or ((`id` = ?)))) </div><div class="line">          lock in share mode</div><div class="line">  )</div><div class="line">commit;</div></pre></td></tr></table></figure>
-<h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><h3 id="async-binlog-worker如何判断所有数据变更已经完成"><a href="#async-binlog-worker如何判断所有数据变更已经完成" class="headerlink" title="async binlog worker如何判断所有数据变更已经完成"></a>async binlog worker如何判断所有数据变更已经完成</h3><p>binlog worker向changelog table发一行记录，在收到这个记录时，即表示完成</p>
-<h3 id="RENAME-race-condition-with-DML"><a href="#RENAME-race-condition-with-DML" class="headerlink" title="RENAME race condition with DML"></a>RENAME race condition with DML</h3><p>mysql内部保证，LOCK TABLE后，如果有DML与RENAME并发操作，那么在UNLOCK TABLES时，RENAME<br>一定获取最高优先级，即：RENAME一定会先执行。<br>否则，会丢数据:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">LOCK TABLE WRITE</div><div class="line">INSERT // blocked</div><div class="line">RENAME // blocked</div><div class="line"></div><div class="line">UNLOCK TABLE</div><div class="line">INERT // 如果INSERT先执行，那么它会插入原表</div><div class="line">RENAME // 原表被rename to tbl_old，刚才INSERT的数据丢失: 存放在了tbl_old</div></pre></td></tr></table></figure></p>
-<h3 id="LOCK-RENAME"><a href="#LOCK-RENAME" class="headerlink" title="LOCK, RENAME"></a>LOCK, RENAME</h3><p>如果在一个mysql连接内执行LOCK; RENAME，那么会失败<br>解决办法：创建2个mysql连接，分别执行LOCK和RENAME</p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj4dxuu7v003n0d5bw8ull4bn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/11/osc/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/osc/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/6/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/8/">Next &raquo;</a>
     </nav>
@@ -1698,6 +1706,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/26/NILFS/" class="title">NILFS</a></p>
+                            <p class="item-date"><time datetime="2017-06-26T10:49:36.000Z" itemprop="datePublished">2017-06-26</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1735,15 +1752,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/23/nagles-and-delayed-ack/" class="title">nagles and delayed ack</a></p>
-                            <p class="item-date"><time datetime="2017-06-23T07:23:47.000Z" itemprop="datePublished">2017-06-23</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1753,7 +1761,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">29</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">30</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1762,7 +1770,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
@@ -1771,7 +1779,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 15px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 11.67px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 15px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
         </div>
     </div>
 
