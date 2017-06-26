@@ -12,10 +12,13 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/06/26/NILFS/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="IntroNew Implementation of a Log-Structured File System，included in Linux 2.6.30 kernel  take snapshot非常简单，只要记录一下version就可以了 尤其在随机的小文件读写效率更高 在SSD上，NILFS2具有绝对性能优势  123insmod nilfs2.ko mkfs – t nilfs2 /">
-<meta property="og:updated_time" content="2017-06-26T11:10:02.000Z">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/smallfile.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/largefile.png?raw=true">
+<meta property="og:updated_time" content="2017-06-26T11:56:49.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NILFS">
 <meta name="twitter:description" content="IntroNew Implementation of a Log-Structured File System，included in Linux 2.6.30 kernel  take snapshot非常简单，只要记录一下version就可以了 尤其在随机的小文件读写效率更高 在SSD上，NILFS2具有绝对性能优势  123insmod nilfs2.ko mkfs – t nilfs2 /">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/smallfile.png?raw=true">
     
 
     
@@ -243,6 +246,7 @@
 <li>在SSD上，NILFS2具有绝对性能优势</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">insmod nilfs2.ko </div><div class="line">mkfs – t nilfs2 /dev/sda8 </div><div class="line">mount – t nilfs2 /nilfs /dev/sda8</div></pre></td></tr></table></figure>
+<h2 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/smallfile.png?raw=true" alt="small file"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/largefile.png?raw=true" alt="large file"></p>
 <h2 id="vs-Journal-File-System"><a href="#vs-Journal-File-System" class="headerlink" title="vs Journal File System"></a>vs Journal File System</h2><p>JFS保存在日志里的只有metadata，而LFS利用日志记录一切</p>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.linux-mag.com/id/7345/" target="_blank" rel="external">http://www.linux-mag.com/id/7345/</a></p>
 
@@ -255,7 +259,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cj4e2d5pp0019hx5bdganbgot" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cj4e3a8li0016qq5bjbeeeric" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
