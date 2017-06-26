@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                68
+                70
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,287 @@
 
             
             <section id="main">
+    <article id="post-InnoDB-MVCC" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/16/InnoDB-MVCC/">InnoDB MVCC</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/16/InnoDB-MVCC/">
+            <time datetime="2017-05-16T00:17:17.000Z" itemprop="datePublished">2017-05-16</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/database/">database</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h2><p>InnoDB中通过Undo log实现了txn rollback和MVCC，而并发控制(isolation)通过锁来实现<br>Undo log分为insert undo和update undo(delete是一种特殊的update)，回滚时</p>
+<ul>
+<li>insert只要把insert undo log丢弃即可</li>
+<li>update需要通过DB_ROLL_PTR DB_TRX_ID找到事务修改前的版本并恢复</li>
+</ul>
+<p>与redo log不同的是，磁盘上不存在单独的undo log文件，所有的undo log均存放在主ibd数据文件中（表空间），即使客户端设置了每表一个数据文件也是如此</p>
+<h2 id="内部存储"><a href="#内部存储" class="headerlink" title="内部存储"></a>内部存储</h2><p>InnoDB为每行row都reserved了隐藏字段(system column)</p>
+<ul>
+<li>DB_ROW_ID</li>
+<li>DB_TRX_ID</li>
+<li>DB_ROLL_PTR</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef ib_uint64_t ib_id_t;</div><div class="line"></div><div class="line">typedef ib_id_t row_id_t;</div><div class="line">typedef ib_id_t trx_id_t;</div><div class="line">typedef ib_id_t roll_ptr_t;</div></pre></td></tr></table></figure>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/undolog.jpg?raw=true" alt="syscol"></p>
+<h2 id="Undo-log实现方式"><a href="#Undo-log实现方式" class="headerlink" title="Undo log实现方式"></a>Undo log实现方式</h2><ul>
+<li>事务以排他锁的形式修改原始数据</li>
+<li>把修改前的数据存放于undo log，通过回滚指针与主数据关联</li>
+<li>修改成功（commit）啥都不做，失败则恢复undo log中的数据（rollback）</li>
+</ul>
+<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/undo1.jpg?raw=true" alt="demo"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/undo2.jpg?raw=true" alt="demo"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/undo3.jpg?raw=true" alt="demo"></p>
+<p>Innodb中存在purge线程，它会查询那些比现在最老的活动事务还早的undo log，并删除它们</p>
+<h2 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h2><h3 id="回滚成本"><a href="#回滚成本" class="headerlink" title="回滚成本"></a>回滚成本</h3><p>当事务正常提交时Innbod只需要更改事务状态为COMMIT即可，不需做其他额外的工作<br>而Rollback如果事务影响的行非常多，回滚则可能成本很高</p>
+<h3 id="write-skew"><a href="#write-skew" class="headerlink" title="write skew"></a>write skew</h3><p>InnoDB通过Undo log实现的MVCC在修改单行记录是没有问题的，但多行时就可能出问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">update table set col1=2 where id=1; // 成功，创建了undo log</div><div class="line">update table set col2=3 where id=2; // 失败</div><div class="line">rollback;</div></pre></td></tr></table></figure></p>
+<p>回滚row(id=1)时，由于它没有被lock，此时可能已经被另外一个txn给修改了，这个回滚会破坏已经commit的事务</p>
+<p>如果要解决这个问题，需要应用层进行控制</p>
+<p>另外一个例子<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">国家规定一个家庭最多养3只宠物(constraint)，Alice和Bob是一家人，他们现在有dog(1)+cat(1)</div><div class="line">如果并发地，Alice再买一只猫，而Bob再买一只狗，这2个事务就会write skew</div><div class="line">因为repeatable read：一个事务提交之后才visible by other txn</div><div class="line">TxnAlice      TxnBob</div><div class="line">cat=cat+1     dog=dog+1</div><div class="line">这2个事务都成功了，但却破坏了constraint</div></pre></td></tr></table></figure></p>
+<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><p>RR隔离级别下，普通select不加锁，使用MVCC进行一致性读取，即snapshot read<br>update, insert, delete, select … for update, select … lock in share mode都会进行加锁，并且读取的是当前版本: READ COMMITTED读<br>除了lock in share mode是S锁，其他都是X锁</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj4dv7aok000hq75bxhh8rzs5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-microservice-transaction" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/16/microservice-transaction/">microservice transaction</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/16/microservice-transaction/">
+            <time datetime="2017-05-15T23:02:29.000Z" itemprop="datePublished">2017-05-16</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/一致性/">一致性</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction" target="_blank" rel="external">https://docs.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj4dv7aqz0039q75bopgt61a0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/16/microservice-transaction/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/microservice-transaction/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-zookeeper" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -321,7 +602,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj4dl89sz0046l85baf271xnp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj4dv7arl0042q75bvwcaza0m" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -453,7 +734,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj4dl89pt0022l85buk9ct1ko" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj4dv7aq00028q75bduq1bb02" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -603,7 +884,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj4dl89sj003ol85bl2nmdepm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj4dv7ar7003mq75bxajk1gvq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -735,7 +1016,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj4dl89pv0026l85b7rl9n8t0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj4dv7apy0026q75bepgfw837" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -862,7 +1143,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj4dl89sq003wl85bifqjx9qx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj4dv7arc003sq75betie8bdh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1047,7 +1328,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj4dl89sg003kl85bgg117ws2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj4dv7ar0003bq75b7mwejtlc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1179,7 +1460,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj4dl89sl003ql85b1p8qtsk7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj4dv7ar5003kq75bxt1zh8kx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1315,7 +1596,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj4dl89o60005l85bfx62wh2h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj4dv7ao70004q75b10opdam5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1410,6 +1691,24 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/26/Bloom-Filter/" class="title">Bloom Filter</a></p>
+                            <p class="item-date"><time datetime="2017-06-26T08:03:58.000Z" itemprop="datePublished">2017-06-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/26/Why-Do-Computers-Stop/" class="title">Why Do Computers Stop</a></p>
+                            <p class="item-date"><time datetime="2017-06-26T06:55:45.000Z" itemprop="datePublished">2017-06-26</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/23/Amazon-Aurora/" class="title">Amazon Aurora</a></p>
                             <p class="item-date"><time datetime="2017-06-23T09:30:31.000Z" itemprop="datePublished">2017-06-23</time></p>
                         </div>
@@ -1433,24 +1732,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/22/KafkaStreams/" class="title">Kafka Streams</a></p>
-                            <p class="item-date"><time datetime="2017-06-22T07:24:10.000Z" itemprop="datePublished">2017-06-22</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/14/2PC-failures/" class="title">2 phase commit failures</a></p>
-                            <p class="item-date"><time datetime="2017-06-14T08:34:59.000Z" itemprop="datePublished">2017-06-14</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1460,7 +1741,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">26</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">28</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1469,7 +1750,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
@@ -1478,7 +1759,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 16.67px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.67px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.33px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.33px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 10px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.67px;">protocol</a> <a href="/tags/storage/" style="font-size: 15px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
         </div>
     </div>
 

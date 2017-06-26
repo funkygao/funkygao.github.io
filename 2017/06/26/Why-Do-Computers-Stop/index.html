@@ -3,23 +3,21 @@
 <head>
     <meta charset="utf-8">
     
-    <title>HDD Stats Q1 2017 | Notes</title>
+    <title>Why Do Computers Stop | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta name="keywords" content="storage">
+    <meta name="description" content="Jim Gray, June 1985, Tandem Technical report 85.7 TermsReliability != Availability  availability is doing the right thing within the specified response time Availability = MTBF/(MTBF + MTTR) 分布式系统下，整体">
+<meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HDD Stats Q1 2017">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/index.html">
+<meta property="og:title" content="Why Do Computers Stop">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
-<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg">
-<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg">
-<meta property="og:updated_time" content="2017-06-14T06:05:54.000Z">
+<meta property="og:description" content="Jim Gray, June 1985, Tandem Technical report 85.7 TermsReliability != Availability  availability is doing the right thing within the specified response time Availability = MTBF/(MTBF + MTTR) 分布式系统下，整体">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/mtbf.png?raw=true">
+<meta property="og:updated_time" content="2017-06-26T08:10:36.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HDD Stats Q1 2017">
-<meta name="twitter:description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
+<meta name="twitter:title" content="Why Do Computers Stop">
+<meta name="twitter:description" content="Jim Gray, June 1985, Tandem Technical report 85.7 TermsReliability != Availability  availability is doing the right thing within the specified response time Availability = MTBF/(MTBF + MTTR) 分布式系统下，整体">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/mtbf.png?raw=true">
     
 
     
@@ -202,7 +200,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-HDD-Stats-Q1-2017" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Why-Do-Computers-Stop" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +208,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            HDD Stats Q1 2017
+            Why Do Computers Stop
         </h1>
     
 
@@ -219,8 +217,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/14/HDD-Stats-Q1-2017/">
-            <time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time>
+        <a href="/2017/06/26/Why-Do-Computers-Stop/">
+            <time datetime="2017-06-26T06:55:45.000Z" itemprop="datePublished">2017-06-26</time>
         </a>
     </div>
 
@@ -229,7 +227,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
     </div>
 
                     </div>
@@ -240,13 +238,30 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true" alt="HDD Fail Rate"></p>
-<h2 id="Backblaze-Storage-Pod"><a href="#Backblaze-Storage-Pod" class="headerlink" title="Backblaze Storage Pod"></a>Backblaze Storage Pod</h2><p>把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS<br>没有iSCSI，没有NFS，没有Fibre Channel<br>180TB成本$9,305，即每GB $0.0517</p>
-<p><img src="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg" alt="storage pod"></p>
-<h2 id="Backblze-Vaults-cloud-backup-service"><a href="#Backblze-Vaults-cloud-backup-service" class="headerlink" title="Backblze Vaults cloud backup service"></a>Backblze Vaults cloud backup service</h2><p>99.999999% annual durability<br>已经存储150PB，由1000个Storage Pod组成，40,000块盘，每天有10块盘损坏</p>
-<p>每个Vault由20个Storage Pod组成，每个Pod有45块盘，即每个Vault有900块盘，一块盘如果是4TB，那么每个Vault可以存3.6PB<br>每个磁盘使用ext4文件系统，每个Vault有个7位数字id，例如555-1021，前3位代表data center id，后4位是vault id<br>有个类似name service的服务，client备份前先request name service获取vault id，之后client直接与相应的vault进行backup IO(https)<br><img src="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg" alt="pod"></p>
-<p>每个文件被分成20 shards = 17 data shars + 3 parity shards，存放在ext4<br>每个shard有checksum，如果损坏，可以从其他17个shards恢复<br>如果某个Vault有1个pod crash了，backup write的parity会变成2，如果3个pod坏了，那么也可以写，但parity就不存在了，如果此时再坏一个pod，数据无法恢复了</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/vault-cloud-storage-architecture/" target="_blank" rel="external">https://www.backblaze.com/blog/vault-cloud-storage-architecture/</a><br><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
+            <p>Jim Gray, June 1985, Tandem Technical report 85.7</p>
+<h2 id="Terms"><a href="#Terms" class="headerlink" title="Terms"></a>Terms</h2><p>Reliability != Availability</p>
+<ul>
+<li>availability is doing the right thing within the specified response time<ul>
+<li>Availability = MTBF/(MTBF + MTTR)</li>
+<li>分布式系统下，整体的可用性=各个子系统可用性的乘积</li>
+<li>模块化使得局部failure不会影响全部，冗余减少MTTR</li>
+<li>磁盘的MTBF是1万小时，即1年；如果两张盘完全独立冗余，假设MTBR是24h，那么整体的MTBF是1000年</li>
+</ul>
+</li>
+<li>reliability is not doing the wrong thing</li>
+</ul>
+<h2 id="Report"><a href="#Report" class="headerlink" title="Report"></a>Report</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mtbf.png?raw=true" alt="MTBF"></p>
+<h2 id="设计容错系统的方法"><a href="#设计容错系统的方法" class="headerlink" title="设计容错系统的方法"></a>设计容错系统的方法</h2><p>process pair</p>
+<ul>
+<li>Lockstep<br>一个执行失败，就启用另外一个<br>容忍了硬件故障，但没有解决Heisenbugs(难以重现的bug)</li>
+<li>State Checkpointing<br>primary通过消息同步把请求发送给backup，如果primary挂了，切到backup<br>通过序列号来排重和发现消息丢失<br>实现起来比较困难</li>
+<li>Automatic Checkpointing<br>kernal自动管理checkpoint，而不是让上层应用管理<br>发送的消息很多</li>
+<li>Delta Checkpointing<br>发给backup的是logical updates，而不是physical updates<br>性能更好，消息更少，但也更难实现</li>
+<li>Persistence<br>失败的时候可能丢失状态<br>需要加入事务来提高可靠性</li>
+</ul>
+<h2 id="Fault-tolerent-Communication"><a href="#Fault-tolerent-Communication" class="headerlink" title="Fault-tolerent Communication"></a>Fault-tolerent Communication</h2><p>硬件，通过multiple data paths with independent failure modes<br>软件，引入session概念(类似tcp)</p>
+<h2 id="Fault-tolerent-Storage"><a href="#Fault-tolerent-Storage" class="headerlink" title="Fault-tolerent Storage"></a>Fault-tolerent Storage</h2><p>2份复制正好，3份不一定提高MTBF，因为其他失败因素会变为主导<br>分布式复制<br>把数据分片，会限制scope of failure</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf" target="_blank" rel="external">http://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf</a></p>
 
         
         </div>
@@ -257,7 +272,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj4dv7aoj000fq75b6nb8aw40" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/" data-id="cj4dv7apd001hq75busg9zylr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -325,7 +340,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/">Comments</a>
     
 
         </footer>
@@ -334,19 +349,19 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/14/graph-database/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2017/06/26/Bloom-Filter/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    graph database
+                    Bloom Filter
                 
             </div>
         </a>
     
     
-        <a href="/2017/06/14/OpenStack-storage/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/23/Amazon-Aurora/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">OpenStack storage</div>
+            <div class="article-nav-title">Amazon Aurora</div>
         </a>
     
 </nav>
@@ -477,9 +492,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/';
+            this.page.url = 'http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/';
         
-        this.page.identifier = 'HDD-Stats-Q1-2017';
+        this.page.identifier = 'Why-Do-Computers-Stop';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

@@ -3,23 +3,21 @@
 <head>
     <meta charset="utf-8">
     
-    <title>HDD Stats Q1 2017 | Notes</title>
+    <title>Bloom Filter | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta name="keywords" content="storage">
+    <meta name="description" content="by Burton Bloom in 1970 false positive possible, false negative impossible Dynamo, Postgresql, HBase, Bitcoin都广泛使用">
+<meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HDD Stats Q1 2017">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/index.html">
+<meta property="og:title" content="Bloom Filter">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/26/Bloom-Filter/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
-<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg">
-<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg">
-<meta property="og:updated_time" content="2017-06-14T06:05:54.000Z">
+<meta property="og:description" content="by Burton Bloom in 1970 false positive possible, false negative impossible Dynamo, Postgresql, HBase, Bitcoin都广泛使用">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/bloom-filter.png?raw=true">
+<meta property="og:updated_time" content="2017-06-26T08:07:10.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HDD Stats Q1 2017">
-<meta name="twitter:description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
+<meta name="twitter:title" content="Bloom Filter">
+<meta name="twitter:description" content="by Burton Bloom in 1970 false positive possible, false negative impossible Dynamo, Postgresql, HBase, Bitcoin都广泛使用">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/bloom-filter.png?raw=true">
     
 
     
@@ -202,7 +200,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-HDD-Stats-Q1-2017" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Bloom-Filter" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +208,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            HDD Stats Q1 2017
+            Bloom Filter
         </h1>
     
 
@@ -219,8 +217,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/14/HDD-Stats-Q1-2017/">
-            <time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time>
+        <a href="/2017/06/26/Bloom-Filter/">
+            <time datetime="2017-06-26T08:03:58.000Z" itemprop="datePublished">2017-06-26</time>
         </a>
     </div>
 
@@ -229,7 +227,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
     </div>
 
                     </div>
@@ -240,13 +238,10 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true" alt="HDD Fail Rate"></p>
-<h2 id="Backblaze-Storage-Pod"><a href="#Backblaze-Storage-Pod" class="headerlink" title="Backblaze Storage Pod"></a>Backblaze Storage Pod</h2><p>把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS<br>没有iSCSI，没有NFS，没有Fibre Channel<br>180TB成本$9,305，即每GB $0.0517</p>
-<p><img src="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg" alt="storage pod"></p>
-<h2 id="Backblze-Vaults-cloud-backup-service"><a href="#Backblze-Vaults-cloud-backup-service" class="headerlink" title="Backblze Vaults cloud backup service"></a>Backblze Vaults cloud backup service</h2><p>99.999999% annual durability<br>已经存储150PB，由1000个Storage Pod组成，40,000块盘，每天有10块盘损坏</p>
-<p>每个Vault由20个Storage Pod组成，每个Pod有45块盘，即每个Vault有900块盘，一块盘如果是4TB，那么每个Vault可以存3.6PB<br>每个磁盘使用ext4文件系统，每个Vault有个7位数字id，例如555-1021，前3位代表data center id，后4位是vault id<br>有个类似name service的服务，client备份前先request name service获取vault id，之后client直接与相应的vault进行backup IO(https)<br><img src="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg" alt="pod"></p>
-<p>每个文件被分成20 shards = 17 data shars + 3 parity shards，存放在ext4<br>每个shard有checksum，如果损坏，可以从其他17个shards恢复<br>如果某个Vault有1个pod crash了，backup write的parity会变成2，如果3个pod坏了，那么也可以写，但parity就不存在了，如果此时再坏一个pod，数据无法恢复了</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/vault-cloud-storage-architecture/" target="_blank" rel="external">https://www.backblaze.com/blog/vault-cloud-storage-architecture/</a><br><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
+            <p>by Burton Bloom in 1970</p>
+<p>false positive possible, false negative impossible</p>
+<p>Dynamo, Postgresql, HBase, Bitcoin都广泛使用</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/bloom-filter.png?raw=true" alt="BloomFilter"></p>
 
         
         </div>
@@ -257,7 +252,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj4dv7aoj000fq75b6nb8aw40" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/Bloom-Filter/" data-id="cj4dv7ao00001q75bnqs0vkis" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -325,7 +320,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/26/Bloom-Filter/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/26/Bloom-Filter/">Comments</a>
     
 
         </footer>
@@ -334,19 +329,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/14/graph-database/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    graph database
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/06/14/OpenStack-storage/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/26/Why-Do-Computers-Stop/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">OpenStack storage</div>
+            <div class="article-nav-title">Why Do Computers Stop</div>
         </a>
     
 </nav>
@@ -477,9 +463,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/';
+            this.page.url = 'http://funkygao.github.io/2017/06/26/Bloom-Filter/';
         
-        this.page.identifier = 'HDD-Stats-Q1-2017';
+        this.page.identifier = 'Bloom-Filter';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
