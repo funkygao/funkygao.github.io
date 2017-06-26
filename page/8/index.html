@@ -3,21 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>architecture design checklist | Notes</title>
+    <title>Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="archeck">
-<meta name="keywords" content="architecture">
-<meta property="og:type" content="article">
-<meta property="og:title" content="architecture design checklist">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/17/architecture-design-checklist/index.html">
+    <meta property="og:type" content="website">
+<meta property="og:title" content="Notes">
+<meta property="og:url" content="http://funkygao.github.io/page/8/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="archeck">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true">
-<meta property="og:updated_time" content="2017-06-02T08:16:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="architecture design checklist">
-<meta name="twitter:description" content="archeck">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true">
+<meta name="twitter:title" content="Notes">
     
 
     
@@ -200,15 +193,16 @@
 </aside>
 
             
-            <section id="main"><article id="post-architecture-design-checklist" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main">
+    <article id="post-2PL" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
             <header class="article-header">
                 
     
-        <h1 class="article-title" itemprop="name">
-            architecture design checklist
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/11/2PL/">两段锁 2PL</a>
         </h1>
     
 
@@ -217,8 +211,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/architecture-design-checklist/">
-            <time datetime="2017-05-17T01:00:00.000Z" itemprop="datePublished">2017-05-17</time>
+        <a href="/2017/05/11/2PL/">
+            <time datetime="2017-05-11T07:33:41.000Z" itemprop="datePublished">2017-05-11</time>
         </a>
     </div>
 
@@ -227,7 +221,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/architecture/">architecture</a>
+        <a class="tag-link" href="/tags/database/">database</a>
     </div>
 
                     </div>
@@ -238,8 +232,16 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><a href="https://github.com/funkygao/archeck" target="_blank" rel="external">archeck</a></p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true" alt="demo"></p>
+            <p>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段</p>
+<p>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件</p>
+<p>MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC</p>
+<p>MySQL 2PL提供2种锁</p>
+<ul>
+<li>shared(read)</li>
+<li>exclusive(write)</li>
+</ul>
+<p>读写互斥，但读读不互斥</p>
+<p>MySQL serialized isolation<br><img src="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true" alt="2pl"></p>
 
         
         </div>
@@ -250,7 +252,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/17/architecture-design-checklist/" data-id="cj4dxuu6h001z0d5b3stghbmg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj4dxuu4m00030d5b4qm8luts" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -318,48 +320,19 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/17/architecture-design-checklist/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/architecture-design-checklist/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/11/2PL/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/2PL/">Comments</a>
     
 
         </footer>
     </div>
     
-        
-<nav id="article-nav">
-    
-        <a href="/2017/05/17/RocketMQ/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    RocketMQ解读
-                
-            </div>
-        </a>
-    
-    
-        <a href="/2017/05/17/kateway-replay-messages/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">kateway replay messages</div>
-        </a>
-    
-</nav>
-
-
-    
 </article>
 
 
-    
-    <section id="comments">
-    
-        
-    <div id="disqus_thread">
-        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
 
-    
-    </section>
-
+    <nav id="page-nav">
+        <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span>
+    </nav>
 </section>
             
                 <aside id="sidebar">
@@ -470,13 +443,11 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/17/architecture-design-checklist/';
-        
-        this.page.identifier = 'architecture-design-checklist';
+        this.page.identifier = 'undefined';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/count.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();

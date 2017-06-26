@@ -3,21 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>architecture design checklist | Notes</title>
+    <title>CryptDB | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="archeck">
-<meta name="keywords" content="architecture">
+    <meta name="description" content="一个DB Proxy，对字段名称、记录都加密，Google根据CryptDB的设计开发了Encrypted BigQuery client仍然存在数据泄露问题  Related CryptDB enables most DBMS functionality with a performance overhead of under 30% Arx is built on top of MongoDB">
+<meta name="keywords" content="database">
 <meta property="og:type" content="article">
-<meta property="og:title" content="architecture design checklist">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/17/architecture-design-checklist/index.html">
+<meta property="og:title" content="CryptDB">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/26/CryptDB/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="archeck">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true">
-<meta property="og:updated_time" content="2017-06-02T08:16:55.000Z">
+<meta property="og:description" content="一个DB Proxy，对字段名称、记录都加密，Google根据CryptDB的设计开发了Encrypted BigQuery client仍然存在数据泄露问题  Related CryptDB enables most DBMS functionality with a performance overhead of under 30% Arx is built on top of MongoDB">
+<meta property="og:image" content="http://static.yihaodou.com/up_img/2016/01/14529240805699dcb05b960.jpg">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/crypdb.jpeg?raw=true">
+<meta property="og:updated_time" content="2017-06-26T08:59:11.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="architecture design checklist">
-<meta name="twitter:description" content="archeck">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true">
+<meta name="twitter:title" content="CryptDB">
+<meta name="twitter:description" content="一个DB Proxy，对字段名称、记录都加密，Google根据CryptDB的设计开发了Encrypted BigQuery client仍然存在数据泄露问题  Related CryptDB enables most DBMS functionality with a performance overhead of under 30% Arx is built on top of MongoDB">
+<meta name="twitter:image" content="http://static.yihaodou.com/up_img/2016/01/14529240805699dcb05b960.jpg">
     
 
     
@@ -200,7 +201,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-architecture-design-checklist" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-CryptDB" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -208,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            architecture design checklist
+            CryptDB
         </h1>
     
 
@@ -217,8 +218,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/architecture-design-checklist/">
-            <time datetime="2017-05-17T01:00:00.000Z" itemprop="datePublished">2017-05-17</time>
+        <a href="/2017/06/26/CryptDB/">
+            <time datetime="2017-06-26T08:46:21.000Z" itemprop="datePublished">2017-06-26</time>
         </a>
     </div>
 
@@ -227,7 +228,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/architecture/">architecture</a>
+        <a class="tag-link" href="/tags/database/">database</a>
     </div>
 
                     </div>
@@ -238,8 +239,16 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><a href="https://github.com/funkygao/archeck" target="_blank" rel="external">archeck</a></p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/archeck.png?raw=true" alt="demo"></p>
+            <p>一个DB Proxy，对字段名称、记录都加密，Google根据CryptDB的设计开发了Encrypted BigQuery client<br>仍然存在数据泄露问题</p>
+<p><img src="http://static.yihaodou.com/up_img/2016/01/14529240805699dcb05b960.jpg" alt="deployment"></p>
+<h2 id="Related"><a href="#Related" class="headerlink" title="Related"></a>Related</h2><ul>
+<li>CryptDB enables most DBMS functionality with a performance overhead of under 30%</li>
+<li>Arx is built on top of MongoDB and reports a performance overhead of approximately 10%</li>
+<li>OSPIR-EXT/SisoSPIR support MySQL</li>
+<li>BlindSeer</li>
+</ul>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/crypdb.jpeg?raw=true" alt="db crypt"></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://github.com/CryptDB/cryptdb" target="_blank" rel="external">https://github.com/CryptDB/cryptdb</a><br><a href="http://people.csail.mit.edu/nickolai/papers/raluca-cryptdb.pdf" target="_blank" rel="external">http://people.csail.mit.edu/nickolai/papers/raluca-cryptdb.pdf</a><br><a href="https://people.csail.mit.edu/nickolai/papers/popa-cryptdb-tr.pdf" target="_blank" rel="external">https://people.csail.mit.edu/nickolai/papers/popa-cryptdb-tr.pdf</a></p>
 
         
         </div>
@@ -250,7 +259,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/17/architecture-design-checklist/" data-id="cj4dxuu6h001z0d5b3stghbmg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/CryptDB/" data-id="cj4dxuu4z000b0d5bbtj63yqx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -318,7 +327,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/17/architecture-design-checklist/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/architecture-design-checklist/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/26/CryptDB/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/26/CryptDB/">Comments</a>
     
 
         </footer>
@@ -327,19 +336,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/17/RocketMQ/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    RocketMQ解读
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/17/kateway-replay-messages/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/26/Bloom-Filter/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">kateway replay messages</div>
+            <div class="article-nav-title">Bloom Filter</div>
         </a>
     
 </nav>
@@ -470,9 +470,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/17/architecture-design-checklist/';
+            this.page.url = 'http://funkygao.github.io/2017/06/26/CryptDB/';
         
-        this.page.identifier = 'architecture-design-checklist';
+        this.page.identifier = 'CryptDB';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
