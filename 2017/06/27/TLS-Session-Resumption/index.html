@@ -3,19 +3,21 @@
 <head>
     <meta charset="utf-8">
     
-    <title>kafka redesign | Notes</title>
+    <title>TLS Session Resumption | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Goals support many topics needle in haystack   IO optimization R/W isolation index file leads to random sync write">
-<meta name="keywords" content="PubSub">
+    <meta name="description" content="There are two mechanisms that can be used to eliminate a round trip for subsequent TLS connections (discussed below):  TLS session IDs ServerHello时，server生成一个32字节的session ID给client，后面的TLS握手client可以在它">
+<meta name="keywords" content="protocol">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kafka redesign">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/24/kafka-redesign/index.html">
+<meta property="og:title" content="TLS Session Resumption">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Goals support many topics needle in haystack   IO optimization R/W isolation index file leads to random sync write">
-<meta property="og:updated_time" content="2017-05-24T08:15:10.000Z">
+<meta property="og:description" content="There are two mechanisms that can be used to eliminate a round trip for subsequent TLS connections (discussed below):  TLS session IDs ServerHello时，server生成一个32字节的session ID给client，后面的TLS握手client可以在它">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/round-trip-elimination-tls.png?raw=true">
+<meta property="og:updated_time" content="2017-06-27T02:12:14.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="kafka redesign">
-<meta name="twitter:description" content="Goals support many topics needle in haystack   IO optimization R/W isolation index file leads to random sync write">
+<meta name="twitter:title" content="TLS Session Resumption">
+<meta name="twitter:description" content="There are two mechanisms that can be used to eliminate a round trip for subsequent TLS connections (discussed below):  TLS session IDs ServerHello时，server生成一个32字节的session ID给client，后面的TLS握手client可以在它">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/round-trip-elimination-tls.png?raw=true">
     
 
     
@@ -198,7 +200,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-kafka-redesign" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-TLS-Session-Resumption" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -206,7 +208,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            kafka redesign
+            TLS Session Resumption
         </h1>
     
 
@@ -215,8 +217,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/24/kafka-redesign/">
-            <time datetime="2017-05-24T02:21:06.000Z" itemprop="datePublished">2017-05-24</time>
+        <a href="/2017/06/27/TLS-Session-Resumption/">
+            <time datetime="2017-06-27T02:00:17.000Z" itemprop="datePublished">2017-06-27</time>
         </a>
     </div>
 
@@ -225,7 +227,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+        <a class="tag-link" href="/tags/protocol/">protocol</a>
     </div>
 
                     </div>
@@ -236,17 +238,21 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Goals"><a href="#Goals" class="headerlink" title="Goals"></a>Goals</h2><ul>
-<li>support many topics<ul>
-<li>needle in haystack</li>
+            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/round-trip-elimination-tls.png?raw=true" alt="TLS"></p>
+<p>There are two mechanisms that can be used to eliminate a round trip for subsequent TLS connections (discussed below):</p>
+<ul>
+<li>TLS session IDs<ul>
+<li>ServerHello时，server生成一个32字节的session ID给client，后面的TLS握手client可以在它的ClientHello里发送这个id，server就会restore the cached TLS context and avoid the 2nd round trip of TLS handshake</li>
+<li>nginx支持该方式<ul>
+<li>ssl_session_cache</li>
+<li>ssl_session_timeout</li>
 </ul>
 </li>
-<li>IO optimization<ul>
-<li>R/W isolation</li>
-<li>index file leads to random sync write</li>
 </ul>
 </li>
+<li>TLS session tickets<br>与session IDs类似，只是session信息保存在client</li>
 </ul>
+<p><a href="/2017/05/19/https/">https dialog</a></p>
 
         
         </div>
@@ -257,7 +263,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/24/kafka-redesign/" data-id="cj4extdcn00389w5b4vv5qobf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj4extdb6001q9w5brx9q9a2q" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -325,7 +331,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/24/kafka-redesign/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/24/kafka-redesign/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/">Comments</a>
     
 
         </footer>
@@ -334,19 +340,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/25/zookeeper-processor/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    zookeeper processor
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/23/apache-bookeeper/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/26/AWS-Marketplace/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">apache bookeeper</div>
+            <div class="article-nav-title">AWS Marketplace</div>
         </a>
     
 </nav>
@@ -477,9 +474,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/24/kafka-redesign/';
+            this.page.url = 'http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/';
         
-        this.page.identifier = 'kafka-redesign';
+        this.page.identifier = 'TLS-Session-Resumption';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
