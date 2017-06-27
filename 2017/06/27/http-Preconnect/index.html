@@ -3,23 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>storm acker | Notes</title>
+    <title>http Preconnect | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta name="keywords" content="PubSub">
+    <meta name="description" content="https://www.igvita.com/2015/08/17/eliminating-roundtrips-with-preconnect/">
+<meta name="keywords" content="protocol">
 <meta property="og:type" content="article">
-<meta property="og:title" content="storm acker">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/02/storm-ack/index.html">
+<meta property="og:title" content="http Preconnect">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/27/http-Preconnect/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true">
-<meta property="og:updated_time" content="2017-06-02T06:36:42.000Z">
+<meta property="og:description" content="https://www.igvita.com/2015/08/17/eliminating-roundtrips-with-preconnect/">
+<meta property="og:updated_time" content="2017-06-27T02:17:45.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="storm acker">
-<meta name="twitter:description" content="Acker对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆 当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现 tuple tree，中间任意一个edge fail，会理解触发Spout的fail，">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true">
+<meta name="twitter:title" content="http Preconnect">
+<meta name="twitter:description" content="https://www.igvita.com/2015/08/17/eliminating-roundtrips-with-preconnect/">
     
 
     
@@ -202,7 +198,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-storm-ack" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-http-Preconnect" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +206,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            storm acker
+            http Preconnect
         </h1>
     
 
@@ -219,8 +215,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/02/storm-ack/">
-            <time datetime="2017-06-02T01:03:52.000Z" itemprop="datePublished">2017-06-02</time>
+        <a href="/2017/06/27/http-Preconnect/">
+            <time datetime="2017-06-27T02:17:27.000Z" itemprop="datePublished">2017-06-27</time>
         </a>
     </div>
 
@@ -229,7 +225,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+        <a class="tag-link" href="/tags/protocol/">protocol</a>
     </div>
 
                     </div>
@@ -240,12 +236,7 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Acker"><a href="#Acker" class="headerlink" title="Acker"></a>Acker</h2><p>对于Spout产生的每一个tuple, storm都会进行跟踪，利用RotatingMap存放内存，但有保护措施，不会打爆</p>
-<p>当Spout触发fail动作时，storm不会自动重发失败的tuple，只是向Spout发送fail消息，触发Spout.fail回调，真正的重发需要在Spout.fail里实现</p>
-<p>tuple tree，中间任意一个edge fail，会理解触发Spout的fail，但后面的Bolt的执行不受影响。做无用功？</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/acker.png?raw=true" alt="backtype.storm.daemon.acker"></p>
-<h2 id="Spout-Executor"><a href="#Spout-Executor" class="headerlink" title="Spout Executor"></a>Spout Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/spout.png?raw=true" alt="spout executor"></p>
-<h2 id="Bolt-Executor"><a href="#Bolt-Executor" class="headerlink" title="Bolt Executor"></a>Bolt Executor</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bolt.png?raw=true" alt="bolt executor"></p>
+            <p><a href="https://www.igvita.com/2015/08/17/eliminating-roundtrips-with-preconnect/" target="_blank" rel="external">https://www.igvita.com/2015/08/17/eliminating-roundtrips-with-preconnect/</a></p>
 
         
         </div>
@@ -256,7 +247,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj4fcwak9004dmx5bze5z7dib" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj4fcwajh0038mx5b9ejtrigs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -324,7 +315,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/02/storm-ack/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/02/storm-ack/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/27/http-Preconnect/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/27/http-Preconnect/">Comments</a>
     
 
         </footer>
@@ -333,19 +324,19 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/05/facebook-Mystery-Machine/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2017/06/27/chain-replication/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    facebook Mystery Machine
+                    chain replication
                 
             </div>
         </a>
     
     
-        <a href="/2017/06/02/monkey-patch-golang/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/27/TLS-Session-Resumption/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">monkey patch golang</div>
+            <div class="article-nav-title">TLS Session Resumption</div>
         </a>
     
 </nav>
@@ -476,9 +467,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/02/storm-ack/';
+            this.page.url = 'http://funkygao.github.io/2017/06/27/http-Preconnect/';
         
-        this.page.identifier = 'storm-ack';
+        this.page.identifier = 'http-Preconnect';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
