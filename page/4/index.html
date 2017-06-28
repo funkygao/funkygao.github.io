@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                78
+                77
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,165 +194,6 @@
 
             
             <section id="main">
-    <article id="post-KafkaSpout" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/01/KafkaSpout/">KafkaSpout</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/01/KafkaSpout/">
-            <time datetime="2017-06-01T10:04:04.000Z" itemprop="datePublished">2017-06-01</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="config"><a href="#config" class="headerlink" title="config"></a>config</h2><h3 id="Topology-config"><a href="#Topology-config" class="headerlink" title="Topology config"></a>Topology config</h3><ul>
-<li>TOPOLOGY_WORKERS<ul>
-<li>整个topology在所有节点上的java进程总数</li>
-<li>例如，设置成25，parallelism=150，那么每个worker进程会创建150/25=6个线程执行task</li>
-</ul>
-</li>
-<li>TOPOLOGY_ACKER_EXECUTORS = 20<ul>
-<li>不设或者为null，it=TOPOLOGY_WORKERS，即one acker task per worker</li>
-<li>设置为0，表示turn off ack/reliability</li>
-</ul>
-</li>
-<li><p>TOPOLOGY_MAX_SPOUT_PENDING = 5000 </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">(defn executor-max-spout-pending [storm-conf num-tasks]</div><div class="line">  (let [p (storm-conf TOPOLOGY-MAX-SPOUT-PENDING)]</div><div class="line">    (if p (* p num-tasks))))</div></pre></td></tr></table></figure>
-<ul>
-<li>max in-flight(not ack or fail) spout tuples on a single spout task at once</li>
-<li>如果不指定，默认是1</li>
-</ul>
-</li>
-<li><p>TOPOLOGY_BACKPRESSURE_ENABLE = false</p>
-</li>
-<li>TOPOLOGY_MESSAGE_TIMEOUT_SECS<br>30s by default</li>
-</ul>
-<h3 id="KafkaSpout-config"><a href="#KafkaSpout-config" class="headerlink" title="KafkaSpout config"></a>KafkaSpout config</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">fetchSizeBytes  = 1024 * 1024 * 2 // 1048576=1M by default FetchRequest</div><div class="line">fetchMaxWait    = 10000           // by default</div><div class="line">forceFromStart  = false</div></pre></td></tr></table></figure>
-<h2 id="emit-ack-fail-flow"><a href="#emit-ack-fail-flow" class="headerlink" title="emit/ack/fail flow"></a>emit/ack/fail flow</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">class PartitionManager &#123;</div><div class="line">    SortedSet&lt;Long&gt; _pending, failed = new TreeSet();</div><div class="line">    LinkedList&lt;MessageAndRealOffset&gt; _waitingToEmit = new LinkedList();</div><div class="line"></div><div class="line">    func EmitState next(SpoutOutputCollector collector) &#123;</div><div class="line">        if (this._waitingToEmit.isEmpty()) &#123;</div><div class="line">            // 如果内存里数据都发出，就调用kafka consumer一次性批量填充内存_waitingToEmit</div><div class="line">            // 填充时，如果发现failed里有东西，那么就从head of failed(offset) FetchRequest: 重发机制</div><div class="line">            this.fill();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 从LinkedList _waitingToEmit里取一条消息</div><div class="line">        MessageAndRealOffset toEmit = (MessageAndRealOffset)this._waitingToEmit.pollFirst();</div><div class="line">        // emit时指定了messageID</div><div class="line">        // BasicBoltExecutor.execute会通过template method自动执行_collector.getOutputter().ack(input)</div><div class="line">        // 即KafkaSpout.ack -&gt; PartitionManager.ack</div><div class="line">        collector.emit(tup, new PartitionManager.KafkaMessageId(this._partition, toEmit.offset));</div><div class="line"></div><div class="line">        // 该tuple处于pending state</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Note: a tuple will be acked or failed by the exact same Spout task that created it</div><div class="line"></div><div class="line">    func ack(Long offset) &#123;</div><div class="line">        this._pending.remove(offset)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    func fail(Long offset) &#123;</div><div class="line">        this.failed.add(offset);</div><div class="line">        // kafka consumer会reset offset to the failed msg，重新消费</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class TopologyBuilder &#123;</div><div class="line">    public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelism_hint) &#123;</div><div class="line">        return setBolt(id, new BasicBoltExecutor(bolt), parallelism_hint);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class BasicBoltExecutor &#123;</div><div class="line">    public void execute(Tuple input) &#123;</div><div class="line">         _collector.setContext(input);</div><div class="line">         try &#123;</div><div class="line">             _bolt.execute(input, _collector);</div><div class="line">             _collector.getOutputter().ack(input);</div><div class="line">         &#125; catch(FailedException e) &#123;</div><div class="line">             _collector.getOutputter().fail(input);</div><div class="line">         &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Bolt-ack"><a href="#Bolt-ack" class="headerlink" title="Bolt ack"></a>Bolt ack</h3><p>KafkaSpout产生的每个tuple，Bolt必须进行ack，否则30s后KafkaSpout会认为emitted tuple tree not fully processed，进行重发<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">class MyBolt &#123;</div><div class="line">    public void execute(Tuple tuple) &#123;</div><div class="line">        _collector.emit(new Values(foo, bar))</div><div class="line">        _collector.ack(tuple)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h3 id="OOM"><a href="#OOM" class="headerlink" title="OOM"></a>OOM</h3><p>如果消息处理一直不ack，累计的unacked msg越来越多，会不会OOM?<br>NO<br>KafkaSpout只保留offset，不会保存每条emitted but no ack/fail msg</p>
-<h2 id="spout-throttle"><a href="#spout-throttle" class="headerlink" title="spout throttle"></a>spout throttle</h2><p><a href="http://storm.apache.org/2016/04/12/storm100-released.html" target="_blank" rel="external">1.0.0</a>之前，只能用TOPOLOGY_MAX_SPOUT_PENDING控制<br>但这个参数很难控制，它有一些与其他参数配合使用才能生效的机制，而且如果使用Trident语义又完全不同<br><a href="http://storm.apache.org/2016/04/12/storm100-released.html" target="_blank" rel="external">1.0.0</a>之后，可以通过backpressure<br><img src="https://github.com/funkygao/blogassets/blob/master/img/backpressure.png?raw=true" alt="backpressure"></p>
-<h2 id="Storm-messaging"><a href="#Storm-messaging" class="headerlink" title="Storm messaging"></a>Storm messaging</h2><ul>
-<li>intra-worker<br>Disruptor</li>
-<li>inter-worker<br>0MQ/Netty</li>
-</ul>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/storm-internal-message-queues.png?raw=true" alt="storm messaing"></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.michael-noll.com/blog/2013/06/21/understanding-storm-internal-message-buffers/" target="_blank" rel="external">http://www.michael-noll.com/blog/2013/06/21/understanding-storm-internal-message-buffers/</a><br><a href="http://jobs.one2team.com/apache-storms/" target="_blank" rel="external">http://jobs.one2team.com/apache-storms/</a><br><a href="http://woodding2008.iteye.com/blog/2335673" target="_blank" rel="external">http://woodding2008.iteye.com/blog/2335673</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/01/KafkaSpout/" data-id="cj4g8pci6000wqa5bvrikrnd3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/01/KafkaSpout/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/KafkaSpout/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <article id="post-aliware" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -426,7 +267,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/aliware/" data-id="cj4g8pcj40024qa5bnxxla1kg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/aliware/" data-id="cj4gack94001z795bsrejo3ao" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -556,7 +397,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/TiDB-KV-Mapping/" data-id="cj4g8pcj0001xqa5bowojqwmk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/TiDB-KV-Mapping/" data-id="cj4gack8x001s795btc8b7xyl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -684,7 +525,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/ssd-vs-hdd/" data-id="cj4g8pcl3004fqa5br4uqzhn1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/ssd-vs-hdd/" data-id="cj4gackat004b795bc73cf0iv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -864,7 +705,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj4g8pckg003iqa5bn3mflmh5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj4gacka1003a795bl4wpueg2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -991,7 +832,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj4g8pcky0047qa5b5a3pqrsb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj4gackap0045795bvrhwjuzw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1121,7 +962,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj4g8pck70034qa5byrlf594f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj4gack9s002y795bsjpkk7j5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1271,7 +1112,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/microservice-gateway/" data-id="cj4g8pckm003oqa5b3vh17ca4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/microservice-gateway/" data-id="cj4gackaa003m795bwwxaxxax" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1399,7 +1240,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/" data-id="cj4g8pchw000iqa5bvu1dqgyw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/Database-as-a-Service/" data-id="cj4gack7c000e795bbgr5ghra" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1530,7 +1371,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj4g8pchs000dqa5bhu03ghsp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj4gack7b000c795bn32vs54u" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1608,6 +1449,168 @@
 
 
 
+    <article id="post-Cassandra" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/31/Cassandra/">Cassandra vs ScyllaDB</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/31/Cassandra/">
+            <time datetime="2017-05-31T00:16:23.000Z" itemprop="datePublished">2017-05-31</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Cassandra"><a href="#Cassandra" class="headerlink" title="Cassandra"></a>Cassandra</h2><p>Cassandra 项目诞生于 Facebook，后来团队有人跳到 Amazon 做了另外一个 NoSQL 数据库 DynamoDB。</p>
+<p>Dynamo论文发表于2007年，用于shopping cart<br>Cassandra在2008年被facebook开源，用于inbox search</p>
+<h3 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h3><ul>
+<li>CQL(Cassandra Query Language)</li>
+<li>1,000 node clusters</li>
+<li>multi-data center</li>
+<li>out-of-the-box replication</li>
+<li>ecosystem with Spark</li>
+</ul>
+<h3 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h3><ul>
+<li>LSM Tree</li>
+<li>Gossip P2P</li>
+<li>DHT</li>
+<li>consistency same as DynamoDB<ul>
+<li>ONE</li>
+<li>QUORUM</li>
+<li>ALL</li>
+<li>read repair</li>
+</ul>
+</li>
+<li>Thrift</li>
+</ul>
+<h2 id="ScyllaDB"><a href="#ScyllaDB" class="headerlink" title="ScyllaDB"></a>ScyllaDB</h2><p>KVM核心人员用C++写的Cassandra(Java) clone，单机性能提高了10倍，主要原因是：</p>
+<ul>
+<li>DPDK, bypass kernel</li>
+<li>O_DIRECT IO, bypass pagecache, cache由scylla自己管理<ul>
+<li>pagecahce的格式必须是文件的格式(sstable)，而app level cache更有效，更terse</li>
+<li>compaction的时候，pagecache讲是个累赘，它可能造成很多热点数据的淘汰</li>
+</ul>
+</li>
+<li>把一个node看做是多个cpu core组成的cluster, share nothing</li>
+<li>sharding at the cpu core instead of node<br>更充分利用多核，减少contention，充分利用cpu cache, NUMA friendly</li>
+<li>在需要core间交换数据时，使用explicit message passing</li>
+<li>avoid JVM GC</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://db-engines.com/en/ranking" target="_blank" rel="external">https://db-engines.com/en/ranking</a><br><a href="https://github.com/scylladb/scylla" target="_blank" rel="external">https://github.com/scylladb/scylla</a><br><a href="http://www.scylladb.com/" target="_blank" rel="external">http://www.scylladb.com/</a><br><a href="http://www.seastar-project.org/" target="_blank" rel="external">http://www.seastar-project.org/</a><br><a href="https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/" target="_blank" rel="external">https://www.reddit.com/r/programming/comments/3lzz56/scylladb_cassandra_rewritten_in_c_claims_to_be_up/</a><br><a href="https://news.ycombinator.com/item?id=10262719" target="_blank" rel="external">https://news.ycombinator.com/item?id=10262719</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/31/Cassandra/" data-id="cj4gack760009795bc8dnku26" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/31/Cassandra/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/31/Cassandra/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
     </nav>
@@ -1627,15 +1630,6 @@
                             <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/06/27/geo-distributed-storage/" class="title">geo-distributed storage system</a></p>
                             <p class="item-date"><time datetime="2017-06-27T10:22:58.000Z" itemprop="datePublished">2017-06-27</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/27/Raft/" class="title">Raft</a></p>
-                            <p class="item-date"><time datetime="2017-06-27T09:53:44.000Z" itemprop="datePublished">2017-06-27</time></p>
                         </div>
                     </li>
                 
@@ -1666,6 +1660,15 @@
                         </div>
                     </li>
                 
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/06/26/AWS-Marketplace/" class="title">AWS Marketplace</a></p>
+                            <p class="item-date"><time datetime="2017-06-26T11:26:36.000Z" itemprop="datePublished">2017-06-26</time></p>
+                        </div>
+                    </li>
+                
             </ul>
         </div>
     </div>
@@ -1675,7 +1678,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">35</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1684,7 +1687,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
         </div>
     </div>
 
@@ -1693,7 +1696,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 15px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 11.25px;">misc</a> <a href="/tags/protocol/" style="font-size: 12.5px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.25px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.89px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.44px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 11.11px;">misc</a> <a href="/tags/protocol/" style="font-size: 12.22px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.78px;">storage</a> <a href="/tags/一致性/" style="font-size: 15.56px;">一致性</a>
         </div>
     </div>
 
