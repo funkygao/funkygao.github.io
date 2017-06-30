@@ -3,19 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>gnatsd | Notes</title>
+    <title>Linux 2.6.19 TCP implementation | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="2011年用Ruby完成了一个版本，后来用golang重写，目前只维护golang版本NATS = Not Another Tibco Server 协议类似redis持久化通过上层的NATS Streaming完成 竞品是0mq/nanomsg/aeron https://github.com/real-logic/Aeron">
-<meta name="keywords" content="PubSub">
+    <meta name="description" content="read  /proc/sys/net/ipv4/tcp_rmemTCP recv Buffer net.core.netdev_max_backlogmaximum number of packets queued at a device, which are waiting to be processed by the TCP receiving processSocket Backlog,">
+<meta name="keywords" content="misc">
 <meta property="og:type" content="article">
-<meta property="og:title" content="gnatsd">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/31/gnatsd/index.html">
+<meta property="og:title" content="Linux 2.6.19 TCP implementation">
+<meta property="og:url" content="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="2011年用Ruby完成了一个版本，后来用golang重写，目前只维护golang版本NATS = Not Another Tibco Server 协议类似redis持久化通过上层的NATS Streaming完成 竞品是0mq/nanomsg/aeron https://github.com/real-logic/Aeron">
-<meta property="og:updated_time" content="2017-06-05T03:26:09.000Z">
+<meta property="og:description" content="read  /proc/sys/net/ipv4/tcp_rmemTCP recv Buffer net.core.netdev_max_backlogmaximum number of packets queued at a device, which are waiting to be processed by the TCP receiving processSocket Backlog,">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/netread.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/netwrite.png?raw=true">
+<meta property="og:updated_time" content="2017-06-30T00:27:49.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="gnatsd">
-<meta name="twitter:description" content="2011年用Ruby完成了一个版本，后来用golang重写，目前只维护golang版本NATS = Not Another Tibco Server 协议类似redis持久化通过上层的NATS Streaming完成 竞品是0mq/nanomsg/aeron https://github.com/real-logic/Aeron">
+<meta name="twitter:title" content="Linux 2.6.19 TCP implementation">
+<meta name="twitter:description" content="read  /proc/sys/net/ipv4/tcp_rmemTCP recv Buffer net.core.netdev_max_backlogmaximum number of packets queued at a device, which are waiting to be processed by the TCP receiving processSocket Backlog,">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/netread.png?raw=true">
     
 
     
@@ -198,7 +201,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-gnatsd" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Linux-TCP-implementation" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -206,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            gnatsd
+            Linux 2.6.19 TCP implementation
         </h1>
     
 
@@ -215,8 +218,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/gnatsd/">
-            <time datetime="2017-05-31T07:33:01.000Z" itemprop="datePublished">2017-05-31</time>
+        <a href="/2017/06/30/Linux-TCP-implementation/">
+            <time datetime="2017-06-29T23:52:33.000Z" itemprop="datePublished">2017-06-30</time>
         </a>
     </div>
 
@@ -225,7 +228,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+        <a class="tag-link" href="/tags/misc/">misc</a>
     </div>
 
                     </div>
@@ -236,10 +239,15 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p>2011年用Ruby完成了一个版本，后来用golang重写，目前只维护golang版本<br>NATS = Not Another Tibco Server</p>
-<p>协议类似redis<br>持久化通过上层的NATS Streaming完成</p>
-<p>竞品是0mq/nanomsg/aeron</p>
-<p><a href="https://github.com/real-logic/Aeron" target="_blank" rel="external">https://github.com/real-logic/Aeron</a></p>
+            <h2 id="read"><a href="#read" class="headerlink" title="read"></a>read</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/netread.png?raw=true" alt="read"></p>
+<ul>
+<li>/proc/sys/net/ipv4/tcp_rmem<br>TCP recv Buffer</li>
+<li>net.core.netdev_max_backlog<br>maximum number of packets queued at a device, which are waiting to be processed by the TCP receiving process<br>Socket Backlog, dropped if full</li>
+</ul>
+<h2 id="write"><a href="#write" class="headerlink" title="write"></a>write</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/netwrite.png?raw=true" alt="write"></p>
+<ul>
+<li>txqueuelen<br>ifconfig eth0 txqueuelen</li>
+</ul>
 
         
         </div>
@@ -250,7 +258,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj4j34ydr0033sa5bo29tjs32" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj4j34ycc000wsa5b55c08seh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -318,7 +326,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/31/gnatsd/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/31/gnatsd/">Comments</a>
+        <a href="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/">Comments</a>
     
 
         </footer>
@@ -327,19 +335,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/01/scale/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    scale
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/31/microservice-gateway/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/06/29/an-IM-implementation/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">microservice gateway</div>
+            <div class="article-nav-title">an IM implementation</div>
         </a>
     
 </nav>
@@ -470,9 +469,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/31/gnatsd/';
+            this.page.url = 'http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/';
         
-        this.page.identifier = 'gnatsd';
+        this.page.identifier = 'Linux-TCP-implementation';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
