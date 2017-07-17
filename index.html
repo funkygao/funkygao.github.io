@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                86
+                87
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,178 @@
 
             
             <section id="main">
+    <article id="post-MapReduce-A-major-step-backwards" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/07/17/MapReduce-A-major-step-backwards/">MapReduce - A major step backwards</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/07/17/MapReduce-A-major-step-backwards/">
+            <time datetime="2017-07-17T06:19:27.000Z" itemprop="datePublished">2017-07-17</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Author"><a href="#Author" class="headerlink" title="Author"></a>Author</h2><p>都是数据库领域的权威</p>
+<ul>
+<li>Michael Stonebraker<br>美国工程院院士，冯诺依曼奖的获得者，第一届SIGMOD Edgar F. Codd创新奖的得主，曾担任Informix CTO<br>他在1992年提出对象关系数据库模型，在加州伯克利分校任计算机教授达25年，目前是麻省理工学院教授<br>是SQL Server/Sysbase奠基人，87年左右，Sybase联合了微软，共同开发SQL Server。1994年(7y)，两家公司合作终止<br>可以认为，Stonebraker教授是目前主流数据库的奠基人</li>
+<li>David J. DeWitt<br>美国工程院院士<br>In 1995, he was named a Fellow of the ACM and received the ACM SIGMOD Innovations Award<br>In 2009, ACM recognized the seminal contributions of his Gamma parallel database system project with the ACM Software Systems Award<br>IEEE awarded him the 2009 IEEE Piore Award<br>He was also a Technical Fellow at Microsoft, leading the Microsoft Jim Gray Systems Lab at Madison, Wisconsin.</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>2008年1月，一个数据库专栏读者让作者表达一下对MapReduce(OSDI 2004)的看法而引出</p>
+<h2 id="Viewpoint"><a href="#Viewpoint" class="headerlink" title="Viewpoint"></a>Viewpoint</h2><h3 id="MapReduce是历史后退"><a href="#MapReduce是历史后退" class="headerlink" title="MapReduce是历史后退"></a>MapReduce是历史后退</h3><p>从IBM IMS的第一个数据库系统(1968)到现在的40年，数据库领域学到了3个经验，而MapReduce把这些经验完全摒弃，仿佛回到了60年代DBMS还没出现的时候</p>
+<ul>
+<li>schema is good<br>防止garbage进入系统<br>MapReduce由于涉及到(k, v)，一定也是可以用schema表达的</li>
+<li>要把schema从应用中decouple<br>存放在catalog里，而不是hard coding在应用层</li>
+<li>high level query is good<br>70年代就充分讨论过应用通过SQL那样的语言访问DBMS好，还是更底层的语言<br>MapReduce就像是DBMS的汇编语言</li>
+</ul>
+<p>即使BigTable，它没有提供物理、逻辑视图分离的View功能</p>
+<h3 id="MapReduce的实现糟糕"><a href="#MapReduce的实现糟糕" class="headerlink" title="MapReduce的实现糟糕"></a>MapReduce的实现糟糕</h3><p>他们应该好好学学25年来并行数据库方面的知识</p>
+<h4 id="Index-vs-Brute-force"><a href="#Index-vs-Brute-force" class="headerlink" title="Index vs Brute force"></a>Index vs Brute force</h4><p>在非full scan场景下，index必不可少。此外，DBMS里还有query optimizer，而MapReduce里只能brute force full scan</p>
+<p>MapReduce能提供自动的并行执行，但这些东西80年代就已经在学术界研究了，并在80年代末出现了类似Teradata那样的商业产品</p>
+<h4 id="Record-Skew导致性能问题"><a href="#Record-Skew导致性能问题" class="headerlink" title="Record Skew导致性能问题"></a>Record Skew导致性能问题</h4><p>David J. DeWitt在并行数据库方向已经找到了解决方案，但MapReduce没有使用，好像skew问题根本不存在一样：<br>Map阶段，相同key的记录数量是不均衡的，这就导致Reduce阶段，有的reduce快、有的慢，最终Job的执行时间取决于最慢的那一个</p>
+<h4 id="吞吐率和IO问题"><a href="#吞吐率和IO问题" class="headerlink" title="吞吐率和IO问题"></a>吞吐率和IO问题</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// map=1000 reduce=500</div><div class="line">1000个map实例，每个map进程都会创建500个本地文件</div><div class="line">reduce阶段，每个reduce都会到1000个map机器上PULL file</div><div class="line">这会导致每个map机器上500个文件进行大量的random IO</div></pre></td></tr></table></figure>
+<p>而并行数据库，采用的是PUSH模型。而MapReduce要修改成PUSH模型是比较困难的，因为它的HA非常依赖它目前的PULL模型</p>
+<h3 id="MapReduce并不新颖"><a href="#MapReduce并不新颖" class="headerlink" title="MapReduce并不新颖"></a>MapReduce并不新颖</h3><p>他们以为他们发现了一个解决大数据处理的新模式，实际上20年前就有了</p>
+<p>“Application of Hash to Data Base Machine and Its Architecture”/1983，是第一个提出把大数据集切分成小数据集的<br>Teradata使用MapReduce同样的技术卖他们的商业产品已经20多年了</p>
+<p>就算MapReduce允许用户自己写map/reduce来控制，80年代中期的POSTGRES系统就支持用户自定义函数</p>
+<h3 id="缺少DBMS已经具备的功能"><a href="#缺少DBMS已经具备的功能" class="headerlink" title="缺少DBMS已经具备的功能"></a>缺少DBMS已经具备的功能</h3><ul>
+<li>Bulk loader</li>
+<li>Update<br>MapReduce is read-only</li>
+<li>Transaction</li>
+<li>Views<br>Hbase处已经提了</li>
+<li>Integrity constraints<br>Schema处已经提了</li>
+<li>Referential integrity<br>防止garbase进入系统</li>
+</ul>
+<h3 id="与DBMS工具不兼容"><a href="#与DBMS工具不兼容" class="headerlink" title="与DBMS工具不兼容"></a>与DBMS工具不兼容</h3><ul>
+<li>BI tools</li>
+<li>Data mining tools</li>
+<li>Replication tools</li>
+<li>ER modelling</li>
+</ul>
+<h3 id="SQL-on-hadoop"><a href="#SQL-on-hadoop" class="headerlink" title="SQL on hadoop"></a>SQL on hadoop</h3><p>作者已经发行类似Pig那样的系统</p>
+<h3 id="Comments"><a href="#Comments" class="headerlink" title="Comments"></a>Comments</h3><p>作者好像觉得MR是用来替代DBMS的</p>
+<ul>
+<li>MapReduce与DBMS的定位不同，它不是OLTP<br>Index好，但cost也很高，在MR里index只会是成本而没有收益<br>用正确的工具解决不同的问题</li>
+<li>Be a lover, not a fighter!</li>
+<li>Google本身已经证明了它的scalability</li>
+<li>With really large datasets and distributed sytems the RDBMS paradigms stop working<br>and that is where a system like Mapreduce is needed</li>
+<li>数据库那些人的问题：什么东西都是数据库</li>
+<li>作者应该再写个“Airplanes: A major step backward”</li>
+</ul>
+<h2 id="Jeff-Dean在ACM-of-communication上面的回馈"><a href="#Jeff-Dean在ACM-of-communication上面的回馈" class="headerlink" title="Jeff Dean在ACM of communication上面的回馈"></a>Jeff Dean在ACM of communication上面的回馈</h2>
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj57tuwmv0019oo5bdw6dg68s" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-conferences-and-journals" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -238,7 +410,7 @@
 <h3 id="OS"><a href="#OS" class="headerlink" title="OS"></a>OS</h3><p>OSDI、SOSP，这两个是OS最好的会议，每两年开一次，轮流开</p>
 <ul>
 <li>SOSP: The ACM Symposium on Operating Systems Principles<br>由ACM下属的SIGOPS(special interest group on operation system)于1967年创办，每届收录20篇<br>GFS就是发表在SOSP 2003的</li>
-<li>OSDI: USENIX Symposium on Operating Systems Design and Implementation<br>USENIX是一个于1975年成立的Advanced Computing Systems Association<br>OSDI是USENIX 1994创办的，每届会议举行3天，每届收录27篇文章，每个小方向3篇</li>
+<li>OSDI: USENIX Symposium on Operating Systems Design and Implementation<br>USENIX是一个于1975年成立的Advanced Computing Systems Association<br>OSDI是USENIX 1994创办的，每届会议举行3天，每届收录27篇文章，每个小方向3篇<br>MapReduce是发表在OSDI 2004的</li>
 </ul>
 <h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><ul>
 <li>ISCA</li>
@@ -267,7 +439,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj57rumvd002wi95bcobc3f35" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj57tuwnz002zoo5brsdvb7uv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -394,7 +566,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj57rumvc002ui95bnhfhph7w" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj57tuwny002xoo5bzv41x5am" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -522,7 +694,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj57rumu4000zi95bcqmdd6u7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj57tuwmn0012oo5bzwhn86p2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -639,12 +811,7 @@
         
             
             <p>大数据，主要是因为Google的Google File System(2003)， MapReduce(OSDI 2004)，BigTable(2006)三篇论文<br>GFS论文是最经典的，后面google的很多论文都遮遮掩掩的<br>Chubby(2006)<br>Dremal(2010)<br>Borg(2015)</p>
-<p>微软在bing项目上的投入，使得微软掌握了大规模data center的建设管理能力，掌握了A/B testing平台，学会了大规模数据分析能力，其中一些成为了Azure的基础，它使得微软顺利从一家软件公司过渡到了云计算公司。<br>微软内部支撑大数据分析的平台Cosmos是狠狠的抄袭了Google的File system却很大程度上摒弃了MapReduce这个框架<br>所谓MapReduce的意思是任何的事情只要都严格遵循Map Shuffle Reduce三个阶段就好。其中Shuffle是系统自己提供的而Map和Reduce则用户需要写代码。Map是一个per record的操作。任何两个record之间都相互独立。Reduce是个per key的操作，相同key的所有record都在一起被同时操作，不同的key在不同的group下面，可以独立运行<br>从做数据库的人的角度来看这无非是一个select一个groupby<br>MapReduce: A major step backwards，Jeff Dean在 ACM of communication 上面的反驳<br><a href="http://db.cs.berkeley.edu/cs286/papers/backwards-vertica2008.pdf" target="_blank" rel="external">http://db.cs.berkeley.edu/cs286/papers/backwards-vertica2008.pdf</a></p>
-<ul>
-<li>是DBMS的汇编语言</li>
-<li>没有decouple schema</li>
-<li>use brute force instead of index</li>
-</ul>
+<p>微软在bing项目上的投入，使得微软掌握了大规模data center的建设管理能力，掌握了A/B testing平台，学会了大规模数据分析能力，其中一些成为了Azure的基础，它使得微软顺利从一家软件公司过渡到了云计算公司。<br>微软内部支撑大数据分析的平台Cosmos是狠狠的抄袭了Google的File system却很大程度上摒弃了MapReduce这个框架<br>所谓MapReduce的意思是任何的事情只要都严格遵循Map Shuffle Reduce三个阶段就好。其中Shuffle是系统自己提供的而Map和Reduce则用户需要写代码。Map是一个per record的操作。任何两个record之间都相互独立。Reduce是个per key的操作，相同key的所有record都在一起被同时操作，不同的key在不同的group下面，可以独立运行<br>Map是分类(categorize)操作，Reduce是aggregate</p>
 <p>To draw an analogy to SQL, map is like the group-by clause of an aggregate query. Reduce is analogous to the aggregate function (e.g., average) that is computed over all the rows with the same group-by attribute.</p>
 <p>Flume Java本质上来说还是MapReduce，但是它采取了一种delayed execution的方式，把所有相关的操作先存成一个execution DAG,然后一口气执行。<br>这和C#里的LINQ差不多。这种方式就产生了很多optimization的机会了。具体来说大的有两个:</p>
 <ul>
@@ -670,7 +837,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj57rumv5002ii95bjm6oicaf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj57tuwnu002poo5bgqq42a9h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -809,7 +976,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj57rumuk001ji95ba95gq247" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj57tuwnf0023oo5b8wfoq2d7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -949,7 +1116,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj57rumv6002ki95bctvqripv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj57tuwnr002noo5byazo92xw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1165,7 +1332,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj57rumwc004ji95bc80zuvza" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj57tuwp9004yoo5bdd4devfl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1300,7 +1467,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj57rumu80017i95br5w4eqia" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj57tuwmx001coo5b3fcb1rnv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1458,7 +1625,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj57rumv2002ci95b6oirz58c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj57tuwno002foo5bb3h0icqh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1536,185 +1703,6 @@
 
 
 
-    <article id="post-geo-distributed-storage" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/27/geo-distributed-storage/">geo-distributed storage system</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/27/geo-distributed-storage/">
-            <time datetime="2017-06-27T10:22:58.000Z" itemprop="datePublished">2017-06-27</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Primer"><a href="#Primer" class="headerlink" title="Primer"></a>Primer</h2><p>Network of network.</p>
-<h3 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h3><ul>
-<li>scale<br>one datacenter too small</li>
-<li>disaster tolerance<br>protect data against catastrophes </li>
-<li>availability<br>keep working after intermittent problems access </li>
-<li>locality<br>serve users from a nearby datacenter</li>
-</ul>
-<h3 id="Challanges"><a href="#Challanges" class="headerlink" title="Challanges"></a>Challanges</h3><ul>
-<li>high latency </li>
-<li>low bandwidth </li>
-<li>congestion<br>overprovisioning prohibitive </li>
-<li>network partitions </li>
-</ul>
-<h2 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">        read-write    |  state machine</div><div class="line">----------------------+-----------------</div><div class="line">sync    ABD           |  Paxos</div><div class="line">async   logical clock |  CRDT</div><div class="line"></div><div class="line">ABD(Alike Backup Delegate)</div></pre></td></tr></table></figure>
-<h2 id="Congestion"><a href="#Congestion" class="headerlink" title="Congestion"></a>Congestion</h2><h3 id="Movivation"><a href="#Movivation" class="headerlink" title="Movivation"></a>Movivation</h3><ul>
-<li>bandwidth across datacenter is expensive </li>
-<li>storage usage subject to spikes</li>
-</ul>
-<p>如何准备带宽？</p>
-<ul>
-<li>按峰值<br>成本高，利用率低</li>
-<li>按均值<br>网络拥塞</li>
-</ul>
-<h3 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h3><ul>
-<li>weak consistency<br>async replication</li>
-<li>priority messages<br>should be small</li>
-</ul>
-<h3 id="vivace-algorithm"><a href="#vivace-algorithm" class="headerlink" title="vivace algorithm"></a>vivace algorithm</h3><p>read-write algorithm based on ABD</p>
-<p>算法</p>
-<ul>
-<li>把数据和timestamp分离<br>把数据和元数据分离，元数据优先级更高</li>
-<li>replicate data locally first</li>
-<li>replicate timestamp remotely with prioritized msg</li>
-<li>replicate data remotely in background</li>
-</ul>
-<p>write<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">obtain timestamp ts</div><div class="line">write data,ts to f+1 temporary local replicas (big msg)</div><div class="line">write only ts to f+1 real replicas (small msg, cross datacenter) </div><div class="line">in background, send data to real replicas (big msg)</div></pre></td></tr></table></figure></p>
-<p>read<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">read ts from f+1 replicas (small msg)</div><div class="line">read data associated with ts from 1 replica (big msg, often local) </div><div class="line">write only ts to f+1 real replicas (small msg, cross datacenter)</div></pre></td></tr></table></figure></p>
-<h2 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h2><h3 id="snapshot-isolation-SI"><a href="#snapshot-isolation-SI" class="headerlink" title="snapshot isolation(SI)"></a>snapshot isolation(SI)</h3><p>total ordering of update transactions</p>
-<p>问题</p>
-<ul>
-<li>it orders the commit time of all transactions<br>even those that do not conflict with each other</li>
-<li>forbids some scenarios we want to allow for efficiency</li>
-</ul>
-<h3 id="parallel-snapshot-isolation-PSI"><a href="#parallel-snapshot-isolation-PSI" class="headerlink" title="parallel snapshot isolation(PSI)"></a>parallel snapshot isolation(PSI)</h3><p>causality: if T1 commits at site S before T2 starts at site S then T2 does not commit before T1 at any site</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">SI                  PSI</div><div class="line">------------------- ---</div><div class="line">1 commit time       1 commit time per site</div><div class="line">1 timeline          1 timeline per site</div><div class="line">read from snapshot  read from snapshot at site</div><div class="line">no w-w conflict     no w-w conflict</div><div class="line">                    causality property</div></pre></td></tr></table></figure>
-<h4 id="idea1-preferred-sites"><a href="#idea1-preferred-sites" class="headerlink" title="idea1: preferred sites"></a>idea1: preferred sites</h4><p>每个key分配一个唯一的preferred site(例如，在长沙的用户它的preferred site就是长沙IDC)，在该site上，可以使用fast commit(without cross-site communication)<br>类似primary/backup，不同的是preferred sites不是强制的，key可以在任何site修改</p>
-<p>但问题是</p>
-<ul>
-<li>what if many sites often modify a key?</li>
-<li>no good way to assign a preferred site to key</li>
-</ul>
-<h4 id="idea2-CRDT"><a href="#idea2-CRDT" class="headerlink" title="idea2: CRDT"></a>idea2: CRDT</h4><h3 id="serializable"><a href="#serializable" class="headerlink" title="serializable"></a>serializable</h3><p>SI/PSI都有write skew问题<br>通过transaction chains[sosp 2013]可以有效地提供serializable isolation</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://dprg.cs.uiuc.edu/docs/vivace-atc/vivace-atc12.pdf" target="_blank" rel="external">http://dprg.cs.uiuc.edu/docs/vivace-atc/vivace-atc12.pdf</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj57rumvn003ei95bkzb0yafv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/27/geo-distributed-storage/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
@@ -1727,6 +1715,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/17/MapReduce-A-major-step-backwards/" class="title">MapReduce - A major step backwards</a></p>
+                            <p class="item-date"><time datetime="2017-07-17T06:19:27.000Z" itemprop="datePublished">2017-07-17</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1764,15 +1761,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/13/Parquet/" class="title">Parquet (TODO)</a></p>
-                            <p class="item-date"><time datetime="2017-07-13T02:12:54.000Z" itemprop="datePublished">2017-07-13</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1782,7 +1770,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1791,7 +1779,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
@@ -1800,7 +1788,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 15px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.25px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.89px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.44px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.22px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.11px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.78px;">storage</a> <a href="/tags/一致性/" style="font-size: 15.56px;">一致性</a>
         </div>
     </div>
 

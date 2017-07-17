@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/07/14/bigdata/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="大数据，主要是因为Google的Google File System(2003)， MapReduce(OSDI 2004)，BigTable(2006)三篇论文GFS论文是最经典的，后面google的很多论文都遮遮掩掩的Chubby(2006)Dremal(2010)Borg(2015) 微软在bing项目上的投入，使得微软掌握了大规模data center的建设管理能力，掌握了A/B test">
-<meta property="og:updated_time" content="2017-07-14T08:14:20.000Z">
+<meta property="og:updated_time" content="2017-07-17T09:02:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="bigdata story">
 <meta name="twitter:description" content="大数据，主要是因为Google的Google File System(2003)， MapReduce(OSDI 2004)，BigTable(2006)三篇论文GFS论文是最经典的，后面google的很多论文都遮遮掩掩的Chubby(2006)Dremal(2010)Borg(2015) 微软在bing项目上的投入，使得微软掌握了大规模data center的建设管理能力，掌握了A/B test">
@@ -146,7 +146,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                86
+                87
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -237,12 +237,7 @@
         
             
             <p>大数据，主要是因为Google的Google File System(2003)， MapReduce(OSDI 2004)，BigTable(2006)三篇论文<br>GFS论文是最经典的，后面google的很多论文都遮遮掩掩的<br>Chubby(2006)<br>Dremal(2010)<br>Borg(2015)</p>
-<p>微软在bing项目上的投入，使得微软掌握了大规模data center的建设管理能力，掌握了A/B testing平台，学会了大规模数据分析能力，其中一些成为了Azure的基础，它使得微软顺利从一家软件公司过渡到了云计算公司。<br>微软内部支撑大数据分析的平台Cosmos是狠狠的抄袭了Google的File system却很大程度上摒弃了MapReduce这个框架<br>所谓MapReduce的意思是任何的事情只要都严格遵循Map Shuffle Reduce三个阶段就好。其中Shuffle是系统自己提供的而Map和Reduce则用户需要写代码。Map是一个per record的操作。任何两个record之间都相互独立。Reduce是个per key的操作，相同key的所有record都在一起被同时操作，不同的key在不同的group下面，可以独立运行<br>从做数据库的人的角度来看这无非是一个select一个groupby<br>MapReduce: A major step backwards，Jeff Dean在 ACM of communication 上面的反驳<br><a href="http://db.cs.berkeley.edu/cs286/papers/backwards-vertica2008.pdf" target="_blank" rel="external">http://db.cs.berkeley.edu/cs286/papers/backwards-vertica2008.pdf</a></p>
-<ul>
-<li>是DBMS的汇编语言</li>
-<li>没有decouple schema</li>
-<li>use brute force instead of index</li>
-</ul>
+<p>微软在bing项目上的投入，使得微软掌握了大规模data center的建设管理能力，掌握了A/B testing平台，学会了大规模数据分析能力，其中一些成为了Azure的基础，它使得微软顺利从一家软件公司过渡到了云计算公司。<br>微软内部支撑大数据分析的平台Cosmos是狠狠的抄袭了Google的File system却很大程度上摒弃了MapReduce这个框架<br>所谓MapReduce的意思是任何的事情只要都严格遵循Map Shuffle Reduce三个阶段就好。其中Shuffle是系统自己提供的而Map和Reduce则用户需要写代码。Map是一个per record的操作。任何两个record之间都相互独立。Reduce是个per key的操作，相同key的所有record都在一起被同时操作，不同的key在不同的group下面，可以独立运行<br>Map是分类(categorize)操作，Reduce是aggregate</p>
 <p>To draw an analogy to SQL, map is like the group-by clause of an aggregate query. Reduce is analogous to the aggregate function (e.g., average) that is computed over all the rows with the same group-by attribute.</p>
 <p>Flume Java本质上来说还是MapReduce，但是它采取了一种delayed execution的方式，把所有相关的操作先存成一个execution DAG,然后一口气执行。<br>这和C#里的LINQ差不多。这种方式就产生了很多optimization的机会了。具体来说大的有两个:</p>
 <ul>
@@ -268,7 +263,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj57rumv5002ii95bjm6oicaf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj57tuwnu002poo5bgqq42a9h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -392,6 +387,15 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/17/MapReduce-A-major-step-backwards/" class="title">MapReduce - A major step backwards</a></p>
+                            <p class="item-date"><time datetime="2017-07-17T06:19:27.000Z" itemprop="datePublished">2017-07-17</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/07/17/conferences-and-journals/" class="title">conferences and journals</a></p>
                             <p class="item-date"><time datetime="2017-07-17T05:48:21.000Z" itemprop="datePublished">2017-07-17</time></p>
                         </div>
@@ -424,15 +428,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/13/Parquet/" class="title">Parquet (TODO)</a></p>
-                            <p class="item-date"><time datetime="2017-07-13T02:12:54.000Z" itemprop="datePublished">2017-07-13</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -442,7 +437,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -451,7 +446,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
@@ -460,7 +455,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 15px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 16.25px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.89px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.44px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.22px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.11px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.78px;">storage</a> <a href="/tags/一致性/" style="font-size: 15.56px;">一致性</a>
         </div>
     </div>
 
