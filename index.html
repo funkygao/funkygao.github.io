@@ -244,12 +244,11 @@
 <li>要把schema从应用中decouple<br>存放在catalog里，而不是hard coding在应用层</li>
 <li>high level query is good<br>70年代就充分讨论过应用通过SQL那样的语言访问DBMS好，还是更底层的语言<br>MapReduce就像是DBMS的汇编语言</li>
 </ul>
-<p>即使BigTable，它没有提供物理、逻辑视图分离的View功能</p>
 <h3 id="MapReduce的实现糟糕"><a href="#MapReduce的实现糟糕" class="headerlink" title="MapReduce的实现糟糕"></a>MapReduce的实现糟糕</h3><p>他们应该好好学学25年来并行数据库方面的知识</p>
-<h4 id="Index-vs-Brute-force"><a href="#Index-vs-Brute-force" class="headerlink" title="Index vs Brute force"></a>Index vs Brute force</h4><p>在非full scan场景下，index必不可少。此外，DBMS里还有query optimizer，而MapReduce里只能brute force full scan</p>
+<h4 id="1-Index-vs-Brute-force"><a href="#1-Index-vs-Brute-force" class="headerlink" title="1. Index vs Brute force"></a>1. Index vs Brute force</h4><p>在非full scan场景下，index必不可少。此外，DBMS里还有query optimizer，而MapReduce里只能brute force full scan</p>
 <p>MapReduce能提供自动的并行执行，但这些东西80年代就已经在学术界研究了，并在80年代末出现了类似Teradata那样的商业产品</p>
-<h4 id="Record-Skew导致性能问题"><a href="#Record-Skew导致性能问题" class="headerlink" title="Record Skew导致性能问题"></a>Record Skew导致性能问题</h4><p>David J. DeWitt在并行数据库方向已经找到了解决方案，但MapReduce没有使用，好像skew问题根本不存在一样：<br>Map阶段，相同key的记录数量是不均衡的，这就导致Reduce阶段，有的reduce快、有的慢，最终Job的执行时间取决于最慢的那一个</p>
-<h4 id="吞吐率和IO问题"><a href="#吞吐率和IO问题" class="headerlink" title="吞吐率和IO问题"></a>吞吐率和IO问题</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// map=1000 reduce=500</div><div class="line">1000个map实例，每个map进程都会创建500个本地文件</div><div class="line">reduce阶段，每个reduce都会到1000个map机器上PULL file</div><div class="line">这会导致每个map机器上500个文件进行大量的random IO</div></pre></td></tr></table></figure>
+<h4 id="2-Record-Skew导致性能问题"><a href="#2-Record-Skew导致性能问题" class="headerlink" title="2. Record Skew导致性能问题"></a>2. Record Skew导致性能问题</h4><p>David J. DeWitt在并行数据库方向已经找到了解决方案，但MapReduce没有使用，好像skew问题根本不存在一样：<br>Map阶段，相同key的记录数量是不均衡的，这就导致Reduce阶段，有的reduce快、有的慢，最终Job的执行时间取决于最慢的那一个</p>
+<h4 id="3-吞吐率和IO问题"><a href="#3-吞吐率和IO问题" class="headerlink" title="3. 吞吐率和IO问题"></a>3. 吞吐率和IO问题</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// map=1000 reduce=500</div><div class="line">1000个map实例，每个map进程都会创建500个本地文件</div><div class="line">reduce阶段，每个reduce都会到1000个map机器上PULL file</div><div class="line">这会导致每个map机器上500个文件进行大量的random IO</div></pre></td></tr></table></figure>
 <p>而并行数据库，采用的是PUSH模型。而MapReduce要修改成PUSH模型是比较困难的，因为它的HA非常依赖它目前的PULL模型</p>
 <h3 id="MapReduce并不新颖"><a href="#MapReduce并不新颖" class="headerlink" title="MapReduce并不新颖"></a>MapReduce并不新颖</h3><p>他们以为他们发现了一个解决大数据处理的新模式，实际上20年前就有了</p>
 <p>“Application of Hash to Data Base Machine and Its Architecture”/1983，是第一个提出把大数据集切分成小数据集的<br>Teradata使用MapReduce同样的技术卖他们的商业产品已经20多年了</p>
@@ -288,7 +287,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj57tuwmv0019oo5bdw6dg68s" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj57xp1wi0019zi5b4cani6dj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -439,7 +438,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj57tuwnz002zoo5brsdvb7uv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj57xp1y8002yzi5bfn3loyrg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -566,7 +565,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj57tuwny002xoo5bzv41x5am" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj57xp1y7002wzi5bo2gq9ow8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -694,7 +693,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj57tuwmn0012oo5bzwhn86p2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj57xp1w9000zzi5bbhlfy4ue" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -837,7 +836,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj57tuwnu002poo5bgqq42a9h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj57xp1xy002mzi5bi82003ur" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -976,7 +975,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj57tuwnf0023oo5b8wfoq2d7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj57xp1ws001mzi5b8qos6pe2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1116,7 +1115,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj57tuwnr002noo5byazo92xw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj57xp1xz002ozi5bjhqcis8j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1332,7 +1331,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj57tuwp9004yoo5bdd4devfl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj57xp1zg004lzi5bzpfevax4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1467,7 +1466,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj57tuwmx001coo5b3fcb1rnv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj57xp1wf0017zi5bw23wudl5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1625,7 +1624,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj57tuwno002foo5bb3h0icqh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj57xp1xt002ezi5borjw2fex" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
