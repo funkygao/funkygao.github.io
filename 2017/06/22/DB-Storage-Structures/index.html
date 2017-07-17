@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="KV任何storage structure，数据都可以用k=&amp;gt;v来表示，不仅NoSQL，RDBMS也一样例如InnoDB的primary key就是1primary_key =&amp;gt; [column1, column2, ...] secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性 B">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/btree.png?raw=true">
-<meta property="og:updated_time" content="2017-06-22T09:30:47.000Z">
+<meta property="og:updated_time" content="2017-07-13T01:22:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DB Storage Structures">
 <meta name="twitter:description" content="KV任何storage structure，数据都可以用k=&amp;gt;v来表示，不仅NoSQL，RDBMS也一样例如InnoDB的primary key就是1primary_key =&amp;gt; [column1, column2, ...] secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性 B">
@@ -148,7 +148,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                79
+                87
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -242,9 +242,12 @@
 <p>secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性</p>
 <h2 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B-Tree"></a>B-Tree</h2><p>Designed for optimal data retrieval performance, not data storage.</p>
 <p>RDBMS, LMDB, MongoDB</p>
+<p>充分利用了read ahead技术</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/btree.png?raw=true" alt="btree throughput"></p>
+<h2 id="LSM-Hash-Table"><a href="#LSM-Hash-Table" class="headerlink" title="LSM Hash Table"></a>LSM Hash Table</h2><p>bitcask</p>
+<p>不支持range，所有index在内存的hash table里<br>算是一个简化版的LSM-Tree</p>
 <h2 id="LSM-Tree"><a href="#LSM-Tree" class="headerlink" title="LSM-Tree"></a>LSM-Tree</h2><p>每个SSTable的bloom filter只能帮助individual key lookup，对range query没用</p>
-<h2 id="Fractal-Tree"><a href="#Fractal-Tree" class="headerlink" title="Fractal-Tree"></a>Fractal-Tree</h2><p>与B-Tree类似，但通过buffer changes/data compression大大降低了disk random IO</p>
+<h2 id="Fractal-Tree"><a href="#Fractal-Tree" class="headerlink" title="Fractal-Tree"></a>Fractal-Tree</h2><p>与B-Tree类似，但通过buffer changes/data compression大大降低了disk random IO<br><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.76.762&amp;rep=rep1&amp;type=pdf" target="_blank" rel="external">http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.76.762&amp;rep=rep1&amp;type=pdf</a></p>
 
         
         </div>
@@ -255,7 +258,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/22/DB-Storage-Structures/" data-id="cj4j34yc1000gsa5buv3fl4xk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/22/DB-Storage-Structures/" data-id="cj57rfm0j000e5l5beq7eeg4v" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -379,8 +382,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/30/Linux-TCP-implementation/" class="title">Linux 2.6.19 TCP implementation</a></p>
-                            <p class="item-date"><time datetime="2017-06-29T23:52:33.000Z" itemprop="datePublished">2017-06-30</time></p>
+                            <p class="item-title"><a href="/2017/07/17/MapReduce-A-major-step-backwards/" class="title">MapReduce A major step backwards</a></p>
+                            <p class="item-date"><time datetime="2017-07-17T06:19:27.000Z" itemprop="datePublished">2017-07-17</time></p>
                         </div>
                     </li>
                 
@@ -388,8 +391,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/29/an-IM-implementation/" class="title">an IM implementation</a></p>
-                            <p class="item-date"><time datetime="2017-06-29T05:38:03.000Z" itemprop="datePublished">2017-06-29</time></p>
+                            <p class="item-title"><a href="/2017/07/17/conferences-and-journals/" class="title">conferences and journals</a></p>
+                            <p class="item-date"><time datetime="2017-07-17T05:48:21.000Z" itemprop="datePublished">2017-07-17</time></p>
                         </div>
                     </li>
                 
@@ -397,8 +400,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/27/geo-distributed-storage/" class="title">geo-distributed storage system</a></p>
-                            <p class="item-date"><time datetime="2017-06-27T10:22:58.000Z" itemprop="datePublished">2017-06-27</time></p>
+                            <p class="item-title"><a href="/2017/07/17/committee/" class="title">committee</a></p>
+                            <p class="item-date"><time datetime="2017-07-17T05:48:06.000Z" itemprop="datePublished">2017-07-17</time></p>
                         </div>
                     </li>
                 
@@ -406,8 +409,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/27/chain-replication/" class="title">chain replication</a></p>
-                            <p class="item-date"><time datetime="2017-06-27T05:21:43.000Z" itemprop="datePublished">2017-06-27</time></p>
+                            <p class="item-title"><a href="/2017/07/14/LINQ/" class="title">LINQ</a></p>
+                            <p class="item-date"><time datetime="2017-07-14T01:45:45.000Z" itemprop="datePublished">2017-07-14</time></p>
                         </div>
                     </li>
                 
@@ -415,8 +418,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/06/27/http-Preconnect/" class="title">http Preconnect</a></p>
-                            <p class="item-date"><time datetime="2017-06-27T02:17:27.000Z" itemprop="datePublished">2017-06-27</time></p>
+                            <p class="item-title"><a href="/2017/07/14/bigdata/" class="title">bigdata story</a></p>
+                            <p class="item-date"><time datetime="2017-07-14T00:06:16.000Z" itemprop="datePublished">2017-07-14</time></p>
                         </div>
                     </li>
                 
@@ -429,7 +432,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -438,7 +441,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">8</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
@@ -447,7 +450,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.89px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.44px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 11.11px;">misc</a> <a href="/tags/protocol/" style="font-size: 12.22px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.78px;">storage</a> <a href="/tags/一致性/" style="font-size: 15.56px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.89px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.67px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.33px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.44px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.22px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.11px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.78px;">storage</a> <a href="/tags/一致性/" style="font-size: 15.56px;">一致性</a>
         </div>
     </div>
 
