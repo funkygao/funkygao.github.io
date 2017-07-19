@@ -276,6 +276,7 @@
 </ul>
 <h3 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h3><p>每个key都被复制在N台机器(其中一台是coordinator)，coordinator向顺时针方向的N-1个机器复制<br>preference list is list of nodes that is responsible for storing a particular key，通常&gt;N，它是通过gossip在每个节点上最终一致<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">okN = 0</div><div class="line">for node = range preferenceList &#123;</div><div class="line">    // 论文中没有提到复制是顺序还是并发</div><div class="line">    // 如果顺序，latency是个问题</div><div class="line">    // 如果并发，为了HA和latency，&gt;N个节点会进行复制，造成空间浪费</div><div class="line">    if replicateTo(node) == ok &#123;</div><div class="line">        okN++</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // all read/write are performed on the first N healthy nodes from pref list</div><div class="line">    if okN == N &#123;</div><div class="line">        break</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>Merkle树<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">node ring(A, B, C, D, E, A), W=3</div><div class="line">A crash</div><div class="line">那么本来应该复制到A的数据，会复制到D</div><div class="line">由于membership change是显示的，D知道这个数据是它临时替A代管的，它会写到临时存储，并携带hint(A) meta info，并定期检查A是否recover</div><div class="line">如果A ok，D会把本来该写到A的数据transfer给A，成功后，本地删除</div><div class="line"></div><div class="line">但，如果D永久crash，而A recover，那么这些hinted data，A就无从transfer了</div><div class="line">此时，通过Merkle进行检查、增量同步</div><div class="line">但它的问题是当有node进入、离开时，这个树要重新创建，在key多的时候非常费时，因此，它只能异步后台执行</div></pre></td></tr></table></figure></p>
+<h3 id="IDCs"><a href="#IDCs" class="headerlink" title="IDCs"></a>IDCs</h3><p>只是在preference list上配一下，架构上并没有过多考虑<br>仍然是coordinator负责复制，首先本地机房，然后远程机房</p>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://jsensarma.com/blog/?p=55" target="_blank" rel="external">http://jsensarma.com/blog/?p=55</a><br><a href="http://jsensarma.com/blog/?p=64" target="_blank" rel="external">http://jsensarma.com/blog/?p=64</a><br><a href="https://timyang.net/data/dynamo-flawed-architecture-chinese/" target="_blank" rel="external">https://timyang.net/data/dynamo-flawed-architecture-chinese/</a><br><a href="https://news.ycombinator.com/item?id=915212" target="_blank" rel="external">https://news.ycombinator.com/item?id=915212</a><br><a href="http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf" target="_blank" rel="external">http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf</a></p>
 
         
@@ -287,7 +288,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj58vqwym000eu55bygx4nktu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5a9od2r000kce5bknyp004x" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -458,7 +459,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj58vqwzb001du55bg8k7nuhw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5a9od3b001bce5brvaxqzty" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -609,7 +610,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj58vqx0c002zu55b1gp51c38" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5a9od4b0030ce5bm2sgwztf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -736,7 +737,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj58vqx0b002xu55bzlmn8qlx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5a9od4b002yce5bk0oa8e4h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -864,7 +865,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj58vqwz40016u55by3paw5sj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5a9od32000zce5blopc2986" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1007,7 +1008,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj58vqx0b002vu55b7rpff6ob" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5a9od43002oce5blmxtld6n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1146,7 +1147,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj58vqwzg001lu55bzfw7dk3r" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj5a9od3k001lce5bdt6cyrec" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1286,7 +1287,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj58vqx07002pu55br7r2awrh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5a9od46002qce5bmj9rf92w" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1502,7 +1503,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj58vqx1i004su55bl2iyrr9o" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5a9od58004nce5byam6zfy5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1637,7 +1638,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj58vqwz70018u55bg261fpx2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5a9od390016ce5b60t38qgd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
