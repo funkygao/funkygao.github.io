@@ -194,6 +194,222 @@
 
             
             <section id="main">
+    <article id="post-raft" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/07/12/raft/">hashicorp/raft implementation</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/07/12/raft/">
+            <time datetime="2017-07-12T02:48:48.000Z" itemprop="datePublished">2017-07-12</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/一致性/">一致性</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Primer"><a href="#Primer" class="headerlink" title="Primer"></a>Primer</h2><p>Log entry = (Term, Index, Command)<br>in RDBMS, Log=WAL/redo log, FSM=records</p>
+<h3 id="Components"><a href="#Components" class="headerlink" title="Components"></a>Components</h3><ul>
+<li>FSM</li>
+<li>LogStore</li>
+<li>StableStore<ul>
+<li>CurrentTerm</li>
+<li>LastVoteTerm</li>
+<li>LastVoteCand</li>
+</ul>
+</li>
+<li>SnapshotStore</li>
+<li>PeerStore</li>
+</ul>
+<h3 id="RPC-Protocol"><a href="#RPC-Protocol" class="headerlink" title="RPC Protocol"></a>RPC Protocol</h3><p>msgpack serializer</p>
+<ul>
+<li>AppendEntries<br>Leader发起<br>If got reponse with Success=false，then step down(退位)<ul>
+<li>Term<br>Each term begins with an election</li>
+<li>Leader<br>partition后，old leader在复制日志时，通过它发现new leader，并step down</li>
+<li>PrevLogIndex, PrevLogTerm<br>它们确保在相同term/index上的log内容完全一致, 而且之前的所有log内容一致：safety</li>
+<li>LeaderCommitIndex<br>只有committed log才能被FSM Apply</li>
+<li>[]Log<ul>
+<li>Term, Index</li>
+<li>Type<ul>
+<li>LogCommand<br>复制日志</li>
+<li>LogAddPeer</li>
+<li>LogRemovePeer</li>
+<li>LogNoop</li>
+<li>LogBarrier</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>RequestVote<br>Candidate发起，if not Granted，step down to follower<br>leader/candidate也可能收到RequestVote<br>发起投票时，可能会收到AppendEntries，比较term来决定进入follower状态还是拒绝<ul>
+<li>Term</li>
+<li>LastLogIndex, LogLogTerm<br>选民如果发现candidate的log没有自己的新，则拒绝投票<br>阻止一个不包含所有committed entries的candidate成为leader</li>
+</ul>
+</li>
+<li>InstallSnapshot<br>Leader发起</li>
+</ul>
+<h3 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h3><p>Leader’s log is ‘the truth’</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/raft2pc.png?raw=true" alt="2 phase commit"></p>
+<p>phase2的作用：<br>uncommitted log是可能回滚的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">A(leader),B,C,D,E 5个节点，partition成A(leader)/B，C(leader)/D/E</div><div class="line">A: apply(set x=9)</div><div class="line">C: apply(set x=8)</div><div class="line">由于只与leader(A)心跳，B并不知道已经partition了。如果没有phase2，B会直接更改FSM，造成consensus失败</div><div class="line">partition修复后，A会退位成follower，同时A/B的(set x=9)这个log entry会回滚</div></pre></td></tr></table></figure></p>
+<h3 id="Commit"><a href="#Commit" class="headerlink" title="Commit"></a>Commit</h3><p>For a leader to decide an entry is committed</p>
+<ul>
+<li>must be stored on majority</li>
+<li>at least one new entry from current term must also be stored on majority</li>
+</ul>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/raftinconsistency.png?raw=true" alt="commit safety"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">1) (term2, index3)，S1 leader，index3收到S2的ack，但没收到S3的ack</div><div class="line">   即S3.LastIndex=2，此时S1 crash</div><div class="line">2) S5成为term3 leader(S3,S4 vote for it)</div><div class="line">   term3内S5有3条append，但由于partition了，其他机器term=3</div><div class="line">   此时重新选举，S1成为term4 leader</div><div class="line">3) S1恢复，成为term4 leader，并把(term3, index3)发给S3。</div><div class="line">   此时，不能认为(term2, index3)是可以安全commit的</div><div class="line">   因为，如果此时S1 crash，currentTerm(S2,S3)=2</div><div class="line">   S5可能成为term4 leader，&apos;committed&apos; log lost</div><div class="line">4) 但如果S1在term4内有一个majority ack的log entry</div><div class="line">   (term2, index3)就可以安全commit，因为majority currentTerm=4</div><div class="line">   那样，S5不不可能成为leader</div></pre></td></tr></table></figure></p>
+<h3 id="Election"><a href="#Election" class="headerlink" title="Election"></a>Election</h3><p>leader要给peers发心跳，阻止新选举(如果一直没有Apply，多久发心跳?)</p>
+<p>处理RequestVote RPC<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">// 同一个term，只会有一个leader，但由于partition的存在，可能存在多个leader在不同的term：新的leader的term更高</div><div class="line">if req.Term &lt; r.getCurrentTerm() &#123;</div><div class="line">    // rejected</div><div class="line">    return</div><div class="line">&#125;</div><div class="line"></div><div class="line">if req.Term &gt; r.getCurrentTerm() &#123;</div><div class="line">    // Ensure transition to follower</div><div class="line">    r.setState(Follower)</div><div class="line">    r.setCurrentTerm(req.Term)</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 每个server只会给每个term投一票，按照先来先给原则</div><div class="line">lastVoteTerm := r.stable.GetUint64(keyLastVoteTerm)</div><div class="line">if req.Term == lastVoteTerm &#123;</div><div class="line">    return</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 保证被选为新leader的server拥有所有的已经committed的log entry</div><div class="line">lastIdx, lastTerm := r.getLastEntry()</div><div class="line">if lastTerm &gt; req.LastLogTerm &#123;</div><div class="line">    return</div><div class="line">&#125;</div><div class="line">if lastTerm == req.LastLogTerm &amp;&amp; lastIdx &gt; req.LastLogIndex &#123;</div><div class="line">    return</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 每次投票要持久化</div><div class="line">r.persistVote(req.Term, req.Candidate)</div><div class="line">resp.Granted = true // 同意</div></pre></td></tr></table></figure></p>
+<h3 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h3><p>leader保存每个followerReplication状态</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">type followerReplication struct &#123;</div><div class="line">    currentTerm uint64</div><div class="line">    matchIndex  uint64</div><div class="line">    nextIndex   uint64 // AppendEntries时，通过nextIndex--来truncate conflict，直到找到同步点</div><div class="line">                       // 初始值是 1 + LastLogIndex(leader)</div><div class="line"></div><div class="line">    lastContact time.Time</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="Repair-follower-logs"><a href="#Repair-follower-logs" class="headerlink" title="Repair follower logs"></a>Repair follower logs</h4><ul>
+<li>delete extraneous entries</li>
+<li>fill in missing entries</li>
+</ul>
+<h3 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">从StableStore里取currentTerm，并设置当前term</div><div class="line">从LogStore里取last Log，并设置lastLogIndex/lastLogTerm</div><div class="line">从PeerStore取peers</div><div class="line">进入Follower状态</div><div class="line">restoreSnapshot: 通过SnapshotStore取snapshot，并调用FSM.Restore</div><div class="line">启动3个goroutine: run(runFollower/runCandicate/runLeader)/runFSM/runSnapshot</div></pre></td></tr></table></figure>
+<h3 id="runFSM"><a href="#runFSM" class="headerlink" title="runFSM"></a>runFSM</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">执行FSM的3个方法</div><div class="line">Apply, Restore, Snapshot</div></pre></td></tr></table></figure>
+<h3 id="runLeader"><a href="#runLeader" class="headerlink" title="runLeader"></a>runLeader</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">r.leaderCh &lt;- true</div><div class="line"></div><div class="line">// 启动每个peer(除了自己)的异步复制goroutine</div><div class="line">for _, peer := range r.peers &#123;</div><div class="line">    r.startReplication(peer)</div><div class="line">&#125;</div><div class="line"></div><div class="line">先发送一个AppendEntries(AddPeer)当做noop心跳</div><div class="line"></div><div class="line">// leader loop</div><div class="line">for r.getState() == Leader &#123;</div><div class="line">    select &#123;</div><div class="line">        case rpc := &lt;-r.rpcCh:</div><div class="line">            r.processRPC(rpc)</div><div class="line"></div><div class="line">        case &lt;-r.stepDown:</div><div class="line">            r.setState(Follower)</div><div class="line"></div><div class="line">        case &lt;-r.commitCh:   &lt;--------------------------+</div><div class="line">            r.processLogs                               |</div><div class="line">        case log := &lt;-r.applyCh:                        |</div><div class="line">            r.dispatchLogs &#123;                            |</div><div class="line">                // 先写本地                             |</div><div class="line">                // 如果失败，就step down Follower       |</div><div class="line">                LogStore.StoreLogs(logs)                |</div><div class="line">                                                        |</div><div class="line">                // 再复制给followers                    |</div><div class="line">                // inflight在获得majority的时候会通知r.commitCh</div><div class="line">                inflight.StartAll(logs)</div><div class="line">                notify each follower replication goroutine</div><div class="line">            &#125;</div><div class="line">        case &lt;-lease:</div><div class="line">            // 如果LeaderLeaseTimeout内没有contact quorum</div><div class="line">            // 就step down to Follower</div><div class="line">        case &lt;-r.shutdownCh:</div><div class="line">            return</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="appendEntries-RPC"><a href="#appendEntries-RPC" class="headerlink" title="appendEntries RPC"></a>appendEntries RPC</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">func appendEntries(rpc RPC, a *AppendEntriesRequest) &#123;</div><div class="line">    // 每次执行，无论成功失败，都要给回复</div><div class="line">    defer rpc.Responde(resp)</div><div class="line"></div><div class="line">    // 比我的term小，reject</div><div class="line">    if a.Term &lt; r.getCurrentTerm() &#123;</div><div class="line">        return</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if a.Term &gt; r.getCurrentTerm() || r.getState() != Follower &#123;</div><div class="line">        r.setState(Follower)</div><div class="line">        a.setCurrentTerm(a.Term)</div><div class="line">        resp.Term = a.Term</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    r.setLeader(a.Leader)</div><div class="line"></div><div class="line">    // log conflict detection</div><div class="line">    if a.PrevLogEntry &gt; 0 &#123;</div><div class="line">        取得本地a.PrevLogEntry上的Log，并比较a.PrevLogTerm与Log.Term是否相同</div><div class="line">        如果不同，那么表示log conflict, return</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 处理a.Entries</div><div class="line">    //</div><div class="line">    // 1 2 3 4 5</div><div class="line">    // x y z       local Logs</div><div class="line">    //   o p q w   a.Entries</div><div class="line">    r.logs.DeleteRange(2, 3) 因为冲突</div><div class="line">    r.logs.StoreLogs(a.Entries)</div><div class="line"></div><div class="line">    // 处理piggyback phase2的commit</div><div class="line">    if a.LeaderCommitIndex &gt; 0 &amp;&amp; a.LeaderCommitIndex &gt; r.getCommitIndex() &#123;</div><div class="line">        </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="runCandidate"><a href="#runCandidate" class="headerlink" title="runCandidate"></a>runCandidate</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">electSelf</div><div class="line">中间，可能会收到RPC，也可能会SetPeers</div></pre></td></tr></table></figure>
+<h2 id="Configuration-Change"><a href="#Configuration-Change" class="headerlink" title="Configuration Change"></a>Configuration Change</h2><p>采用2PC方法:  C_old -&gt; C_old+new -&gt; C_new</p>
+<p><a href="http://zookeeper.apache.org/doc/trunk/zookeeperReconfig.html" target="_blank" rel="external">http://zookeeper.apache.org/doc/trunk/zookeeperReconfig.html</a><br>zookeeper 3.5.0开始，也有了动态修改cluster的功能</p>
+<h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h2><h3 id="time"><a href="#time" class="headerlink" title="time"></a>time</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">broadcast time &lt;&lt; election timeout &lt;&lt; MTBF</div><div class="line">                  [T, 2T]</div></pre></td></tr></table></figure>
+<h3 id="为什么每个node上的current-term需要持久化"><a href="#为什么每个node上的current-term需要持久化" class="headerlink" title="为什么每个node上的current term需要持久化?"></a>为什么每个node上的current term需要持久化?</h3><p>It is best guess, persistent for recovery after crash.</p>
+<p>恢复时，从leader拿不行吗？</p>
+<h3 id="为什么每个node上的votedFor要持久化"><a href="#为什么每个node上的votedFor要持久化" class="headerlink" title="为什么每个node上的votedFor要持久化?"></a>为什么每个node上的votedFor要持久化?</h3><p>为了保证election safety: allow at most one winner per term<br>term1，A vote for B，然后A crash，等A恢复了，如果voteFor不持久化，可能它对term1又vote for C了</p>
+<h3 id="成为leader后，立刻发heartbeat还是等heartbeat-timeout"><a href="#成为leader后，立刻发heartbeat还是等heartbeat-timeout" class="headerlink" title="成为leader后，立刻发heartbeat还是等heartbeat timeout?"></a>成为leader后，立刻发heartbeat还是等heartbeat timeout?</h3><h3 id="如果一个follower的AppendEntries失败，leader怎么处理"><a href="#如果一个follower的AppendEntries失败，leader怎么处理" class="headerlink" title="如果一个follower的AppendEntries失败，leader怎么处理?"></a>如果一个follower的AppendEntries失败，leader怎么处理?</h3><p>一直retry，Leader’s log is ‘the truth’.<br>Log是幂等的，因为有term/index，可以很容易排重</p>
+<p>但在client方面，就没有保障了：<br>如果leader crash after executing command but before responding?<br>client如果盲目retry，有可能造成重复执行<br>解决办法：client在发送log时，在每个命令上加入id，确保幂等<br>leader上保存每个follower的index</p>
+<h2 id="Engineering"><a href="#Engineering" class="headerlink" title="Engineering"></a>Engineering</h2><h3 id="Config"><a href="#Config" class="headerlink" title="Config"></a>Config</h3><p>HeartbeatTimeout = ElectionTimeout = 1s<br>LeaderLeaseTimeout = 500ms<br>CommitTimeout = 50ms<br>MaxAppendEntries = 64<br>SnapshotInterval = 2m<br>SnapshotThreshold = 8192</p>
+<h3 id="Group-Commit"><a href="#Group-Commit" class="headerlink" title="Group Commit"></a>Group Commit</h3><p>0 &lt; MaxAppendEntries &lt;= 1024</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">newLog := &lt;-r.applyCh</div><div class="line">ready := []*logFuture&#123;newLog&#125;</div><div class="line">for i := 0; i &lt; r.conf.MaxAppendEntries; i++ &#123;</div><div class="line">    select &#123;</div><div class="line">        case newLog := &lt;-r.applyCh:</div><div class="line">            ready = append(ready, newLog)</div><div class="line">        default:</div><div class="line">            break</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Lease"><a href="#Lease" class="headerlink" title="Lease"></a>Lease</h3><p>除了follower通过被动接受心跳来检测leader存活，leader本身也通过与majority follower<br>的response来判断自己是否已经被partition了，如果是，进入Follower状态</p>
+<h3 id="Pipeline"><a href="#Pipeline" class="headerlink" title="Pipeline"></a>Pipeline</h3><p>仅仅用于AppendEntries，通过channel实现多次发送RPC给follower而不等待response<br>但如果有错误响应，立刻取消pipeline模式</p>
+<p>max outstanding AppendEntries RPC calls = 128</p>
+<h3 id="Limitations"><a href="#Limitations" class="headerlink" title="Limitations"></a>Limitations</h3><ul>
+<li><p>Apply([]Log)<br>只能在leader上发起，follower没有自动redispatch<br>applyCh是no buffer的</p>
+</li>
+<li><p>StableStore.GetUint64<br>如果没有找到key，返回的error必须是”not found”</p>
+</li>
+<li><p>LeaderCh() might lose event</p>
+</li>
+</ul>
+<h2 id="Paxos"><a href="#Paxos" class="headerlink" title="Paxos"></a>Paxos</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/consensusoverview.png?raw=true" alt="concensus overview"></p>
+<p>server replication (SR), log replication (LR), synchronisation service (SS), barrier orchestration (BO), service discovery (SD), leader election (LE), metadata management (MM), and Message Queues (Q).</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>1985 FLP Impossibility Result<br>1988 Oki and Liskov’s Viewstamped Repication<br>1998 Lamport’s original Paxos paper “Part-Time Parliment”<br>2000 Brewer proposes CAP conjecture during Keynote at PODC<br>2002 Proof of CAP by Gilbert and Lynch<br>2005 Lamport’s Technical Report on Generalized Consensus &amp; Paxos<br>2013 Raft Consensus Paper first available online</p>
+<p><a href="http://www.cnblogs.com/foxmailed/p/3418143.html" target="_blank" rel="external">http://www.cnblogs.com/foxmailed/p/3418143.html</a><br><a href="http://raftuserstudy.s3-website-us-west-1.amazonaws.com/study/raft.pptx" target="_blank" rel="external">http://raftuserstudy.s3-website-us-west-1.amazonaws.com/study/raft.pptx</a></p>
+<p><a href="http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf" target="_blank" rel="external">http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf</a><br><a href="https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf" target="_blank" rel="external">https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5d5c8r2004q425bo6zhxzcy" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/07/12/raft/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/12/raft/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-Linux-TCP-implementation" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -251,7 +467,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5acm3e50019g75b3iit9pnq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5d5c8ox001g425bokl38gvm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -409,7 +625,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj5acm3f3002gg75bcmoegyl3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj5d5c8ps002p425b0hcg9zma" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -588,7 +804,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj5acm3fs003kg75bebzhjt45" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj5d5c8qa003j425bn0yxqhpf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -717,7 +933,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cj5acm3fd002wg75bm859q9pi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cj5d5c8py002z425b8y4lfsbx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -844,7 +1060,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj5acm3g1003wg75bsq036ups" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj5d5c8ql003x425bjqgx06vb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -985,7 +1201,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj5acm3et0022g75bg5h2cd85" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj5d5c8pd0024425b6tp0amcj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1119,7 +1335,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cj5acm3d20005g75bgipmpvg4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cj5d5c8ny0009425bh71e38up" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1255,7 +1471,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cj5acm3ee001jg75b5v6z29o5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cj5d5c8p6001s425bcxcv6nyt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1391,7 +1607,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/CryptDB/" data-id="cj5acm3db000cg75b2myl30p8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/CryptDB/" data-id="cj5d5c8o6000g425btjmh4hr1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1469,136 +1685,6 @@
 
 
 
-    <article id="post-Bloom-Filter" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/26/Bloom-Filter/">Bloom Filter</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/26/Bloom-Filter/">
-            <time datetime="2017-06-26T08:03:58.000Z" itemprop="datePublished">2017-06-26</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>by Burton Bloom in 1970</p>
-<p>false positive possible, false negative impossible</p>
-<p>Dynamo, Postgresql, HBase, Bitcoin都广泛使用</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/bloom-filter.png?raw=true" alt="BloomFilter"></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/26/Bloom-Filter/" data-id="cj5acm3d60009g75bahdr3ok6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/26/Bloom-Filter/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/26/Bloom-Filter/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
     </nav>
@@ -1616,8 +1702,26 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/19/replication/" class="title">replication</a></p>
+                            <p class="item-date"><time datetime="2017-07-19T11:12:26.000Z" itemprop="datePublished">2017-07-19</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/07/19/Google-container-evolution/" class="title">Google container evolution</a></p>
                             <p class="item-date"><time datetime="2017-07-19T01:45:30.000Z" itemprop="datePublished">2017-07-19</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/18/Ceph/" class="title">Ceph Internals</a></p>
+                            <p class="item-date"><time datetime="2017-07-18T07:27:20.000Z" itemprop="datePublished">2017-07-18</time></p>
                         </div>
                     </li>
                 
@@ -1639,24 +1743,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/17/conferences-and-journals/" class="title">conferences and journals</a></p>
-                            <p class="item-date"><time datetime="2017-07-17T05:48:21.000Z" itemprop="datePublished">2017-07-17</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/17/committee/" class="title">committee</a></p>
-                            <p class="item-date"><time datetime="2017-07-17T05:48:06.000Z" itemprop="datePublished">2017-07-17</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1666,7 +1752,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1675,7 +1761,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
@@ -1684,7 +1770,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 15px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.75px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
         </div>
     </div>
 

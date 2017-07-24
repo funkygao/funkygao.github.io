@@ -3,19 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>DB Schema Management | Notes</title>
+    <title>replication | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="https://github.com/skeema/skeema 统一控制dev/test/staging/prod等环境的scheme 12345678910111213141516$skeemaSkeema is a MySQL schema management tool. It allows you to export a databaseschema to the filesystem,">
-<meta name="keywords" content="database">
+    <meta name="description" content="Models primary-replica/multi-master replica/ec push/pull sync/async  1234567891011Dynamo      coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK     master commit log -&amp;gt; majority ackG">
+<meta name="keywords" content="storage">
 <meta property="og:type" content="article">
-<meta property="og:title" content="DB Schema Management">
-<meta property="og:url" content="http://funkygao.github.io/2017/05/31/DB-Schema-Management/index.html">
+<meta property="og:title" content="replication">
+<meta property="og:url" content="http://funkygao.github.io/2017/07/19/replication/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="https://github.com/skeema/skeema 统一控制dev/test/staging/prod等环境的scheme 12345678910111213141516$skeemaSkeema is a MySQL schema management tool. It allows you to export a databaseschema to the filesystem,">
-<meta property="og:updated_time" content="2017-05-31T03:15:29.000Z">
+<meta property="og:description" content="Models primary-replica/multi-master replica/ec push/pull sync/async  1234567891011Dynamo      coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK     master commit log -&amp;gt; majority ackG">
+<meta property="og:updated_time" content="2017-07-24T01:01:01.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="DB Schema Management">
-<meta name="twitter:description" content="https://github.com/skeema/skeema 统一控制dev/test/staging/prod等环境的scheme 12345678910111213141516$skeemaSkeema is a MySQL schema management tool. It allows you to export a databaseschema to the filesystem,">
+<meta name="twitter:title" content="replication">
+<meta name="twitter:description" content="Models primary-replica/multi-master replica/ec push/pull sync/async  1234567891011Dynamo      coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK     master commit log -&amp;gt; majority ackG">
     
 
     
@@ -198,7 +198,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-DB-Schema-Management" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-replication" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -206,7 +206,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            DB Schema Management
+            replication
         </h1>
     
 
@@ -215,8 +215,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/DB-Schema-Management/">
-            <time datetime="2017-05-31T03:06:12.000Z" itemprop="datePublished">2017-05-31</time>
+        <a href="/2017/07/19/replication/">
+            <time datetime="2017-07-19T11:12:26.000Z" itemprop="datePublished">2017-07-19</time>
         </a>
     </div>
 
@@ -225,7 +225,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
+        <a class="tag-link" href="/tags/storage/">storage</a>
     </div>
 
                     </div>
@@ -236,11 +236,14 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><a href="https://github.com/skeema/skeema" target="_blank" rel="external">https://github.com/skeema/skeema</a></p>
-<p>统一控制dev/test/staging/prod等环境的scheme</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">$skeema</div><div class="line">Skeema is a MySQL schema management tool. It allows you to export a database</div><div class="line">schema to the filesystem, and apply online schema changes by modifying files.</div><div class="line"></div><div class="line">Usage:</div><div class="line">      skeema [&lt;options&gt;] &lt;command&gt;</div><div class="line"></div><div class="line">Commands:</div><div class="line">      add-environment  Add a new named environment to an existing host directory</div><div class="line">      diff             Compare a DB instance&apos;s schemas and tables to the filesystem</div><div class="line">      help             Display usage information</div><div class="line">      init             Save a DB instance&apos;s schemas and tables to the filesystem</div><div class="line">      lint             Verify table files and reformat them in a standardized way</div><div class="line">      pull             Update the filesystem representation of schemas and tables</div><div class="line">      push             Alter tables on DBs to reflect the filesystem representation</div><div class="line">      version          Display program version</div></pre></td></tr></table></figure>
-<p>与<a href="http://funkygao.github.io/2017/05/11/osc/">mysql在线alter table设计</a>不同，它是higher level的，底层仍旧需要OSC支持:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">alter-wrapper=&quot;/usr/local/bin/pt-online-schema-change --execute --alter &#123;CLAUSES&#125; D=&#123;SCHEMA&#125;,t=&#123;TABLE&#125;,h=&#123;HOST&#125;,P=&#123;PORT&#125;,u=&#123;USER&#125;,p=&#123;PASSWORDX&#125;&quot;</div></pre></td></tr></table></figure></p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.percona.com/live/17/sessions/automatic-mysql-schema-management-skeema" target="_blank" rel="external">https://www.percona.com/live/17/sessions/automatic-mysql-schema-management-skeema</a></p>
+            <h2 id="Models"><a href="#Models" class="headerlink" title="Models"></a>Models</h2><ul>
+<li>primary-replica/multi-master</li>
+<li>replica/ec</li>
+<li>push/pull</li>
+<li>sync/async</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Dynamo      coordinator -&gt; preference list next nodes in hash ring</div><div class="line">Raft/ZK     master commit log -&gt; majority ack</div><div class="line">GFS/Hadoop  chain replication</div><div class="line">ES          primary-replica model, master concurrently dispatch index req to all replicas</div><div class="line">MySQL       master async PUSH to slaves binlog</div><div class="line">MySQL group</div><div class="line">Kafka       PULL(Fetch) ISR</div><div class="line">redis</div><div class="line">Ceph        primary-replica sync model with degrade mode 同步写入</div><div class="line">Swift</div><div class="line">Aurora</div></pre></td></tr></table></figure>
+<p>failover<br>slave readable</p>
 
         
         </div>
@@ -251,7 +254,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/" data-id="cj5d5c8o7000h425bedh0zs0w" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5d5c8rq005a425by2m0t1sa" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -319,7 +322,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/05/31/DB-Schema-Management/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/31/DB-Schema-Management/">Comments</a>
+        <a href="http://funkygao.github.io/2017/07/19/replication/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/19/replication/">Comments</a>
     
 
         </footer>
@@ -328,19 +331,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/05/31/Database-as-a-Service/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    Database as a Service
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/05/31/Cassandra/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2017/07/19/Google-container-evolution/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">Cassandra vs ScyllaDB</div>
+            <div class="article-nav-title">Google container evolution</div>
         </a>
     
 </nav>
@@ -471,9 +465,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/05/31/DB-Schema-Management/';
+            this.page.url = 'http://funkygao.github.io/2017/07/19/replication/';
         
-        this.page.identifier = 'DB-Schema-Management';
+        this.page.identifier = 'replication';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
