@@ -233,12 +233,12 @@
         
             
             <h2 id="Models"><a href="#Models" class="headerlink" title="Models"></a>Models</h2><ul>
-<li>primary-replica(failover, replica readable)/multi-master</li>
+<li>primary-replica(failover, replica readable)/multi-master/chain</li>
 <li>replica/ec</li>
 <li>push/pull</li>
 <li>sync/async</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Dynamo      coordinator -&gt; preference list next nodes in hash ring</div><div class="line">Raft/ZK     master commit log -&gt; majority ack</div><div class="line">GFS/Hadoop  chain replication</div><div class="line">ES          primary-replica model, master concurrently dispatch index req to all replicas</div><div class="line">MySQL       master async PUSH to slaves binlog</div><div class="line">MySQL group</div><div class="line">Kafka       PULL(Fetch) ISR</div><div class="line">redis</div><div class="line">Ceph        primary-replica sync model with degrade mode 同步写入</div><div class="line">Swift</div><div class="line">Aurora</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Dynamo      PUSH coordinator -&gt; preference list next nodes in hash ring</div><div class="line">Raft/ZK     PUSH master commit log -&gt; majority ack</div><div class="line">GFS/Hadoop  chain replication</div><div class="line">ES          PUSH primary-replica model, master concurrently dispatch index req to all replicas</div><div class="line">MySQL       PUSH master async PUSH to slaves binlog</div><div class="line">Kafka       PULL(Fetch) ISR</div><div class="line">redis</div><div class="line">Ceph        PUSH primary-replica sync model with degrade mode 同步写入</div><div class="line">Swift</div><div class="line">Aurora      PUSH primary instance R(3)+W(4)&gt;N(6)</div></pre></td></tr></table></figure>
 
         
         </div>
@@ -249,7 +249,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5hhyqc4004qcr5b3ewhmoyu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5hjg80u004sfk5bkevzm6vf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -396,7 +396,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5hhyq95000scr5bbss1pj2n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5hjg7xw000ofk5b39l6uo2a" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -556,7 +556,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5hhyq8p000acr5bx8bu7hvi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5hjg7xr000gfk5bdbcoks7p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -728,7 +728,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5hhyq8x000ncr5blrs41kqd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5hjg7y1000qfk5bqi2g3eyr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -899,7 +899,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5hhyq9u001gcr5bp8g3basn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5hjg7yh001cfk5buiiljqbj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1050,7 +1050,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5hhyqay002zcr5bc1z8kany" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5hjg7zk0031fk5b9owpymly" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1177,7 +1177,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5hhyqax002xcr5b7oqdvk9t" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5hjg7zj002zfk5b8ha02kb3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1305,7 +1305,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5hhyq9e0016cr5bwlj03man" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5hjg7y80012fk5bijyru13n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1448,7 +1448,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5hhyqap002ncr5buqj3vfjp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5hjg7zb002pfk5bon9airkl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1588,7 +1588,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5hhyqas002pcr5br1f8b03l" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5hjg7zf002rfk5bnwvvnbeq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

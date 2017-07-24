@@ -5,17 +5,17 @@
     
     <title>replication | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Models primary-replica(failover, replica readable)/multi-master replica/ec push/pull sync/async  1234567891011Dynamo      coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK     master co">
+    <meta name="description" content="Models primary-replica(failover, replica readable)/multi-master/chain replica/ec push/pull sync/async  12345678910Dynamo      PUSH coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK">
 <meta name="keywords" content="storage">
 <meta property="og:type" content="article">
 <meta property="og:title" content="replication">
 <meta property="og:url" content="http://funkygao.github.io/2017/07/19/replication/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Models primary-replica(failover, replica readable)/multi-master replica/ec push/pull sync/async  1234567891011Dynamo      coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK     master co">
-<meta property="og:updated_time" content="2017-07-24T01:53:02.000Z">
+<meta property="og:description" content="Models primary-replica(failover, replica readable)/multi-master/chain replica/ec push/pull sync/async  12345678910Dynamo      PUSH coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK">
+<meta property="og:updated_time" content="2017-07-24T06:41:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="replication">
-<meta name="twitter:description" content="Models primary-replica(failover, replica readable)/multi-master replica/ec push/pull sync/async  1234567891011Dynamo      coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK     master co">
+<meta name="twitter:description" content="Models primary-replica(failover, replica readable)/multi-master/chain replica/ec push/pull sync/async  12345678910Dynamo      PUSH coordinator -&amp;gt; preference list next nodes in hash ringRaft/ZK">
     
 
     
@@ -237,12 +237,12 @@
         
             
             <h2 id="Models"><a href="#Models" class="headerlink" title="Models"></a>Models</h2><ul>
-<li>primary-replica(failover, replica readable)/multi-master</li>
+<li>primary-replica(failover, replica readable)/multi-master/chain</li>
 <li>replica/ec</li>
 <li>push/pull</li>
 <li>sync/async</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Dynamo      coordinator -&gt; preference list next nodes in hash ring</div><div class="line">Raft/ZK     master commit log -&gt; majority ack</div><div class="line">GFS/Hadoop  chain replication</div><div class="line">ES          primary-replica model, master concurrently dispatch index req to all replicas</div><div class="line">MySQL       master async PUSH to slaves binlog</div><div class="line">MySQL group</div><div class="line">Kafka       PULL(Fetch) ISR</div><div class="line">redis</div><div class="line">Ceph        primary-replica sync model with degrade mode 同步写入</div><div class="line">Swift</div><div class="line">Aurora</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Dynamo      PUSH coordinator -&gt; preference list next nodes in hash ring</div><div class="line">Raft/ZK     PUSH master commit log -&gt; majority ack</div><div class="line">GFS/Hadoop  chain replication</div><div class="line">ES          PUSH primary-replica model, master concurrently dispatch index req to all replicas</div><div class="line">MySQL       PUSH master async PUSH to slaves binlog</div><div class="line">Kafka       PULL(Fetch) ISR</div><div class="line">redis</div><div class="line">Ceph        PUSH primary-replica sync model with degrade mode 同步写入</div><div class="line">Swift</div><div class="line">Aurora      PUSH primary instance R(3)+W(4)&gt;N(6)</div></pre></td></tr></table></figure>
 
         
         </div>
@@ -253,7 +253,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5hhyqc4004qcr5b3ewhmoyu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5hjg80u004sfk5bkevzm6vf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
