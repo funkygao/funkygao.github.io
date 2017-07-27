@@ -263,6 +263,7 @@
 </li>
 </ul>
 <h3 id="metadata"><a href="#metadata" class="headerlink" title="metadata"></a>metadata</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">type metadata &#123;</div><div class="line">    filename string // prefix compression</div><div class="line">    owner uid</div><div class="line">    perm acl</div><div class="line">    chunks []chunk &#123;</div><div class="line">        chunk_id int64</div><div class="line">        version int</div><div class="line">        refCount int // for snapshot COW</div><div class="line">        chunkservers []string // ip addr</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h3><p>rename to hidden file，保留3天，之后真正删除</p>
 <h3 id="write-mutation"><a href="#write-mutation" class="headerlink" title="write/mutation"></a>write/mutation</h3><ul>
 <li>operation log replicated between master and shadows</li>
 <li>client write data flow to pipelined chain chunkservers</li>
@@ -284,7 +285,7 @@
 <li>可以减少带宽的hotspot<br>如果没有chunk，那么1TB的文件就只能从一个replica读<br>有了chunk，可以从多个replica读</li>
 <li>sharding the load</li>
 <li>加快recovery时间<br>每个chunk，可以很快地被clone到一台新机器</li>
-<li>如果一个file只有1MB，那么实际存储空间是1MB，而不是64MB</li>
+<li>如果一个file只有1MB，那么实际存储空间是1MB，而不是64MB<br>但它会增加master file count问题</li>
 <li>可以独立replicate<ul>
 <li>文件的一部分损坏，可以迅速从好的replica恢复</li>
 <li>支持更细粒度的placement</li>
@@ -299,15 +300,57 @@
 <h4 id="master为什么不持久化chunk-location"><a href="#master为什么不持久化chunk-location" class="headerlink" title="master为什么不持久化chunk location?"></a>master为什么不持久化chunk location?</h4><p>其他的metadata是有redo log replication并持久化的，他们的变化，都是主动产生的，例如创建一个文件，增加一个chunk<br>而由于chunkserver随时可能crash，不受控制，因此通过heartbeat来计算并存放内存，通过heartbeat，master又可以修正chunkserver的一些错误，例如orphan chunk</p>
 <h4 id="Data-flow为什么pipelined-chain，而不并发"><a href="#Data-flow为什么pipelined-chain，而不并发" class="headerlink" title="Data flow为什么pipelined chain，而不并发?"></a>Data flow为什么pipelined chain，而不并发?</h4><p>为了避免产生网络瓶颈，同时为了更充分利用high latency links<br>通过ip地址，感知chunkserver直接的距离</p>
 <p>Total Latency = (B/T) + (R*L)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">client负责把一个write请求分成多个chunk的请求</div><div class="line"></div><div class="line">Phase1: data flow  client -&gt; chained chunkservers</div><div class="line">相当于prepare，但数据不落盘</div><div class="line">client由近及远地chain把数据写入相应chunkserver的LRU buffer</div><div class="line">这个顺序跟primary在哪无关</div><div class="line"></div><div class="line">Phase2: control flow  client -&gt; primary -&gt; secondary chunkservers</div><div class="line">相当于commit，数据visible</div><div class="line">确定mutation order</div><div class="line"></div><div class="line">Phase1出错，则等master来修复，把crashed chunkserver摘除</div><div class="line">Phase2出错，primary-&gt;secondary，这个阶段，那么primary返回client err，client会重试，此时可能出现不一致的状态，但最终master会修复</div></pre></td></tr></table></figure>
+<p>2PC，避免了client(coordinator) crash问题，因为primary成为了coordinator，而它是有failover的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">client负责把一个write请求分成多个chunk的请求</div><div class="line"></div><div class="line">Phase1: data flow  client -&gt; chained chunkservers</div><div class="line">相当于prepare，但数据不落盘</div><div class="line">client由近及远地chain把数据写入相应chunkserver的LRU buffer</div><div class="line">这个顺序跟primary在哪无关</div><div class="line"></div><div class="line">Phase2: control flow  client -&gt; primary -&gt; secondary chunkservers</div><div class="line">相当于commit，数据visible</div><div class="line">确定mutation order</div><div class="line"></div><div class="line">Phase1出错，则等master来修复，把crashed chunkserver摘除</div><div class="line">Phase2出错，primary-&gt;secondary，这个阶段，那么primary返回client err，client会重试，此时可能出现不一致的状态，但最终master会修复</div></pre></td></tr></table></figure></p>
 <h4 id="为什么搞个primary角色，而不让master做"><a href="#为什么搞个primary角色，而不让master做" class="headerlink" title="为什么搞个primary角色，而不让master做?"></a>为什么搞个primary角色，而不让master做?</h4><p>为了减轻master负担，所以搞了个二级调度:<br>跨chunk，master负责；chunk内部，primary负责</p>
 <h4 id="master如何revoke-primary-lease"><a href="#master如何revoke-primary-lease" class="headerlink" title="master如何revoke primary lease?"></a>master如何revoke primary lease?</h4><p>在lease expire后，master可能什么都不做<br>在lease expire前，master会sendto(primary)让它取消；如果sendto失败，那么只能等expire</p>
 <h4 id="为什么data-flow和control-flow分开"><a href="#为什么data-flow和control-flow分开" class="headerlink" title="为什么data flow和control flow分开?"></a>为什么data flow和control flow分开?</h4><p>如果不分开，那么所有的数据都是client-&gt;primary-&gt;secondary<br>分开后，比较轻量级的control flow必须走primary扩散；重量级的data flow可以根据物理拓扑进行优化</p>
-<h2 id="2009-GFS回顾"><a href="#2009-GFS回顾" class="headerlink" title="2009 GFS回顾"></a>2009 GFS回顾</h2><h3 id="GFS的问题"><a href="#GFS的问题" class="headerlink" title="GFS的问题"></a>GFS的问题</h3><ul>
-<li>扩展性：在50M文件，10PB的时候出现瓶颈</li>
-<li>有需要不那么大文件的应用</li>
-<li>有对于latency敏感的应用</li>
+<h2 id="GFS-vs-Ceph"><a href="#GFS-vs-Ceph" class="headerlink" title="GFS vs Ceph"></a>GFS vs Ceph</h2><ul>
+<li>论文2003 vs 2006</li>
+<li>chunk(64MB) vs Object(4MB)<br>object size可配</li>
+<li>master vs mon(Paxos)</li>
+<li>chunkserver vs osd</li>
+<li>replication<ul>
+<li>GFS<br>2PC, decouple data/control flow</li>
+<li>Ceph<br>client &lt;-&gt; osd</li>
 </ul>
+</li>
+<li>Ceph通过PG+crunch提高了扩展性<br>GFS通过allocation table的方式</li>
+<li>GFS上直接跑MapReduce<br>计算向存储locality</li>
+<li>Ceph更通用，latency更好<br>GFS通过lease提高扩展性，但遇到错误时只能等expire</li>
+<li>节点的变化<ul>
+<li>GFS<br>chunkserver向master汇报，自动加入，完全不需要人工参与</li>
+<li>Ceph<br>需要通过ceph osd命令，手工执行</li>
+</ul>
+</li>
+<li>namespace<br>GFS是directory，Ceph是flat object id</li>
+</ul>
+<h2 id="2009-GFS回顾"><a href="#2009-GFS回顾" class="headerlink" title="2009 GFS回顾"></a>2009 GFS回顾</h2><p>GFS在使用了10年的过程中，发现了一些问题，对这些问题，有的是通过上层的应用来解决的，有的是修改GFS解决的</p>
+<h3 id="master-ops压力"><a href="#master-ops压力" class="headerlink" title="master ops压力"></a>master ops压力</h3><p>最开始的设计，考虑的是支撑几百TB，几百万个文件。但很快，到了几十PB，这对master有了压力</p>
+<ul>
+<li>master在recover的时候，也变慢</li>
+<li>master要维护的数据更多</li>
+<li>client与master的交互变慢<br>每次open，client都要请求master<br>MapReduce下，可能突然多出很多task，每个都需要open，master处理能力也就是每秒几千个请求<br>解决办法是在应用层垂直切分，弄多个cluster，应用通过静态的NameSpace找自己的master，同时提升单个master能力到数万ops</li>
+</ul>
+<p>随着GFS的内部推广，越来越多的千奇百怪的上层应用连接进来</p>
+<ul>
+<li>最开始是爬虫和索引系统</li>
+<li>然后QA和research组用GFS来保存large data sets</li>
+<li>再然后，就有50多个用户了</li>
+<li>在此过程中GFS不断地调整以满足新use case</li>
+</ul>
+<h3 id="file-count问题"><a href="#file-count问题" class="headerlink" title="file-count问题"></a>file-count问题</h3><p>很早就发现了，例如：</p>
+<ul>
+<li>前端机上要把log发到GFS保存以便MapReduce分析，前端机很多，每个log每天会logrotate，log的种类也越来越多</li>
+<li>gmail需要保存很多小文件<br>解决办法是把多个文件合并，绕开file-count问题，同时增加quota功能，限制file-count和storage space<br>长远的办法：在开发distributed multi-master系统，一个cluster可以有上百个master，每个master可以存1亿个文件，但<br>如果都是小文件，会有新的问题出现：more seek<br>再后来，建立在GFS之上的BigTable推出了，帮助GFS直接面对应用对小文件、多文件的需求，BigTable层给解决了，BigTable在使用GFS时，仍然是大文件、少文件</li>
+</ul>
+<h3 id="latency问题"><a href="#latency问题" class="headerlink" title="latency问题"></a>latency问题</h3><p>GFS设计是只考虑吞吐率，而少考虑latency</p>
+<h4 id="error-recovery慢"><a href="#error-recovery慢" class="headerlink" title="error recovery慢"></a>error recovery慢</h4><p>如果write一个文件，需要写到3个chunkserver，如果其中一个卡住了或crash，master会发觉(heartbeat)，它会开新的一个chunkserver replica从其他chunkserver pull<br>master会把这个lock，以便新的client不能write(等恢复后再unlock)<br>而这个pullchunk操作，为了防止bandwidth burst，是有throttle的，限制在5-10MB/s，即一个64MB chunk，需要10s左右<br>等恢复到3个ok的时候再返回给client，client再继续write<br>在此过程中，client一直是block的</p>
+<h4 id="master-failover慢"><a href="#master-failover慢" class="headerlink" title="master failover慢"></a>master failover慢</h4><p>刚开始master failover完全靠人工，可能需要1h；后来增加了自动master failover，需要几分钟；再改进，可以在几秒钟内完成master自动切换</p>
+<h4 id="为吞吐量而设计的batch增加latency"><a href="#为吞吐量而设计的batch增加latency" class="headerlink" title="为吞吐量而设计的batch增加latency"></a>为吞吐量而设计的batch增加latency</h4><h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>BigTable是无法忍受那么高的延时的，它的transaction log是最大的瓶颈，存储在GFS：<br>2个log，一个慢，就切换到另外一个</p>
+<p>Gmail是多机房部署的，一个卡了，切到另外机房</p>
+<p>google使用这个request redundancy or timeout方法很广泛，为了解决search long tail latency，一样思路</p>
+<h3 id="consistency"><a href="#consistency" class="headerlink" title="consistency"></a>consistency</h3><p>client一直push the write till it succeeds<br>但如果中途client crash了，会造成中间状态：不同client读同一个文件，可能发现文件长度不同<br>解决办法：使用append，offset统一由primary管理</p>
+<p>但append由于没有reply保护机制，也有问题：<br>client write，primary分配一个offset，并call secondary，有的secondary收到有的没收到，此时primary crash<br>master会选另外一个作为primary，它可能会分配一个新的offset，造成该数据重复<br>如果为此再设计一套consensus，得不偿失<br>解决办法：single writer，让上层应用保证不并发写</p>
 <h2 id="Colossus"><a href="#Colossus" class="headerlink" title="Colossus"></a>Colossus</h2><p>Colossus is specifically designed for BigTable, 没有GFS那么通用<br>In other words, it was built specifically for use with the new Caffeine search-indexing system, and though it may be used in some form with other Google services, it is not the sort of thing that is designed to span the entire Google infrastructure.</p>
 <ul>
 <li>automatically sharded metadata layer</li>
@@ -315,7 +358,7 @@
 <li>client driven replication</li>
 <li>metadata space has enabled availability analysis</li>
 </ul>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a><br><a href="http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf" target="_blank" rel="external">http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf</a></p>
 
         
         </div>
@@ -326,7 +369,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5lw9p14000rk05bcn68gh5r" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5lwaxy3000ski5b1skzezir" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -459,7 +502,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5lw9p4u004tk05bqfj5mqqw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5lway1w004uki5bs13ejkeq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -606,7 +649,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5lw9p17000tk05b3lp0d2u7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5lwaxy5000uki5bhicnchyi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -709,6 +752,11 @@
 
                         
                         
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
                     </div>
                 
             </header>
@@ -717,7 +765,12 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="RADOS"><a href="#RADOS" class="headerlink" title="RADOS"></a>RADOS</h2><h3 id="Object"><a href="#Object" class="headerlink" title="Object"></a>Object</h3><p>Object是最终落地存储文件的基本单位，可以类比fs block，默认4MB<br>如果一个文件 &gt; object size，文件会被stripped，这个操作是client端完成的</p>
+            <h2 id="RADOS"><a href="#RADOS" class="headerlink" title="RADOS"></a>RADOS</h2><h3 id="Key-ideas"><a href="#Key-ideas" class="headerlink" title="Key ideas"></a>Key ideas</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/ceph.png?raw=true" alt="components"></p>
+<ul>
+<li>把传统文件系统架构分隔成client component and storage component<br>client负责更上层的抽象(file, block, object)，storage负责底层object, disk</li>
+<li>seperation of data and metadata<br>各管各的</li>
+</ul>
+<h3 id="Object"><a href="#Object" class="headerlink" title="Object"></a>Object</h3><p>Object是最终落地存储文件的基本单位，可以类比fs block，默认4MB<br>如果一个文件 &gt; object size，文件会被stripped，这个操作是client端完成的</p>
 <p>It does not use a directory hierarchy or a tree structure for storage<br>It is stored in a flat-address space containing billions of objects without any complexity</p>
 <p>Object组成</p>
 <ul>
@@ -726,26 +779,31 @@
 <li>metadata<br>可以存放在扩展的fs attr里<br>因此对底层文件系统是有要求的，ext4fs对extended attr数量限制的太少，可以用xfs</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">  +---logical------+       +--physical layer -+</div><div class="line">  |                |       |                  |</div><div class="line">cluster -&gt; pool -&gt; pg ---&gt; osd -&gt; object -&gt; fs files</div><div class="line">                   |       |                 </div><div class="line">                   +-crush-+</div></pre></td></tr></table></figure>
-<h3 id="Lookup"><a href="#Lookup" class="headerlink" title="Lookup"></a>Lookup</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">file = ino</div><div class="line">obj = (ino, ono)</div><div class="line">obj_hash = hash(ino, ono)</div><div class="line">pg = obj_hash &amp; (num_pg-1) // num_pg是2整数幂，例如codis里1024</div><div class="line">                           // 官方推荐num_pg是osd总数的数百倍</div><div class="line">                           // num_pg如果变化，会引起大量的数据迁移</div><div class="line">osds_for_pg = crush(pg)    // list of osds，此处是唯一需要全局cluster map的地方</div><div class="line">                           // 其他的，都是算出来的</div><div class="line">primary = osds_for_pg[0]</div><div class="line">replicas = osds_for_pg[1:]</div></pre></td></tr></table></figure>
+<h3 id="Lookup"><a href="#Lookup" class="headerlink" title="Lookup"></a>Lookup</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">file = ino</div><div class="line">obj = (ino, ono)</div><div class="line">obj_hash = hash(ino, ono)</div><div class="line">pg = obj_hash &amp; (num_pg-1) // num_pg是2整数幂，例如codis里1024</div><div class="line">                           // 官方推荐num_pg是osd总数的数百倍</div><div class="line">                           // num_pg如果变化，会引起大量的数据迁移</div><div class="line">osds_for_pg = crush(pg)    // list of osds，此处是唯一需要全局cluster map的地方</div><div class="line">                           // 其他的，都是算出来的</div><div class="line">                           // osds_for_pg is ordered，len(osds_for_pg)=replicate factor</div><div class="line">primary = osds_for_pg[0]</div><div class="line">replicas = osds_for_pg[1:]</div></pre></td></tr></table></figure>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/ceph-lookup.png?raw=true" alt="lookup"></p>
-<h3 id="crush"><a href="#crush" class="headerlink" title="crush"></a>crush</h3><p>目标</p>
+<h3 id="crush"><a href="#crush" class="headerlink" title="crush"></a>crush</h3><p>一个hash算法，目标</p>
 <ul>
 <li>数据均匀的分布到集群中</li>
 <li>需要考虑各个OSD权重的不同（根据读写性能的差异，磁盘的容量的大小差异等设置不同的权重）</li>
 <li>当有OSD损坏需要数据迁移时，数据的迁移量尽可能的少</li>
 </ul>
+<p>有点像一致性哈希：failure, addition, removal of nodes result in near-minimal object migration</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/ceph-crush.png?raw=true" alt="crush"></p>
 <h3 id="PG"><a href="#PG" class="headerlink" title="PG"></a>PG</h3><p>PG(placement group)与Couchbase里的vbucket一样，codis里也类似，都是presharding技术</p>
 <p>在object_id与osd中间增加一层pg，减少由于osd数量变化造成大量的数据迁移<br>PG使得文件的定位问题，变成了通过crush定位PG的问题，数量大大减少<br>例如，1万个osd，100亿个文件，30万个pg: 100亿 vs 30万</p>
 <p>线上尽量不要更改PG的数量，PG的数量的变更将导致整个集群动起来（各个OSD之间copy数据），大量数据均衡期间读写性能下降严重</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Total PGs = (Total_number_of_OSD * 100) / max_replication_count</div></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ceph osd map pool1 object1</div><div class="line">osdmap e566 pool &apos;pool1&apos; (10) object &apos;object1&apos; -&gt; pg 10.bac4decb (10.3c) -&gt; up [0,6,3] acting [0,6,3]</div><div class="line">$</div><div class="line">// osdmap e566: osd map epoch 566</div><div class="line">// pool &apos;pool1&apos; (10): pool name and pool id，pool id从0开始，每新建+1</div><div class="line">// pg 10.bac4decb (10.3c): placement group number 10.3c(pg id是16进制，256个pg，那么他们的id: 0, 1, f, fe, ff)</div><div class="line">                           pg id实际上是pool_id.pg_id(pool id=10, pg id=3c)</div><div class="line">// up [0,6,3]: osd up set contains osd.0, osd.6, osd.3</div></pre></td></tr></table></figure>
+<p>同一个PG内的osd通过heartbeat相互检查对方状态，大部分情况下不需要mon参与，减少了mon负担</p>
 <h3 id="mon"><a href="#mon" class="headerlink" title="mon"></a>mon</h3><p>相当于Ceph的zookeeper</p>
 <p>mon quorum负责整个Ceph cluster中所有OSD状态(cluster map)，然后以增量、异步、lazy方式扩散到each OSD和client<br>mon被动接收osd的上报请求，作为reponse把cluster map返回，不主动push cluster map to osd<br>如果client和它要访问的PG内部各个OSD看到的cluster map不一致，则这几方会首先同步cluster map，然后即可正常访问</p>
 <p>MON跟踪cluster状态：OSD, PG, CRUSH maps<br>同一个PG的osd除了向mon发送心跳外，还互相发心跳以及坚持pg数据replica是否正常</p>
 <h3 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h3><p>是primary-replica model, 强一致性，读和写只能向primary发起请求<br><img src="https://github.com/funkygao/blogassets/blob/master/img/ceph-rw.png?raw=true" alt="read write"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/ceph-rw1.jpg?raw=true" alt="read write"><br>其中replicas在复制到buffer时就ack，如果某个replica复制时失败，进入degrade状态</p>
+<h3 id="2PC-Write"><a href="#2PC-Write" class="headerlink" title="2PC Write"></a>2PC Write</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/ceph-2pc.png?raw=true" alt="write 2PC"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">phase1: client从primay接收ack</div><div class="line">此时，数据已经replicate到每个replica的内存</div><div class="line"></div><div class="line">phase2: client从primary接收commit</div><div class="line">此时，数据已经replicate到每个replica的磁盘</div><div class="line">client才把本地的write buffer cache清除</div></pre></td></tr></table></figure>
 <h3 id="scrub机制"><a href="#scrub机制" class="headerlink" title="scrub机制"></a>scrub机制</h3><p>read verify</p>
-<h2 id="Questions"><a href="#Questions" class="headerlink" title="Questions"></a>Questions</h2><h3 id="Can-Ceph-replace-facebook-Haystack"><a href="#Can-Ceph-replace-facebook-Haystack" class="headerlink" title="Can Ceph replace facebook Haystack?"></a>Can Ceph replace facebook Haystack?</h3><p>Haystack解决的实际上是metadata访问造成的IO问题，解决的方法是metadata完全内存，无IO<br>每个图片的read，需要NetApp进行3次IO: dir inode, file inode, file data<br>haystack每个图片read，需要1次IO，metadata保证在内存<br>在一个4TB的SATA盘存储20M个文件，每个inode如果需要500B，那么如果inode都存放内存，需要10GB内存</p>
+<h2 id="Questions"><a href="#Questions" class="headerlink" title="Questions"></a>Questions</h2><h3 id="consistency"><a href="#consistency" class="headerlink" title="consistency?"></a>consistency?</h3><p>strongly consistent</p>
+<h3 id="Can-Ceph-replace-facebook-Haystack"><a href="#Can-Ceph-replace-facebook-Haystack" class="headerlink" title="Can Ceph replace facebook Haystack?"></a>Can Ceph replace facebook Haystack?</h3><p>Haystack解决的实际上是metadata访问造成的IO问题，解决的方法是metadata完全内存，无IO<br>每个图片的read，需要NetApp进行3次IO: dir inode, file inode, file data<br>haystack每个图片read，需要1次IO，metadata保证在内存<br>在一个4TB的SATA盘存储20M个文件，每个inode如果需要500B，那么如果inode都存放内存，需要10GB内存</p>
 <ul>
 <li>减少每个metadata的大小<br>去掉大部分不需要的数据，例如uid, gid, atime等<br>xfs里每个metadata占536字节，haystack每个图片需要10字节</li>
 <li>减少metadata的总数量<br>多个图片(needle)合并进一个大文件(superblock)</li>
@@ -755,7 +813,7 @@
 <p>Ceph解决了一个文件到分布式系统里的定位问题(crush(pg))，但osd并没有解决local store的问题: 如果一个osd上存储过多文件(例如10M)，性能会下降明显</p>
 <h3 id="Why-EC-is-slow"><a href="#Why-EC-is-slow" class="headerlink" title="Why EC is slow?"></a>Why EC is slow?</h3><p>Google Colossus采用的是(6,3)EC，存储overhead=(6+3)/6=150%<br>把数据分成6个data block+3个parity block，恢复任意一个数据块需要6个I/O<br>生成parity block和恢复数据时，需要进行额外的encode/decode，造成性能损失</p>
 <h3 id="Store-small-file-waste-space"><a href="#Store-small-file-waste-space" class="headerlink" title="Store small file, waste space?"></a>Store small file, waste space?</h3><p>object size是可以设置的</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://ceph.com/papers/weil-crush-sc06.pdf" target="_blank" rel="external">http://ceph.com/papers/weil-crush-sc06.pdf</a><br><a href="http://ceph.com/papers/weil-rados-pdsw07.pdf" target="_blank" rel="external">http://ceph.com/papers/weil-rados-pdsw07.pdf</a><br><a href="http://ceph.com/papers/weil-ceph-osdi06.pdf" target="_blank" rel="external">http://ceph.com/papers/weil-ceph-osdi06.pdf</a><br><a href="http://www.xsky.com/tec/ceph72hours/" target="_blank" rel="external">http://www.xsky.com/tec/ceph72hours/</a></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://ceph.com/papers/weil-crush-sc06.pdf" target="_blank" rel="external">http://ceph.com/papers/weil-crush-sc06.pdf</a><br><a href="http://ceph.com/papers/weil-rados-pdsw07.pdf" target="_blank" rel="external">http://ceph.com/papers/weil-rados-pdsw07.pdf</a><br><a href="http://ceph.com/papers/weil-ceph-osdi06.pdf" target="_blank" rel="external">http://ceph.com/papers/weil-ceph-osdi06.pdf</a><br><a href="http://www.xsky.com/tec/ceph72hours/" target="_blank" rel="external">http://www.xsky.com/tec/ceph72hours/</a><br><a href="https://blogs.rdoproject.org/6427/ceph-and-swift-why-we-are-not-fighting" target="_blank" rel="external">https://blogs.rdoproject.org/6427/ceph-and-swift-why-we-are-not-fighting</a><br><a href="https://users.soe.ucsc.edu/~elm/Papers/sc04.pdf" target="_blank" rel="external">https://users.soe.ucsc.edu/~elm/Papers/sc04.pdf</a></p>
 
         
         </div>
@@ -766,7 +824,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5lw9p0q000bk05bsa4ja1lg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5lwaxxl000cki5bk1hg4dh9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -938,7 +996,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5lw9p0z000mk05b9c07iq7t" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5lwaxxv000nki5bc8h3py8p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1109,7 +1167,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5lw9p2a001kk05b2a5svi77" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5lwaxyq001iki5bt30j5z4j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1260,7 +1318,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5lw9p3i0032k05b8u4xtkq9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5lway010033ki5b02c1piqf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1387,7 +1445,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5lw9p3h0030k05b6j15y9ka" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5lwaxzz0031ki5b2bckkgrd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1515,7 +1573,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5lw9p1g0017k05bm3jnpbcd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5lwaxyh0018ki5bfan6f37c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1658,7 +1716,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5lw9p3d002sk05bdix5wx8h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5lwaxzt002rki5bib9t19ht" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1812,7 +1870,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
