@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                89
+                90
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,216 @@
 
             
             <section id="main">
+    <article id="post-GFS" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/07/25/GFS/">GFS evolution</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/07/25/GFS/">
+            <time datetime="2017-07-25T06:39:34.000Z" itemprop="datePublished">2017-07-25</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="GFS"><a href="#GFS" class="headerlink" title="GFS"></a>GFS</h2><p>GFS，2001年开发出来，3个人，1年，论文发表于2003<br>BigTable，2003年开发出来</p>
+<h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><ul>
+<li>replicated operation(redo) log with checkpoint to shadow masters<ul>
+<li>当时没有自动failover，全是人工操作DNS alias</li>
+<li>read请求可以使用shadow masters</li>
+<li>生成checkpoint时，master切换到新的redo log file，创建新线程生成checkpoint<br>在此过程中发生的变化，记录到新redo log file</li>
+<li>operation log保证了mutation的全局有序</li>
+<li>save checkpoint<br>很可能是通过mmap+msync</li>
+</ul>
+</li>
+<li>bottleneck?<ul>
+<li>当时部署了多个cluster，根据业务属性<br>最大的超过1000节点，300TB</li>
+<li>过高的OPS<br>由于redo log需要复制，master的tps也就在1万左右<ul>
+<li>client cache<br>何时invalidate and recall master?<ul>
+<li>primary unreachable</li>
+<li>primary reponse: no lease</li>
+</ul>
+</li>
+<li>client batch request</li>
+<li>lease</li>
+</ul>
+</li>
+<li>内存容量<ul>
+<li>prefix compression to reduce memory footprint</li>
+<li>每个chunk(64MB)，metadata占内存64B<br>如果保存1百万个文件(64TB)，需要64MB内存<br>如果保存10亿个文件(64PB)，需要64GB内存<br>实际上是到了5千万个文件，10PB的时候，master已经到达瓶颈了</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="metadata"><a href="#metadata" class="headerlink" title="metadata"></a>metadata</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">type metadata &#123;</div><div class="line">    filename string // prefix compression</div><div class="line">    owner uid</div><div class="line">    perm acl</div><div class="line">    chunks []chunk &#123;</div><div class="line">        chunk_id int64</div><div class="line">        version int</div><div class="line">        refCount int // for snapshot COW</div><div class="line">        chunkservers []string // ip addr</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="write-mutation"><a href="#write-mutation" class="headerlink" title="write/mutation"></a>write/mutation</h3><ul>
+<li>operation log replicated between master and shadows</li>
+<li>client write data flow to pipelined chain chunkservers</li>
+<li>primary write control flow to secondary chunkservers</li>
+</ul>
+<h3 id="read-filename-offset-size"><a href="#read-filename-offset-size" class="headerlink" title="read(filename, offset, size)"></a>read(filename, offset, size)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">client根据(offset, size)计算出需要哪些chunks，假设chunk1, chunk2</div><div class="line">client把(filename, chunk index [1, 2])类似batch一样发送master</div><div class="line">master返回&#123;chunk1: &#123;chunkId1, [ip1, ip2, ip3]&#125;, chunk2: &#123;chunkId2, [ip4, ip5, ip6]&#125;&#125;</div><div class="line">client.putInCache(metadata)</div><div class="line">client顺序地获取chunk1, chunk2</div><div class="line">对于chunk1，根据ip1-3与client ip的距离，找最近的，取chunk；如果失败，找下一个最近的chunkserver</div><div class="line">client.sendToIp1(chunkId1, offset1, size1)</div><div class="line"></div><div class="line">// stale read是存在的，read的时候chunkserver可能发现data corruption</div></pre></td></tr></table></figure>
+<h3 id="磁盘错误的解决"><a href="#磁盘错误的解决" class="headerlink" title="磁盘错误的解决"></a>磁盘错误的解决</h3><p>file -&gt; chunk -&gt; block</p>
+<p>在每个chunkserver上执行，通过checksum检测</p>
+<p>每个chunk由多个64KB的block组成，每个block有一个32位的checksum</p>
+<p>read repair，如果chunkserver发现了一个非法block，会返回client err，同时向master汇报</p>
+<ul>
+<li>client会从其他replica read</li>
+<li>master会从其他有效的replica把这整个chunk clone到另外一个chunkserver，然后告诉有问题的chunkserver删除那个chunk</li>
+</ul>
+<h3 id="Questions"><a href="#Questions" class="headerlink" title="Questions"></a>Questions</h3><h4 id="chunk为什么64MB那么大"><a href="#chunk为什么64MB那么大" class="headerlink" title="chunk为什么64MB那么大?"></a>chunk为什么64MB那么大?</h4><ul>
+<li>减少master内存的占用</li>
+<li>减少client与master的交互<br>同一个chunk的R/W，client只需要与master交互一次</li>
+<li>可以很容易看到机器里哪些机器磁盘快满了，而做迁移</li>
+<li>可以减少带宽的hotspot<br>如果没有chunk，那么1TB的文件就只能从一个replica读<br>有了chunk，可以从多个replica读</li>
+<li>sharding the load</li>
+<li>加快recovery时间<br>每个chunk，可以很快地被clone到一台新机器</li>
+<li>如果一个file只有1MB，那么实际存储空间是1MB，而不是64MB</li>
+<li>可以独立replicate<ul>
+<li>文件的一部分损坏，可以迅速从好的replica恢复</li>
+<li>支持更细粒度的placement</li>
+</ul>
+</li>
+<li>支持超大文件</li>
+</ul>
+<h4 id="chunk-hotspot问题"><a href="#chunk-hotspot问题" class="headerlink" title="chunk hotspot问题"></a>chunk hotspot问题</h4><p>MapReduce时，需要把代码发布到GFS，很可能小于64MB，即只有1个chunk，当很多mapper时，这个chunkserver就成为hotspot<br>解决办法是：增加replication factor</p>
+<p>但最终的解决方案是：client间P2P，互相读</p>
+<h4 id="master为什么不用Paxos"><a href="#master为什么不用Paxos" class="headerlink" title="master为什么不用Paxos?"></a>master为什么不用Paxos?</h4><p>master通过redo log sync replication来提高可靠性，但没有election过程，都是完全手工进行failover</p>
+<p>我猜，chubby当时还没有启动</p>
+<h4 id="master为什么不持久化chunk-location"><a href="#master为什么不持久化chunk-location" class="headerlink" title="master为什么不持久化chunk location?"></a>master为什么不持久化chunk location?</h4><p>其他的metadata是有redo log replication并持久化的，他们的变化，都是主动产生的，例如创建一个文件，增加一个chunk<br>而由于chunkserver随时可能crash，不受控制，因此通过heartbeat来计算并存放内存，通过heartbeat，master又可以修正chunkserver的一些错误，例如orphan chunk</p>
+<h4 id="Data-flow为什么pipelined-chain，而不并发"><a href="#Data-flow为什么pipelined-chain，而不并发" class="headerlink" title="Data flow为什么pipelined chain，而不并发?"></a>Data flow为什么pipelined chain，而不并发?</h4><p>为了避免产生网络瓶颈，同时为了更充分利用high latency links<br>通过ip地址，感知chunkserver直接的距离</p>
+<p>Total Latency = (B/T) + (R*L)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">client负责把一个write请求分成多个chunk的请求</div><div class="line"></div><div class="line">Phase1: data flow  client -&gt; chained chunkservers</div><div class="line">相当于prepare，但数据不落盘</div><div class="line">client由近及远地chain把数据写入相应chunkserver的LRU buffer</div><div class="line">这个顺序跟primary在哪无关</div><div class="line"></div><div class="line">Phase2: control flow  client -&gt; primary -&gt; secondary chunkservers</div><div class="line">相当于commit，数据visible</div><div class="line">确定mutation order</div><div class="line"></div><div class="line">Phase1出错，则等master来修复，把crashed chunkserver摘除</div><div class="line">Phase2出错，primary-&gt;secondary，这个阶段，那么primary返回client err，client会重试，此时可能出现不一致的状态，但最终master会修复</div></pre></td></tr></table></figure>
+<h4 id="为什么搞个primary角色，而不让master做"><a href="#为什么搞个primary角色，而不让master做" class="headerlink" title="为什么搞个primary角色，而不让master做?"></a>为什么搞个primary角色，而不让master做?</h4><p>为了减轻master负担，所以搞了个二级调度:<br>跨chunk，master负责；chunk内部，primary负责</p>
+<h4 id="master如何revoke-primary-lease"><a href="#master如何revoke-primary-lease" class="headerlink" title="master如何revoke primary lease?"></a>master如何revoke primary lease?</h4><p>在lease expire后，master可能什么都不做<br>在lease expire前，master会sendto(primary)让它取消；如果sendto失败，那么只能等expire</p>
+<h4 id="为什么data-flow和control-flow分开"><a href="#为什么data-flow和control-flow分开" class="headerlink" title="为什么data flow和control flow分开?"></a>为什么data flow和control flow分开?</h4><p>如果不分开，那么所有的数据都是client-&gt;primary-&gt;secondary<br>分开后，比较轻量级的control flow必须走primary扩散；重量级的data flow可以根据物理拓扑进行优化</p>
+<h2 id="2009-GFS回顾"><a href="#2009-GFS回顾" class="headerlink" title="2009 GFS回顾"></a>2009 GFS回顾</h2><h3 id="GFS的问题"><a href="#GFS的问题" class="headerlink" title="GFS的问题"></a>GFS的问题</h3><ul>
+<li>扩展性：在50M文件，10PB的时候出现瓶颈</li>
+<li>有需要不那么大文件的应用</li>
+<li>有对于latency敏感的应用</li>
+</ul>
+<h2 id="Colossus"><a href="#Colossus" class="headerlink" title="Colossus"></a>Colossus</h2><p>Colossus is specifically designed for BigTable, 没有GFS那么通用<br>In other words, it was built specifically for use with the new Caffeine search-indexing system, and though it may be used in some form with other Google services, it is not the sort of thing that is designed to span the entire Google infrastructure.</p>
+<ul>
+<li>automatically sharded metadata layer</li>
+<li>EC</li>
+<li>client driven replication</li>
+<li>metadata space has enabled availability analysis</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5j7oaun000no25b5fapzla3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/07/25/GFS/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/25/GFS/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-replication" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -249,7 +459,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5hjg80u004sfk5bkevzm6vf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5j7oax5004oo25b0z9ls84p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -396,7 +606,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5hjg7xw000ofk5b39l6uo2a" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5j7oaus000so25bno2t2ixs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -556,7 +766,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5hjg7xr000gfk5bdbcoks7p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5j7oaug000co25bckce6cvp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -728,7 +938,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5hjg7y1000qfk5bqi2g3eyr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5j7oaux0011o25bdv2fwzum" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -899,7 +1109,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5hjg7yh001cfk5buiiljqbj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5j7oav7001go25bmv3i19u3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1050,7 +1260,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5hjg7zk0031fk5b9owpymly" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5j7oaw3002vo25bt2k4p0lt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1177,7 +1387,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5hjg7zj002zfk5b8ha02kb3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5j7oaw2002to25b3llnvdah" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1305,7 +1515,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5hjg7y80012fk5bijyru13n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5j7oauz0016o25b9g9vr9pt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1448,7 +1658,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5hjg7zb002pfk5bon9airkl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5j7oavx002lo25bj5p84wjs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1526,146 +1736,6 @@
 
 
 
-    <article id="post-bitcask" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/07/13/bitcask/">bitcask</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/07/13/bitcask/">
-            <time datetime="2017-07-13T00:02:10.000Z" itemprop="datePublished">2017-07-13</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>A Log-Structured Hash Table for KV storage<br>Riak默认采用的存储引擎就是bitcask，在开发bitcask的时候，LevelDB还没有开放出来<br>刚听到的消息，Riak的公司basho，已经离解散不远了，CTO已经离职，公司好像只有1、2人了</p>
-<h2 id="Data"><a href="#Data" class="headerlink" title="Data"></a>Data</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bitcask1.jpg?raw=true" alt="data files"></p>
-<p>older data files will be merged and compacted</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/bitcask2.jpg?raw=true" alt="data entry"></p>
-<h2 id="Index"><a href="#Index" class="headerlink" title="Index"></a>Index</h2><p>reside in mem</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/bitcask3.jpg?raw=true" alt="hash index"></p>
-<p>读取file_id对应文件的value_pos开始的value_sz个字节，就得到了我们需要的value值</p>
-<h3 id="Write"><a href="#Write" class="headerlink" title="Write"></a>Write</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">append to active data file</div><div class="line">update hash table index in memory</div></pre></td></tr></table></figure>
-<h2 id="Hint-File"><a href="#Hint-File" class="headerlink" title="Hint File"></a>Hint File</h2><p>为了冷启动时加快index生成速度：重建hash table时，不需要full scan data files，只scan much smaller hint file</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/bitcask4.jpg?raw=true" alt="hint file"></p>
-<h2 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h2><ul>
-<li>由于index是包含所有key的，因此可以容纳的数据量跟内存有很大关系，每个index至少占40B</li>
-<li>不支持range/sort操作<br>如果把hash table变成skiplist，而merge sort older data files，就可以支持range了</li>
-</ul>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5hjg7zf002rfk5bnwvvnbeq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/07/13/bitcask/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/13/bitcask/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
@@ -1678,6 +1748,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/25/GFS/" class="title">GFS evolution</a></p>
+                            <p class="item-date"><time datetime="2017-07-25T06:39:34.000Z" itemprop="datePublished">2017-07-25</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1715,15 +1794,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/17/MapReduce-A-major-step-backwards/" class="title">MapReduce - A major step backwards</a></p>
-                            <p class="item-date"><time datetime="2017-07-17T06:19:27.000Z" itemprop="datePublished">2017-07-17</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1733,7 +1803,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1742,7 +1812,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
