@@ -346,9 +346,8 @@
 <h3 id="latency问题"><a href="#latency问题" class="headerlink" title="latency问题"></a>latency问题</h3><p>GFS设计是只考虑吞吐率，而少考虑latency</p>
 <h4 id="error-recovery慢"><a href="#error-recovery慢" class="headerlink" title="error recovery慢"></a>error recovery慢</h4><p>如果write一个文件，需要写到3个chunkserver，如果其中一个卡住了或crash，master会发觉(heartbeat)，它会开新的一个chunkserver replica从其他chunkserver pull<br>master会把这个lock，以便新的client不能write(等恢复后再unlock)<br>而这个pullchunk操作，为了防止bandwidth burst，是有throttle的，限制在5-10MB/s，即一个64MB chunk，需要10s左右<br>等恢复到3个ok的时候再返回给client，client再继续write<br>在此过程中，client一直是block的</p>
 <h4 id="master-failover慢"><a href="#master-failover慢" class="headerlink" title="master failover慢"></a>master failover慢</h4><p>刚开始master failover完全靠人工，可能需要1h；后来增加了自动master failover，需要几分钟；再改进，可以在几秒钟内完成master自动切换</p>
-<h4 id="为吞吐量而设计的batch增加latency"><a href="#为吞吐量而设计的batch增加latency" class="headerlink" title="为吞吐量而设计的batch增加latency"></a>为吞吐量而设计的batch增加latency</h4><h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>BigTable是无法忍受那么高的延时的，它的transaction log是最大的瓶颈，存储在GFS：<br>2个log，一个慢，就切换到另外一个，这2个log任意时刻只有1个active，并且log entry里有sequence号，以便replay时防重</p>
+<h4 id="为吞吐量而设计的batch增加latency"><a href="#为吞吐量而设计的batch增加latency" class="headerlink" title="为吞吐量而设计的batch增加latency"></a>为吞吐量而设计的batch增加latency</h4><h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>BigTable是无法忍受那么高的延时的，它的transaction log是最大的瓶颈，存储在GFS：<br>2个log(secondary log)，一个慢，就切换到另外一个，这2个log任意时刻只有1个active，并且log entry里有sequence号，以便replay时防重<br>google使用这个request redundancy or timeout方法很广泛，为了解决search long tail latency，一样思路</p>
 <p>Gmail是多机房部署的，一个卡了，切到另外机房</p>
-<p>google使用这个request redundancy or timeout方法很广泛，为了解决search long tail latency，一样思路</p>
 <h3 id="consistency"><a href="#consistency" class="headerlink" title="consistency"></a>consistency</h3><p>client一直push the write till it succeeds<br>但如果中途client crash了，会造成中间状态：不同client读同一个文件，可能发现文件长度不同<br>解决办法：使用append，offset统一由primary管理</p>
 <p>但append由于没有reply保护机制，也有问题：<br>client write，primary分配一个offset，并call secondary，有的secondary收到有的没收到，此时primary crash<br>master会选另外一个作为primary，它可能会分配一个新的offset，造成该数据重复<br>如果为此再设计一套consensus，得不偿失<br>解决办法：single writer，让上层应用保证不并发写</p>
 <h2 id="Colossus"><a href="#Colossus" class="headerlink" title="Colossus"></a>Colossus</h2><p>Colossus is specifically designed for BigTable, 没有GFS那么通用<br>In other words, it was built specifically for use with the new Caffeine search-indexing system, and though it may be used in some form with other Google services, it is not the sort of thing that is designed to span the entire Google infrastructure.</p>
@@ -359,11 +358,16 @@
 <li>metadata space has enabled availability analysis</li>
 </ul>
 <h2 id="BigTable"><a href="#BigTable" class="headerlink" title="BigTable"></a>BigTable</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bigtable.jpg?raw=true" alt="(row, column, time) -&gt; value"></p>
-<p>在有了GFS和Chubby后，Google就可以在上面搭建BigTable了<br>但BigTable论文对很多细节都没有提到：SSTable的实现、tabletserver的HA，B+数的metadata table算法</p>
+<p>在有了GFS和Chubby后，Google就可以在上面搭建BigTable了，一个GFS的索引服务<br>但BigTable论文对很多细节都没有提到：SSTable的实现、tabletserver的HA，B+数的metadata table算法</p>
 <p>为了管理巨大的table，按照row key做sharding，每个shard称为tablet(100-200MB，再大就split)，每台机器存储100-1000个tablet<br>row key是一级索引，column是二级索引，版本号(timestamp)是三级索引</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/tablet-write.png?raw=true" alt="redo log和SSTable都存放在GFS的Chubby管理元信息的分布式LSM Tree"></p>
 <p>tabletserver没有任何的持久化数据，只是操作memtable，真正的数据存放在哪里只有GFS知道，那为什么需要master在chubby上分配tablet给tabletserver?<br>因为memtable是有状态的: level0</p>
-<p>tabletserver的HA?<br>通过chubby ephemeral node，死了master会让别的server接管，通过GFS上的redo log恢复memtable</p>
+<p>tabletserver的HA?<br>通过chubby ephemeral node，死了master会让别的server接管，通过GFS上的redo log恢复memtable<br>为了保证强一致性系统，同一时刻同一份数据只能一台tabletserver服务，tabletserver对每个tablet是没有备份的<br>当它crash，由于只需要排序很少的操作日志并且加载服务的tablet的索引，宕机恢复可以做到一分钟以内；在此期间，一部分rowkey不可用</p>
+<p>split and migration?<br>在没有crash情况下，只需要修改metadata和从sstable加载索引数据，效率很高</p>
+<h3 id="与GFS的对应"><a href="#与GFS的对应" class="headerlink" title="与GFS的对应"></a>与GFS的对应</h3><ul>
+<li>commit log<br>每台机器一个commit log文件，与GFS File一一对应</li>
+<li>sstable<br>HBase中Column Family的名称会被作为文件系统中的目录名称，每个CF存储成一个HDFS的HFile<br>据google工作过的人说：Column Families are stored in their own SSTable，应该是这样<br>sstable对应一个GFS File<br>sstable block=64KB，它与GFS的block相同<br>sstable block为了压缩和索引(binary search)，GFS block为了checksum</li>
+</ul>
 <h3 id="Highlights"><a href="#Highlights" class="headerlink" title="Highlights"></a>Highlights</h3><h4 id="redo-log合并"><a href="#redo-log合并" class="headerlink" title="redo log合并"></a>redo log合并</h4><p>一台机器一个redo log，而不是一个tablet一个redo log(每个机器有100-1000个tablet)，否则GFS受不了<br>group commit</p>
 <p>带来的问题：恢复时麻烦了<br>如果一天机器crash了，它上面的tablets会被master分配到很多其他的tabletserver上<br>例如，分配到了100台新tabletserver，他们都会read redo log and filter，这样redo log被读了100次<br>解决办法：利用类似MapReduce机制，在recovery之前先给redo log排序 <table, rowkey,="" log="" sequence="" number=""></table,></p>
 <h4 id="加速tablet迁移"><a href="#加速tablet迁移" class="headerlink" title="加速tablet迁移"></a>加速tablet迁移</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">sourceTablet.miniorCompaction() // 把memtable里内容dump到GFS的SSTable</div><div class="line">sourceTablet.stopServe()</div><div class="line">sourceTablet.miniorCompaction() // 把in-flight commit log对应的操作也持久化到GFS</div><div class="line">                                // 这样targetTablet就不需要从commit log recover了</div><div class="line">master.doSwitch()</div></pre></td></tr></table></figure>
@@ -374,9 +378,10 @@
 <li>network corruption<br>通过给RPC增加checksum解决</li>
 <li>delay adding features until clear how it will be used<br>刚开始想给API增加一个通用的事务机制，后来发现大部分人只需要单行事务</li>
 <li>不仅监控server，也监控client<br>扩展了RPC，采样detailed trace of important actions</li>
-<li>设计和实现都要简单、明了<br>BigTable代码10万行<br>tabletserver的membership协议的设计，最初：master给tabletserver发lease<br>结果：在网络出问题时大大降低了可用性(master无法reach tabletserver就只能等expire)<br>改进：实现了更复杂的协议，也利用了Chubby里非常少见的特性<br>结果：大量时间在调试edge case，很多时间在调试Chubby的代码<br>最终：回到简单的设计，只依赖Chubby，而且只使用它通用的特性</li>
+<li>设计和实现都要简单、明了<br>BigTable代码10万行C++<br>tabletserver的membership协议的设计，最初：master给tabletserver发lease<br>结果：在网络出问题时大大降低了可用性(master无法reach tabletserver就只能等expire)<br>改进：实现了更复杂的协议，也利用了Chubby里非常少见的特性<br>结果：大量时间在调试edge case，很多时间在调试Chubby的代码<br>最终：回到简单的设计，只依赖Chubby，而且只使用它通用的特性</li>
 </ul>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a><br><a href="http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf" target="_blank" rel="external">http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf</a></p>
+<h3 id="Questions-1"><a href="#Questions-1" class="headerlink" title="Questions"></a>Questions</h3><p>按照rowkey来shard，那么可能造成hotspot问题，client端比较难控制</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a><br><a href="http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf" target="_blank" rel="external">http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf</a><br><a href="https://stephenholiday.com/notes/bigtable/" target="_blank" rel="external">https://stephenholiday.com/notes/bigtable/</a></p>
 
         
         </div>
@@ -387,7 +392,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5n58wlq000s7d5b75fwnajs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5nhpoh8000svb5bq0u06ogh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -520,7 +525,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5n58wo5004x7d5ba2ml0uxq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5nhpojm004rvb5b08ud4khd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -667,7 +672,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5n58wlr000u7d5b0qsrzonf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5nhpoh9000uvb5bv08rb5cl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -842,7 +847,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5n58wld000c7d5by9xvmhbj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5nhpogw000cvb5bl91322ey" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1014,7 +1019,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5n58wlj000n7d5bd4x8aiue" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5nhpoh2000nvb5b59idnq4o" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1185,7 +1190,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5n58wmb001n7d5bxxcxolbt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5nhpohs001ivb5bim9n1elr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1336,7 +1341,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5n58wn800387d5bdu1hjxfw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5nhpoio0034vb5bfhulwlfs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1463,7 +1468,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5n58wn400327d5badluoqk7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5nhpoio0032vb5bvq6cvk8q" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1591,7 +1596,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5n58wlx00167d5blpwsupm8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5nhpohk0018vb5bja2tafee" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1734,7 +1739,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5n58wn1002u7d5brcw4t9pr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5nhpoij002svb5byf41igd2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
