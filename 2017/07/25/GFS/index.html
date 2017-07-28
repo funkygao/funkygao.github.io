@@ -3,19 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>GFS evolution | Notes</title>
+    <title>GFS evolution and BigTable | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoint时，master">
+    <meta name="description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
 <meta name="keywords" content="storage">
 <meta property="og:type" content="article">
-<meta property="og:title" content="GFS evolution">
+<meta property="og:title" content="GFS evolution and BigTable">
 <meta property="og:url" content="http://funkygao.github.io/2017/07/25/GFS/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoint时，master">
-<meta property="og:updated_time" content="2017-07-27T09:21:24.000Z">
+<meta property="og:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/bigtable.jpg?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/tablet-write.png?raw=true">
+<meta property="og:updated_time" content="2017-07-28T05:58:19.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="GFS evolution">
-<meta name="twitter:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoint时，master">
+<meta name="twitter:title" content="GFS evolution and BigTable">
+<meta name="twitter:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/bigtable.jpg?raw=true">
     
 
     
@@ -206,7 +209,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            GFS evolution
+            GFS evolution and BigTable
         </h1>
     
 
@@ -236,7 +239,7 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="GFS"><a href="#GFS" class="headerlink" title="GFS"></a>GFS</h2><p>GFS，2001年开发出来，3个人，1年，论文发表于2003<br>BigTable，2003年开发出来</p>
+            <h2 id="GFS"><a href="#GFS" class="headerlink" title="GFS"></a>GFS</h2><p>GFS，2001年开发出来，3个人，1年，论文发表于2003<br>BigTable，2003年开发出来，论文发表于2006</p>
 <h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><ul>
 <li>replicated operation(redo) log with checkpoint to shadow masters<ul>
 <li>当时没有自动failover，全是人工操作DNS alias</li>
@@ -300,7 +303,7 @@
 <h4 id="chunk-hotspot问题"><a href="#chunk-hotspot问题" class="headerlink" title="chunk hotspot问题"></a>chunk hotspot问题</h4><p>MapReduce时，需要把代码发布到GFS，很可能小于64MB，即只有1个chunk，当很多mapper时，这个chunkserver就成为hotspot<br>解决办法是：增加replication factor</p>
 <p>但最终的解决方案是：client间P2P，互相读</p>
 <h4 id="master为什么不用Paxos"><a href="#master为什么不用Paxos" class="headerlink" title="master为什么不用Paxos?"></a>master为什么不用Paxos?</h4><p>master通过redo log sync replication来提高可靠性，但没有election过程，都是完全手工进行failover</p>
-<p>我猜，chubby当时还没有启动</p>
+<p>我猜，chubby当时还没有启动，chubby论文发表于2006</p>
 <h4 id="master为什么不持久化chunk-location"><a href="#master为什么不持久化chunk-location" class="headerlink" title="master为什么不持久化chunk location?"></a>master为什么不持久化chunk location?</h4><p>其他的metadata是有redo log replication并持久化的，他们的变化，都是主动产生的，例如创建一个文件，增加一个chunk<br>而由于chunkserver随时可能crash，不受控制，因此通过heartbeat来计算并存放内存，通过heartbeat，master又可以修正chunkserver的一些错误，例如orphan chunk</p>
 <h4 id="Data-flow为什么pipelined-chain，而不并发"><a href="#Data-flow为什么pipelined-chain，而不并发" class="headerlink" title="Data flow为什么pipelined chain，而不并发?"></a>Data flow为什么pipelined chain，而不并发?</h4><p>为了避免产生网络瓶颈，同时为了更充分利用high latency links<br>通过ip地址，感知chunkserver直接的距离</p>
 <p>Total Latency = (B/T) + (R*L)</p>
@@ -350,7 +353,7 @@
 <h3 id="latency问题"><a href="#latency问题" class="headerlink" title="latency问题"></a>latency问题</h3><p>GFS设计是只考虑吞吐率，而少考虑latency</p>
 <h4 id="error-recovery慢"><a href="#error-recovery慢" class="headerlink" title="error recovery慢"></a>error recovery慢</h4><p>如果write一个文件，需要写到3个chunkserver，如果其中一个卡住了或crash，master会发觉(heartbeat)，它会开新的一个chunkserver replica从其他chunkserver pull<br>master会把这个lock，以便新的client不能write(等恢复后再unlock)<br>而这个pullchunk操作，为了防止bandwidth burst，是有throttle的，限制在5-10MB/s，即一个64MB chunk，需要10s左右<br>等恢复到3个ok的时候再返回给client，client再继续write<br>在此过程中，client一直是block的</p>
 <h4 id="master-failover慢"><a href="#master-failover慢" class="headerlink" title="master failover慢"></a>master failover慢</h4><p>刚开始master failover完全靠人工，可能需要1h；后来增加了自动master failover，需要几分钟；再改进，可以在几秒钟内完成master自动切换</p>
-<h4 id="为吞吐量而设计的batch增加latency"><a href="#为吞吐量而设计的batch增加latency" class="headerlink" title="为吞吐量而设计的batch增加latency"></a>为吞吐量而设计的batch增加latency</h4><h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>BigTable是无法忍受那么高的延时的，它的transaction log是最大的瓶颈，存储在GFS：<br>2个log，一个慢，就切换到另外一个</p>
+<h4 id="为吞吐量而设计的batch增加latency"><a href="#为吞吐量而设计的batch增加latency" class="headerlink" title="为吞吐量而设计的batch增加latency"></a>为吞吐量而设计的batch增加latency</h4><h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>BigTable是无法忍受那么高的延时的，它的transaction log是最大的瓶颈，存储在GFS：<br>2个log，一个慢，就切换到另外一个，这2个log任意时刻只有1个active，并且log entry里有sequence号，以便replay时防重</p>
 <p>Gmail是多机房部署的，一个卡了，切到另外机房</p>
 <p>google使用这个request redundancy or timeout方法很广泛，为了解决search long tail latency，一样思路</p>
 <h3 id="consistency"><a href="#consistency" class="headerlink" title="consistency"></a>consistency</h3><p>client一直push the write till it succeeds<br>但如果中途client crash了，会造成中间状态：不同client读同一个文件，可能发现文件长度不同<br>解决办法：使用append，offset统一由primary管理</p>
@@ -361,6 +364,24 @@
 <li>EC</li>
 <li>client driven replication</li>
 <li>metadata space has enabled availability analysis</li>
+</ul>
+<h2 id="BigTable"><a href="#BigTable" class="headerlink" title="BigTable"></a>BigTable</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/bigtable.jpg?raw=true" alt="(row, column, time) -&gt; value"></p>
+<p>在有了GFS和Chubby后，Google就可以在上面搭建BigTable了<br>但BigTable论文对很多细节都没有提到：SSTable的实现、tabletserver的HA，B+数的metadata table算法</p>
+<p>为了管理巨大的table，按照row key做sharding，每个shard称为tablet(100-200MB，再大就split)，每台机器存储100-1000个tablet<br>row key是一级索引，column是二级索引，版本号(timestamp)是三级索引</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/tablet-write.png?raw=true" alt="redo log和SSTable都存放在GFS的Chubby管理元信息的分布式LSM Tree"></p>
+<p>tabletserver没有任何的持久化数据，只是操作memtable，真正的数据存放在哪里只有GFS知道，那为什么需要master在chubby上分配tablet给tabletserver?<br>因为memtable是有状态的: level0</p>
+<p>tabletserver的HA?<br>通过chubby ephemeral node，死了master会让别的server接管，通过GFS上的redo log恢复memtable</p>
+<h3 id="Highlights"><a href="#Highlights" class="headerlink" title="Highlights"></a>Highlights</h3><h4 id="redo-log合并"><a href="#redo-log合并" class="headerlink" title="redo log合并"></a>redo log合并</h4><p>一台机器一个redo log，而不是一个tablet一个redo log(每个机器有100-1000个tablet)，否则GFS受不了<br>group commit</p>
+<p>带来的问题：恢复时麻烦了<br>如果一天机器crash了，它上面的tablets会被master分配到很多其他的tabletserver上<br>例如，分配到了100台新tabletserver，他们都会read redo log and filter，这样redo log被读了100次<br>解决办法：利用类似MapReduce机制，在recovery之前先给redo log排序 <table, rowkey,="" log="" sequence="" number=""></table,></p>
+<h4 id="加速tablet迁移"><a href="#加速tablet迁移" class="headerlink" title="加速tablet迁移"></a>加速tablet迁移</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">sourceTablet.miniorCompaction() // 把memtable里内容dump到GFS的SSTable</div><div class="line">sourceTablet.stopServe()</div><div class="line">sourceTablet.miniorCompaction() // 把in-flight commit log对应的操作也持久化到GFS</div><div class="line">                                // 这样targetTablet就不需要从commit log recover了</div><div class="line">master.doSwitch()</div></pre></td></tr></table></figure>
+<h4 id="SSTable由多个64KB的block组成"><a href="#SSTable由多个64KB的block组成" class="headerlink" title="SSTable由多个64KB的block组成"></a>SSTable由多个64KB的block组成</h4><p>压缩以block为单位，虽然相比在整个SSTable上压缩比小(浪费空间)，但对于随机读，可以只uncompress block而非整个SSTable</p>
+<h3 id="经验和教训"><a href="#经验和教训" class="headerlink" title="经验和教训"></a>经验和教训</h3><p>遇到了新的问题</p>
+<ul>
+<li>发现了Chubby的bug</li>
+<li>network corruption<br>通过给RPC增加checksum解决</li>
+<li>delay adding features until clear how it will be used<br>刚开始想给API增加一个通用的事务机制，后来发现大部分人只需要单行事务</li>
+<li>不仅监控server，也监控client<br>扩展了RPC，采样detailed trace of important actions</li>
+<li>设计和实现都要简单、明了<br>BigTable代码10万行<br>tabletserver的membership协议的设计，最初：master给tabletserver发lease<br>结果：在网络出问题时大大降低了可用性(master无法reach tabletserver就只能等expire)<br>改进：实现了更复杂的协议，也利用了Chubby里非常少见的特性<br>结果：大量时间在调试edge case，很多时间在调试Chubby的代码<br>最终：回到简单的设计，只依赖Chubby，而且只使用它通用的特性</li>
 </ul>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a><br><a href="http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf" target="_blank" rel="external">http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf</a></p>
 
@@ -373,7 +394,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5lwaxy3000ski5b1skzezir" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5n58wlq000s7d5b75fwnajs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -488,7 +509,7 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/25/GFS/" class="title">GFS evolution</a></p>
+                            <p class="item-title"><a href="/2017/07/25/GFS/" class="title">GFS evolution and BigTable</a></p>
                             <p class="item-date"><time datetime="2017-07-25T06:39:34.000Z" itemprop="datePublished">2017-07-25</time></p>
                         </div>
                     </li>
