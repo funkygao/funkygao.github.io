@@ -5,19 +5,19 @@
     
     <title>GFS evolution and BigTable | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
+    <meta name="description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2004年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
 <meta name="keywords" content="storage">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GFS evolution and BigTable">
 <meta property="og:url" content="http://funkygao.github.io/2017/07/25/GFS/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
+<meta property="og:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2004年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/bigtable.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/tablet-write.png?raw=true">
-<meta property="og:updated_time" content="2017-07-28T09:03:06.000Z">
+<meta property="og:updated_time" content="2017-07-31T00:31:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GFS evolution and BigTable">
-<meta name="twitter:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2003年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
+<meta name="twitter:description" content="GFSGFS，2001年开发出来，3个人，1年，论文发表于2003BigTable，2004年开发出来，论文发表于2006 master replicated operation(redo) log with checkpoint to shadow masters 当时没有自动failover，全是人工操作DNS alias read请求可以使用shadow masters 生成checkpoi">
 <meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/bigtable.jpg?raw=true">
     
 
@@ -239,7 +239,7 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="GFS"><a href="#GFS" class="headerlink" title="GFS"></a>GFS</h2><p>GFS，2001年开发出来，3个人，1年，论文发表于2003<br>BigTable，2003年开发出来，论文发表于2006</p>
+            <h2 id="GFS"><a href="#GFS" class="headerlink" title="GFS"></a>GFS</h2><p>GFS，2001年开发出来，3个人，1年，论文发表于2003<br>BigTable，2004年开发出来，论文发表于2006</p>
 <h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><ul>
 <li>replicated operation(redo) log with checkpoint to shadow masters<ul>
 <li>当时没有自动failover，全是人工操作DNS alias</li>
@@ -388,7 +388,16 @@
 <li>设计和实现都要简单、明了<br>BigTable代码10万行C++<br>tabletserver的membership协议的设计，最初：master给tabletserver发lease<br>结果：在网络出问题时大大降低了可用性(master无法reach tabletserver就只能等expire)<br>改进：实现了更复杂的协议，也利用了Chubby里非常少见的特性<br>结果：大量时间在调试edge case，很多时间在调试Chubby的代码<br>最终：回到简单的设计，只依赖Chubby，而且只使用它通用的特性</li>
 </ul>
 <h3 id="Questions-1"><a href="#Questions-1" class="headerlink" title="Questions"></a>Questions</h3><p>按照rowkey来shard，那么可能造成hotspot问题，client端比较难控制</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a><br><a href="http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf" target="_blank" rel="external">http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf</a><br><a href="https://stephenholiday.com/notes/bigtable/" target="_blank" rel="external">https://stephenholiday.com/notes/bigtable/</a></p>
+<h2 id="2009-BigTable回顾"><a href="#2009-BigTable回顾" class="headerlink" title="2009 BigTable回顾"></a>2009 BigTable回顾</h2><p>部署了500+个BigTable集群，最大的机器：70+ PB data; sustained: 10M ops/sec; 30+ GB/s I/O</p>
+<ul>
+<li>Lots of work on scaling</li>
+<li>Improved performance isolation</li>
+<li>Improved protection against corruption</li>
+<li>Configure on per-table</li>
+<li>异地机房复制: 增加了最终一致性模型</li>
+<li>Coprocessor<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2></li>
+</ul>
+<p><a href="http://queue.acm.org/detail.cfm?id=1594206" target="_blank" rel="external">http://queue.acm.org/detail.cfm?id=1594206</a><br><a href="http://google-file-system.wikispaces.asu.edu/" target="_blank" rel="external">http://google-file-system.wikispaces.asu.edu/</a><br><a href="http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf" target="_blank" rel="external">http://static.usenix.org/publications/login/2010-08/openpdfs/maltzahn.pdf</a><br><a href="https://stephenholiday.com/notes/bigtable/" target="_blank" rel="external">https://stephenholiday.com/notes/bigtable/</a></p>
 
         
         </div>
@@ -399,7 +408,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5nhpoh8000svb5bq0u06ogh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5nnbs27000s3j5bfd2pb49s" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
