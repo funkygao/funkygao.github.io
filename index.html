@@ -401,7 +401,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5nnbs27000s3j5bfd2pb49s" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj5rf8foc000s0d5bkv3s7nnc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -534,7 +534,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5nnbs4r004v3j5bq1f4e83e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj5rf8fqs004v0d5bmzuw7g9k" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -681,7 +681,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5nnbs28000u3j5bg3clvc4c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj5rf8fod000u0d5b0k785ked" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -856,7 +856,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5nnbs1v000c3j5b16cl5bw7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj5rf8fo2000e0d5bg6hrmpmz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1028,7 +1028,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5nnbs22000n3j5bbb6vr7hk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj5rf8fo7000o0d5byqcx2o4d" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1161,7 +1161,8 @@
 <p>MapReduce能提供自动的并行执行，但这些东西80年代就已经在学术界研究了，并在80年代末出现了类似Teradata那样的商业产品</p>
 <h4 id="2-Record-Skew导致性能问题"><a href="#2-Record-Skew导致性能问题" class="headerlink" title="2. Record Skew导致性能问题"></a>2. Record Skew导致性能问题</h4><p>David J. DeWitt在并行数据库方向已经找到了解决方案，但MapReduce没有使用，好像skew问题根本不存在一样：<br>Map阶段，相同key的记录数量是不均衡的，这就导致Reduce阶段，有的reduce快、有的慢，最终Job的执行时间取决于最慢的那一个</p>
 <h4 id="3-吞吐率和IO问题"><a href="#3-吞吐率和IO问题" class="headerlink" title="3. 吞吐率和IO问题"></a>3. 吞吐率和IO问题</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// map=1000 reduce=500</div><div class="line">1000个map实例，每个map进程都会创建500个本地文件</div><div class="line">reduce阶段，每个reduce都会到1000个map机器上PULL file</div><div class="line">这会导致每个map机器上500个文件进行大量的random IO</div></pre></td></tr></table></figure>
-<p>而并行数据库，采用的是PUSH模型。而MapReduce要修改成PUSH模型是比较困难的，因为它的HA非常依赖它目前的PULL模型</p>
+<p>而并行数据库，采用的是PUSH模型。而MapReduce要修改成PUSH模型是比较困难的，因为它的HA非常依赖它目前的PULL模型<br>MapReduce uses a pull model for moving data between Mappers and Reducers</p>
+<p>(Jeff:<br>承认了这个问题的存在。但google在实现的时候，通过batching, sorting, grouping of intermediate data and smart scheduling of reads缓解了这个问题<br>只所以使用PULL MODEL，是考虑到容错。大部分MR Job都会遇到几次错误，除了硬件、软件错误外，Google内部的调度系统是抢占式的：它可能会把M/R kill以疼出资源给更高优先级的进程，如果PUSH，那么就需要重新执行所有的Map任务)</p>
 <h3 id="MapReduce并不新颖"><a href="#MapReduce并不新颖" class="headerlink" title="MapReduce并不新颖"></a>MapReduce并不新颖</h3><p>他们以为他们发现了一个解决大数据处理的新模式，实际上20年前就有了</p>
 <p>“Application of Hash to Data Base Machine and Its Architecture”/1983，是第一个提出把大数据集切分成小数据集的<br>Teradata使用MapReduce同样的技术卖他们的商业产品已经20多年了</p>
 <p>就算MapReduce允许用户自己写map/reduce来控制，80年代中期的POSTGRES系统就支持用户自定义函数</p>
@@ -1189,7 +1190,14 @@
 <li>数据库那些人的问题：什么东西都是数据库</li>
 <li>作者应该再写个“Airplanes: A major step backward”</li>
 </ul>
-<h2 id="Jeff-Dean在ACM-of-communication上面的回馈"><a href="#Jeff-Dean在ACM-of-communication上面的回馈" class="headerlink" title="Jeff Dean在ACM of communication上面的回馈"></a>Jeff Dean在ACM of communication上面的回馈</h2>
+<h2 id="Jeff-Dean在ACM-of-communication上面的回馈"><a href="#Jeff-Dean在ACM-of-communication上面的回馈" class="headerlink" title="Jeff Dean在ACM of communication上面的回馈"></a>Jeff Dean在ACM of communication上面的回馈</h2><p><a href="http://cs.smith.edu/dftwiki/images/3/3c/MapReduceFlexibleDataProcessingTool.pdf" target="_blank" rel="external">http://cs.smith.edu/dftwiki/images/3/3c/MapReduceFlexibleDataProcessingTool.pdf</a></p>
+<ul>
+<li>MR可以通过实现Reader/Writer来支持更多的存储系统<br>而并行数据库，必须要把数据load进系统后才能开始计算</li>
+<li>MR可以使用index，它并不一定总是full table scan</li>
+<li>MR可以完成比SQL更复杂的查询<br>UDF可以帮助DBMS，但目前商业产品上的实现要么缺功能，要么buggy</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://database.cs.brown.edu/projects/mapreduce-vs-dbms/" target="_blank" rel="external">http://database.cs.brown.edu/projects/mapreduce-vs-dbms/</a></p>
+
         
         </div>
         <footer class="article-footer">
@@ -1199,7 +1207,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5nnbs2q001i3j5bhwscata2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj5rf8fou001i0d5bxk0ya3z8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1350,7 +1358,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5nnbs3p00343j5bqvpu2feb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj5rf8fpq00340d5b76bxygo1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1477,7 +1485,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5nnbs3o00323j5bj38l0kr0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/committee/" data-id="cj5rf8fpq00320d5b4ffaz4aa" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1605,7 +1613,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5nnbs2k00183j5bpzdcu1nt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/LINQ/" data-id="cj5rf8fom00180d5biprgf48b" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1748,7 +1756,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5nnbs3i002s3j5b90atvlvq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/14/bigdata/" data-id="cj5rf8fpn002u0d5bqgx74riu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
