@@ -3,21 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>DB Storage Structures | Notes</title>
+    <title>Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="KV任何storage structure，数据都可以用k=&amp;gt;v来表示，不仅NoSQL，RDBMS也一样例如InnoDB的primary key就是1primary_key =&amp;gt; [column1, column2, ...] secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性 B">
-<meta name="keywords" content="storage">
-<meta property="og:type" content="article">
-<meta property="og:title" content="DB Storage Structures">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/22/DB-Storage-Structures/index.html">
+    <meta property="og:type" content="website">
+<meta property="og:title" content="Notes">
+<meta property="og:url" content="http://funkygao.github.io/page/10/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="KV任何storage structure，数据都可以用k=&amp;gt;v来表示，不仅NoSQL，RDBMS也一样例如InnoDB的primary key就是1primary_key =&amp;gt; [column1, column2, ...] secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性 B">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/btree.png?raw=true">
-<meta property="og:updated_time" content="2017-07-13T01:22:59.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="DB Storage Structures">
-<meta name="twitter:description" content="KV任何storage structure，数据都可以用k=&amp;gt;v来表示，不仅NoSQL，RDBMS也一样例如InnoDB的primary key就是1primary_key =&amp;gt; [column1, column2, ...] secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性 B">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/btree.png?raw=true">
+<meta name="twitter:title" content="Notes">
     
 
     
@@ -200,15 +193,16 @@
 </aside>
 
             
-            <section id="main"><article id="post-DB-Storage-Structures" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main">
+    <article id="post-2PL" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
             <header class="article-header">
                 
     
-        <h1 class="article-title" itemprop="name">
-            DB Storage Structures
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/11/2PL/">两段锁 2PL</a>
         </h1>
     
 
@@ -217,8 +211,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/22/DB-Storage-Structures/">
-            <time datetime="2017-06-22T09:13:42.000Z" itemprop="datePublished">2017-06-22</time>
+        <a href="/2017/05/11/2PL/">
+            <time datetime="2017-05-11T07:33:41.000Z" itemprop="datePublished">2017-05-11</time>
         </a>
     </div>
 
@@ -227,7 +221,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
+        <a class="tag-link" href="/tags/database/">database</a>
     </div>
 
                     </div>
@@ -238,16 +232,16 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="KV"><a href="#KV" class="headerlink" title="KV"></a>KV</h2><p>任何storage structure，数据都可以用k=&gt;v来表示，不仅NoSQL，RDBMS也一样<br>例如InnoDB的primary key就是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">primary_key =&gt; [column1, column2, ...]</div></pre></td></tr></table></figure></p>
-<p>secondary index也一样，因此在insert/update时有index maintaenance overhead，保持各个index的一致性</p>
-<h2 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B-Tree"></a>B-Tree</h2><p>Designed for optimal data retrieval performance, not data storage.</p>
-<p>RDBMS, LMDB, MongoDB</p>
-<p>充分利用了read ahead技术</p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/btree.png?raw=true" alt="btree throughput"></p>
-<h2 id="LSM-Hash-Table"><a href="#LSM-Hash-Table" class="headerlink" title="LSM Hash Table"></a>LSM Hash Table</h2><p>bitcask</p>
-<p>不支持range，所有index在内存的hash table里<br>算是一个简化版的LSM-Tree</p>
-<h2 id="LSM-Tree"><a href="#LSM-Tree" class="headerlink" title="LSM-Tree"></a>LSM-Tree</h2><p>每个SSTable的bloom filter只能帮助individual key lookup，对range query没用</p>
-<h2 id="Fractal-Tree"><a href="#Fractal-Tree" class="headerlink" title="Fractal-Tree"></a>Fractal-Tree</h2><p>与B-Tree类似，但通过buffer changes/data compression大大降低了disk random IO<br><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.76.762&amp;rep=rep1&amp;type=pdf" target="_blank" rel="external">http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.76.762&amp;rep=rep1&amp;type=pdf</a></p>
+            <p>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段</p>
+<p>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件</p>
+<p>MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC</p>
+<p>MySQL 2PL提供2种锁</p>
+<ul>
+<li>shared(read)</li>
+<li>exclusive(write)</li>
+</ul>
+<p>读写互斥，但读读不互斥</p>
+<p>MySQL serialized isolation<br><img src="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true" alt="2pl"></p>
 
         
         </div>
@@ -258,7 +252,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/22/DB-Storage-Structures/" data-id="cj5rik1fq000h895bas9suu34" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj5rik1fc0005895bk0vnupgw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -326,48 +320,19 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/22/DB-Storage-Structures/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/22/DB-Storage-Structures/">Comments</a>
+        <a href="http://funkygao.github.io/2017/05/11/2PL/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/2PL/">Comments</a>
     
 
         </footer>
     </div>
     
-        
-<nav id="article-nav">
-    
-        <a href="/2017/06/23/nagles-and-delayed-ack/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    nagles and delayed ack
-                
-            </div>
-        </a>
-    
-    
-        <a href="/2017/06/22/KafkaStreams/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">Kafka Streams</div>
-        </a>
-    
-</nav>
-
-
-    
 </article>
 
 
-    
-    <section id="comments">
-    
-        
-    <div id="disqus_thread">
-        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
 
-    
-    </section>
-
+    <nav id="page-nav">
+        <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span>
+    </nav>
 </section>
             
                 <aside id="sidebar">
@@ -478,13 +443,11 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/22/DB-Storage-Structures/';
-        
-        this.page.identifier = 'DB-Storage-Structures';
+        this.page.identifier = 'undefined';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/count.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();

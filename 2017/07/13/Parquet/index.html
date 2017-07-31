@@ -3,19 +3,21 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Parquet (TODO) | Notes</title>
+    <title>RCFile, Parquet, Dremel | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="hadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dramel的Parquet Data placement for MapReduce  row store column store hybrid PAX store  logical view -&amp;gt; storage -&amp;gt; physical view RCFile">
+    <meta name="description" content="Overviewhadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dremel的Parquet Data placement for MapReduce  row store column store hybrid PAX store  RCFile - Record Columnar File一种PAX的实现：Table先水平">
 <meta name="keywords" content="storage">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Parquet (TODO)">
+<meta property="og:title" content="RCFile, Parquet, Dremel">
 <meta property="og:url" content="http://funkygao.github.io/2017/07/13/Parquet/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="hadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dramel的Parquet Data placement for MapReduce  row store column store hybrid PAX store  logical view -&amp;gt; storage -&amp;gt; physical view RCFile">
-<meta property="og:updated_time" content="2017-07-17T06:24:38.000Z">
+<meta property="og:description" content="Overviewhadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dremel的Parquet Data placement for MapReduce  row store column store hybrid PAX store  RCFile - Record Columnar File一种PAX的实现：Table先水平">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/rcfile.png?raw=true">
+<meta property="og:updated_time" content="2017-07-31T07:45:31.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Parquet (TODO)">
-<meta name="twitter:description" content="hadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dramel的Parquet Data placement for MapReduce  row store column store hybrid PAX store  logical view -&amp;gt; storage -&amp;gt; physical view RCFile">
+<meta name="twitter:title" content="RCFile, Parquet, Dremel">
+<meta name="twitter:description" content="Overviewhadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dremel的Parquet Data placement for MapReduce  row store column store hybrid PAX store  RCFile - Record Columnar File一种PAX的实现：Table先水平">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/rcfile.png?raw=true">
     
 
     
@@ -146,7 +148,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                89
+                91
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -206,7 +208,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            Parquet (TODO)
+            RCFile, Parquet, Dremel
         </h1>
     
 
@@ -236,19 +238,20 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p>hadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dramel的Parquet</p>
+            <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>hadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dremel的Parquet</p>
 <p>Data placement for MapReduce</p>
 <ul>
 <li>row store</li>
 <li>column store</li>
 <li>hybrid PAX store</li>
 </ul>
-<p>logical view -&gt; storage -&gt; physical view</p>
-<h2 id="RCFile-Record-Columnar-File"><a href="#RCFile-Record-Columnar-File" class="headerlink" title="RCFile - Record Columnar File"></a>RCFile - Record Columnar File</h2><p>是一种PAX的实现：Table先水平切分成多个row group，每个row group再垂直切分到不同的column<br>这样保证一个row的数据都位于一个block(避免一个row要读取多个block)，列与列的数据在磁盘上是连续的存储块</p>
-<p>RCFile是一种“允许按行查询，提供了列存储的压缩效率”的混合列存储格式。它的</p>
-<p>解决嵌套的schema结构化存储问题，跟google dramel类似<br>在行式存储中一行的多列是连续的写在一起的，在列式存储中数据按列分开存储</p>
-<p>核心思想是使用“record shredding and assembly algorithm”来表示复杂的嵌套数据类型</p>
-<p>Parquet格式的存储中，一个schema的树结构有几个叶子节点，实际的存储中就会有多少column</p>
+<h2 id="RCFile-Record-Columnar-File"><a href="#RCFile-Record-Columnar-File" class="headerlink" title="RCFile - Record Columnar File"></a>RCFile - Record Columnar File</h2><p>一种PAX的实现：Table先水平切分成多个row group，每个row group再垂直切分到不同的column<br>这样保证一个row的数据都位于一个block(避免一个row要读取多个block)，列与列的数据在磁盘上是连续的存储块</p>
+<p>table = RCFile -&gt; block -&gt; row group -&gt; (sync marker, metadata header(RLE), column store(gzip))</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/rcfile.png?raw=true" alt="rcfile"></p>
+<p>For a table, all row groups have the same size.</p>
+<p>ql/src/java/org/apache/hadoop/hive/ql/io/RCFile.java</p>
+<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE demo_t (</div><div class="line">  datatime string,</div><div class="line">  section string,</div><div class="line">  domain string,</div><div class="line">  province string,</div><div class="line">  city string,</div><div class="line">  idc string)</div><div class="line">STORED AS RCFILE;</div></pre></td></tr></table></figure>
+<h2 id="ORCFile"><a href="#ORCFile" class="headerlink" title="ORCFile"></a>ORCFile</h2><h2 id="Parquet"><a href="#Parquet" class="headerlink" title="Parquet"></a>Parquet</h2><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf" target="_blank" rel="external">http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf</a><br><a href="http://www.ece.eng.wayne.edu/~sjiang/ECE7650-winter-14/Topic3-RCFile.pdf" target="_blank" rel="external">http://www.ece.eng.wayne.edu/~sjiang/ECE7650-winter-14/Topic3-RCFile.pdf</a></p>
 
         
         </div>
@@ -259,7 +262,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj5acm3eh001og75bm47sszhb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj5rrqtto005r895br06w399t" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -383,8 +386,35 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/25/GFS/" class="title">GFS evolution and BigTable</a></p>
+                            <p class="item-date"><time datetime="2017-07-25T06:39:34.000Z" itemprop="datePublished">2017-07-25</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/19/replication/" class="title">replication models</a></p>
+                            <p class="item-date"><time datetime="2017-07-19T11:12:26.000Z" itemprop="datePublished">2017-07-19</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/07/19/Google-container-evolution/" class="title">Google container evolution</a></p>
                             <p class="item-date"><time datetime="2017-07-19T01:45:30.000Z" itemprop="datePublished">2017-07-19</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/18/Ceph/" class="title">Ceph Internals</a></p>
+                            <p class="item-date"><time datetime="2017-07-18T07:27:20.000Z" itemprop="datePublished">2017-07-18</time></p>
                         </div>
                     </li>
                 
@@ -397,33 +427,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/17/MapReduce-A-major-step-backwards/" class="title">MapReduce - A major step backwards</a></p>
-                            <p class="item-date"><time datetime="2017-07-17T06:19:27.000Z" itemprop="datePublished">2017-07-17</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/17/conferences-and-journals/" class="title">conferences and journals</a></p>
-                            <p class="item-date"><time datetime="2017-07-17T05:48:21.000Z" itemprop="datePublished">2017-07-17</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/17/committee/" class="title">committee</a></p>
-                            <p class="item-date"><time datetime="2017-07-17T05:48:06.000Z" itemprop="datePublished">2017-07-17</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -433,7 +436,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">10</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">37</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -442,7 +445,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
@@ -451,7 +454,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 15px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.75px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
         </div>
     </div>
 

@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                90
+                91
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,146 @@
 
             
             <section id="main">
+    <article id="post-Parquet" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/07/13/Parquet/">RCFile, Parquet, Dremel</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/07/13/Parquet/">
+            <time datetime="2017-07-13T02:12:54.000Z" itemprop="datePublished">2017-07-13</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>hadoop的存储格式：TextFile, SequenceFile, Hive优化的RCFile, 类似google dremel的Parquet</p>
+<p>Data placement for MapReduce</p>
+<ul>
+<li>row store</li>
+<li>column store</li>
+<li>hybrid PAX store</li>
+</ul>
+<h2 id="RCFile-Record-Columnar-File"><a href="#RCFile-Record-Columnar-File" class="headerlink" title="RCFile - Record Columnar File"></a>RCFile - Record Columnar File</h2><p>一种PAX的实现：Table先水平切分成多个row group，每个row group再垂直切分到不同的column<br>这样保证一个row的数据都位于一个block(避免一个row要读取多个block)，列与列的数据在磁盘上是连续的存储块</p>
+<p>table = RCFile -&gt; block -&gt; row group -&gt; (sync marker, metadata header(RLE), column store(gzip))</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/rcfile.png?raw=true" alt="rcfile"></p>
+<p>For a table, all row groups have the same size.</p>
+<p>ql/src/java/org/apache/hadoop/hive/ql/io/RCFile.java</p>
+<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE demo_t (</div><div class="line">  datatime string,</div><div class="line">  section string,</div><div class="line">  domain string,</div><div class="line">  province string,</div><div class="line">  city string,</div><div class="line">  idc string)</div><div class="line">STORED AS RCFILE;</div></pre></td></tr></table></figure>
+<h2 id="ORCFile"><a href="#ORCFile" class="headerlink" title="ORCFile"></a>ORCFile</h2><h2 id="Parquet"><a href="#Parquet" class="headerlink" title="Parquet"></a>Parquet</h2><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf" target="_blank" rel="external">http://web.cse.ohio-state.edu/hpcs/WWW/HTML/publications/papers/TR-11-4.pdf</a><br><a href="http://www.ece.eng.wayne.edu/~sjiang/ECE7650-winter-14/Topic3-RCFile.pdf" target="_blank" rel="external">http://www.ece.eng.wayne.edu/~sjiang/ECE7650-winter-14/Topic3-RCFile.pdf</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj5rrqtto005r895br06w399t" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/07/13/Parquet/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/13/Parquet/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-bitcask" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -256,7 +396,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5rf8fpl002s0d5beeloneia" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5rik1hr002v895bup9pkdrd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -472,7 +612,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5rf8fqp004p0d5b5mcr7jvq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5rik1jq004w895bg3w7mpff" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -607,7 +747,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5rf8fot001g0d5bq2sijpjx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5rik1gm001g895bt4pkqe0r" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -765,7 +905,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj5rf8fpg002j0d5bwj6gm5e2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj5rik1hh002k895bbugbqmxv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -944,7 +1084,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj5rf8fq2003m0d5bpex4bse5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj5rik1ie003n895be7j5mn1i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1073,7 +1213,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cj5rf8fpp00300d5bq8fn8px3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cj5rik1hu0031895br772fv76" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1200,7 +1340,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj5rf8fq9003y0d5bc2b13h8r" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj5rik1in003z895b1jzox0dl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1341,7 +1481,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj5rf8fp900250d5b8ujtomng" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj5rik1h60027895bw4apfkii" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1475,7 +1615,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cj5rf8fns00050d5bogael8rl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cj5rik1fe0006895bes90pepu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1553,144 +1693,8 @@
 
 
 
-    <article id="post-NILFS" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/26/NILFS/">NILFS</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/26/NILFS/">
-            <time datetime="2017-06-26T10:49:36.000Z" itemprop="datePublished">2017-06-26</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/misc/">misc</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h2><p>New Implementation of a Log-Structured File System，included in Linux 2.6.30 kernel</p>
-<ul>
-<li>take snapshot非常简单，只要记录一下version就可以了</li>
-<li>尤其在随机的小文件读写效率更高</li>
-<li>在SSD上，NILFS2具有绝对性能优势</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">insmod nilfs2.ko </div><div class="line">mkfs – t nilfs2 /dev/sda8 </div><div class="line">mount – t nilfs2 /nilfs /dev/sda8</div></pre></td></tr></table></figure>
-<h2 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/smallfile.png?raw=true" alt="small file"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/largefile.png?raw=true" alt="large file"></p>
-<h2 id="vs-Journal-File-System"><a href="#vs-Journal-File-System" class="headerlink" title="vs Journal File System"></a>vs Journal File System</h2><p>JFS保存在日志里的只有metadata，而LFS利用日志记录一切</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.linux-mag.com/id/7345/" target="_blank" rel="external">http://www.linux-mag.com/id/7345/</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cj5rf8foz001q0d5bbpv2vuzc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/26/NILFS/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/26/NILFS/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
-        <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+        <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
     </nav>
 </section>
             
@@ -1756,7 +1760,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1765,7 +1769,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 

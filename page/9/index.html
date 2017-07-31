@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                90
+                91
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,154 @@
 
             
             <section id="main">
+    <article id="post-LSM" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/16/LSM/">LSM for SSD</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/16/LSM/">
+            <time datetime="2017-05-16T01:33:59.000Z" itemprop="datePublished">2017-05-16</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/leveldb.png?raw=true" alt="leveldb"></p>
+<ul>
+<li>(immutable)memtable: sorted skiplist</li>
+<li>SSTable: sorted string table</li>
+<li>L0里的SSTable们，key可能会overlap，因为他们是直接从immutable memtable刷出来的</li>
+</ul>
+<h3 id="SSTable-file"><a href="#SSTable-file" class="headerlink" title="SSTable file"></a>SSTable file</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+-------------------+-------------------------+------------+</div><div class="line">| index block(16KB) | bloom-filter block(4KB) | data block |</div><div class="line">+-------------------+-------------------------+------------+</div></pre></td></tr></table></figure>
+<h3 id="Get-key"><a href="#Get-key" class="headerlink" title="Get(key)"></a>Get(key)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">locate key in memtable</div><div class="line">if found then return</div><div class="line">locate key in immutable memtable</div><div class="line">if found then return</div><div class="line">for level:=0; level&lt;=6; level++ &#123;</div><div class="line">    // 对于level0，需要遍历所有SSTable，因为keys overlap</div><div class="line">    // 但leveldb为了解决这个问题，除了Bloomfilter，也限制了L0的文件数量，一旦超过8，就compact(L0-&gt;L1)</div><div class="line">    // 对于其他level，由于已经sorted，可以直接定位SSTable</div><div class="line">    //</div><div class="line">    // 最坏情况下，Get(key)需要读8个L0以及L1-L6，共14个文件</div><div class="line">    locate key in SSTable in $level </div><div class="line">    if found then return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="SSD"><a href="#SSD" class="headerlink" title="SSD"></a>SSD</h2><p>主流SSD，例如<a href="http://www.anandtech.com/show/10754/samsung-960-pro-ssd-review" target="_blank" rel="external">Samsung 960 Pro</a>，可以提供440K/s random read<br>with block size=4KB</p>
+<p>LSM是为传统硬盘设计的，在SSD下，可以做优化，不必过分担心随机读</p>
+<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h2><p>LSM-Tree的主要成本都在compaction(merge sort)，造成IO放大(50倍)</p>
+<ul>
+<li>读很多文件到内存</li>
+<li>排序</li>
+<li>再写回到磁盘</li>
+</ul>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/ioamplification.png?raw=true" alt="io"></p>
+<p>要优化compaction，可以把LSM Tree变小，RocksDB是通过压缩实现的</p>
+<p>在SSD下，可以考虑把key和value分离，在LSM Tree里只保存sorted key和pointer(value)，value直接保存在WAL里</p>
+<p>key: 16B<br>pointer(value): 16B</p>
+<p>2M个k/v，需要64MB<br>2B个k/v，需要64GB</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf" target="_blank" rel="external">https://www.usenix.org/system/files/conference/fast16/fast16-papers-lu.pdf</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/16/LSM/" data-id="cj5rik1gj001d895baegmhzcb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/16/LSM/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/16/LSM/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-InnoDB-MVCC" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -270,7 +418,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj5rf8foe000y0d5b6ouwvvrm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/InnoDB-MVCC/" data-id="cj5rik1g4000y895bcqqwxytt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -397,7 +545,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj5rf8fqk004e0d5bzjyr3t3s" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/16/microservice-transaction/" data-id="cj5rik1jf004h895biacnyf42" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -605,7 +753,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj5rf8frc005b0d5by7hfh430" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cj5rik1k1005e895b10pgnvwr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -737,7 +885,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj5rf8fpu00380d5bki4x378u" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cj5rik1i20039895bk0kbkmit" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -887,7 +1035,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj5rf8fqr004t0d5b4zl3i4ip" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cj5rik1jp004t895blky0ympl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1019,7 +1167,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj5rf8fpv003a0d5b39urjzlp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cj5rik1i4003d895bboa5uc1k" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1146,7 +1294,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj5rf8fqv00510d5b5790t8im" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cj5rik1jv0054895bdv6wsr0e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1331,7 +1479,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj5rf8fqn004i0d5bqlg966ik" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj5rik1ji004j895bh3vmyays" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1463,7 +1611,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj5rf8fqq004r0d5b2y0kvqud" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj5rik1jn004p895bbtfyndmh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1541,144 +1689,8 @@
 
 
 
-    <article id="post-2PL" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/11/2PL/">两段锁 2PL</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/11/2PL/">
-            <time datetime="2017-05-11T07:33:41.000Z" itemprop="datePublished">2017-05-11</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段</p>
-<p>事务遵守两段锁协议是可串行化调度的充分条件，而不是必要条件</p>
-<p>MS SQL Server默认采用2PL实现isolation，Oralce/PostgreSQL/MySQL InnoDB默认使用MVCC</p>
-<p>MySQL 2PL提供2种锁</p>
-<ul>
-<li>shared(read)</li>
-<li>exclusive(write)</li>
-</ul>
-<p>读写互斥，但读读不互斥</p>
-<p>MySQL serialized isolation<br><img src="https://github.com/funkygao/blogassets/blob/master/img/phantomread2plmysql1.png?raw=true" alt="2pl"></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj5rf8fnq00040d5b6niya77w" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/11/2PL/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/11/2PL/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
-        <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span>
+        <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
     </nav>
 </section>
             
@@ -1744,7 +1756,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1753,7 +1765,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 

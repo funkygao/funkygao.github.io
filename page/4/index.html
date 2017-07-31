@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                90
+                91
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,139 @@
 
             
             <section id="main">
+    <article id="post-HDD-Stats-Q1-2017" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/14/HDD-Stats-Q1-2017/">HDD Stats Q1 2017</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/14/HDD-Stats-Q1-2017/">
+            <time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true" alt="HDD Fail Rate"></p>
+<h2 id="Backblaze-Storage-Pod"><a href="#Backblaze-Storage-Pod" class="headerlink" title="Backblaze Storage Pod"></a>Backblaze Storage Pod</h2><p>把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS<br>没有iSCSI，没有NFS，没有Fibre Channel<br>180TB成本$9,305，即每GB $0.0517</p>
+<p><img src="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg" alt="storage pod"></p>
+<h2 id="Backblze-Vaults-cloud-backup-service"><a href="#Backblze-Vaults-cloud-backup-service" class="headerlink" title="Backblze Vaults cloud backup service"></a>Backblze Vaults cloud backup service</h2><p>99.999999% annual durability<br>已经存储150PB，由1000个Storage Pod组成，40,000块盘，每天有10块盘损坏</p>
+<p>每个Vault由20个Storage Pod组成，每个Pod有45块盘，即每个Vault有900块盘，一块盘如果是4TB，那么每个Vault可以存3.6PB<br>每个磁盘使用ext4文件系统，每个Vault有个7位数字id，例如555-1021，前3位代表data center id，后4位是vault id<br>有个类似name service的服务，client备份前先request name service获取vault id，之后client直接与相应的vault进行backup IO(https)<br><img src="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg" alt="pod"></p>
+<p>每个文件被分成20 shards = 17 data shars + 3 parity shards，存放在ext4<br>每个shard有checksum，如果损坏，可以从其他17个shards恢复<br>如果某个Vault有1个pod crash了，backup write的parity会变成2，如果3个pod坏了，那么也可以写，但parity就不存在了，如果此时再坏一个pod，数据无法恢复了</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/vault-cloud-storage-architecture/" target="_blank" rel="external">https://www.backblaze.com/blog/vault-cloud-storage-architecture/</a><br><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cj5rik1g2000w895b6ssomz1t" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-erasure-coding" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -247,7 +380,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj5rf8fpw003e0d5b3s8hadhu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/erasure-coding/" data-id="cj5rik1i6003f895b1ia142zt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -402,7 +535,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj5rf8fqa00400d5bcy0i4nr7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/kafka-ext4/" data-id="cj5rik1j50043895b4xrj9sz4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -547,7 +680,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj5rf8fpz003k0d5bbr32ztv8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/12/fs-atomic-and-ordering/" data-id="cj5rik1ia003l895bweljus7j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -676,7 +809,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj5rf8fpd002c0d5bazdch0zp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/09/WOL/" data-id="cj5rik1hb002c895bvw88a2ga" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -805,7 +938,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj5rf8fp7001x0d5b7fzrcgv8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/SDT/" data-id="cj5rik1h1001x895baqaoanhd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -936,7 +1069,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj5rf8fr900530d5ba73c2p3e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/socket-recv-buffer/" data-id="cj5rik1jw0056895bh2af41pc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1063,7 +1196,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj5rf8fq5003q0d5bxwmdci8q" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj5rik1ih003r895ba0t6iinw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1290,7 +1423,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj5rf8fo9000r0d5byj0t4c5x" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj5rik1fw000p895bsv5epz9c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1422,7 +1555,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/" data-id="cj5rf8fog00110d5bb4o0x543" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/" data-id="cj5rik1g60011895bmfbfep5p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1500,142 +1633,8 @@
 
 
 
-    <article id="post-facebook-Mystery-Machine" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/05/facebook-Mystery-Machine/">facebook Mystery Machine</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/05/facebook-Mystery-Machine/">
-            <time datetime="2017-06-05T01:49:00.000Z" itemprop="datePublished">2017-06-05</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/cloud/">cloud</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Data-Flow"><a href="#Data-Flow" class="headerlink" title="Data Flow"></a>Data Flow</h2><p>consistent sampling</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">local log --&gt; Scribe --&gt; Hive --&gt; UberTrace --&gt; UI</div></pre></td></tr></table></figure>
-<h2 id="Log-Schema"><a href="#Log-Schema" class="headerlink" title="Log Schema"></a>Log Schema</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">request id</div><div class="line">host id</div><div class="line">host-local timestamp</div><div class="line">unique event label(event name, task name)</div></pre></td></tr></table></figure>
-<h2 id="Timestamp-Normalize"><a href="#Timestamp-Normalize" class="headerlink" title="Timestamp Normalize"></a>Timestamp Normalize</h2><ul>
-<li>不考虑local clock skew</li>
-<li>假设client/server间的RTT是对称的</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Client        Server</div><div class="line"> 1|------------&gt;|</div><div class="line">  |             |--+1.1</div><div class="line">  |             |  | logic</div><div class="line">  |             |&lt;-+1.2</div><div class="line"> 2|&lt;------------|</div><div class="line"></div><div class="line">1.2 - 1.1 = 0.1</div><div class="line">2 - 1 = 1.0</div><div class="line">RTT = (1.0 - 0.1)/2 = 0.45</div><div class="line"></div><div class="line">clock(1.1) = 1 + 0.45 = 1.45</div><div class="line">clock(1.2) = 1.45 + 0.1 = 1.55</div><div class="line"></div><div class="line">RTT是个经验值，根据大量的trace后稳定下来: 使用最小值</div></pre></td></tr></table></figure>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/" data-id="cj5rf8fpy003i0d5b5x99txsm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
-        <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
+        <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
     </nav>
 </section>
             
@@ -1701,7 +1700,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">12</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1710,7 +1709,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
