@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/06/14/2PC-failures/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="Node Failure Models fail-stopcrash and never recover fail-recovercrash and later recover byzantine failure  Cases2 phase commit，n个节点，那么需要3n个消息交换  coordinator发送proposal后crash  有的node收到，有的没收到 收到Proposal">
-<meta property="og:updated_time" content="2017-06-14T09:15:52.000Z">
+<meta property="og:updated_time" content="2017-08-01T01:14:54.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="2 phase commit failures">
 <meta name="twitter:description" content="Node Failure Models fail-stopcrash and never recover fail-recovercrash and later recover byzantine failure  Cases2 phase commit，n个节点，那么需要3n个消息交换  coordinator发送proposal后crash  有的node收到，有的没收到 收到Proposal">
@@ -253,6 +253,11 @@
 <li><p>worse case<br>coordinator本身也是participant</p>
 </li>
 </ul>
+<h2 id="3PC"><a href="#3PC" class="headerlink" title="3PC"></a>3PC</h2><p>在propose和commit这2个phase中间，加了个prepare to commit</p>
+<ul>
+<li>如果coordinator在prepare to commit或者proposal阶段crash<br>trx aborted</li>
+<li>如果coordinator在commit阶段crash<br>nodes will timeout waiting for the commit phase and commit the trx</li>
+</ul>
 
         
         </div>
@@ -263,7 +268,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/2PC-failures/" data-id="cj5rik1f20002895bqto9i771" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/14/2PC-failures/" data-id="cj5ruqzye0002kb5bz5wa6bxf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

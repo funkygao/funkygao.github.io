@@ -15,7 +15,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/raft2pc.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/raftinconsistency.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/consensusoverview.png?raw=true">
-<meta property="og:updated_time" content="2017-07-13T06:28:01.000Z">
+<meta property="og:updated_time" content="2017-08-01T00:50:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hashicorp&#x2F;raft implementation">
 <meta name="twitter:description" content="PrimerLog entry = (Term, Index, Command)in RDBMS, Log=WAL/redo log, FSM=records Components FSM LogStore StableStore CurrentTerm LastVoteTerm LastVoteCand   SnapshotStore PeerStore  RPC Protocolmsgpack">
@@ -327,7 +327,8 @@
 </ul>
 <h2 id="Paxos"><a href="#Paxos" class="headerlink" title="Paxos"></a>Paxos</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/consensusoverview.png?raw=true" alt="concensus overview"></p>
 <p>server replication (SR), log replication (LR), synchronisation service (SS), barrier orchestration (BO), service discovery (SD), leader election (LE), metadata management (MM), and Message Queues (Q).</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>1985 FLP Impossibility Result<br>1988 Oki and Liskov’s Viewstamped Repication<br>1998 Lamport’s original Paxos paper “Part-Time Parliment”<br>2000 Brewer proposes CAP conjecture during Keynote at PODC<br>2002 Proof of CAP by Gilbert and Lynch<br>2005 Lamport’s Technical Report on Generalized Consensus &amp; Paxos<br>2013 Raft Consensus Paper first available online</p>
+<h2 id="CAP"><a href="#CAP" class="headerlink" title="CAP"></a>CAP</h2><p>证明：<br>在一个network partition的2个节点，现在有两个client分别向他们发送冲突的请求，如果要C，那么必然有一个节点要拒绝：牺牲A；如果要A，必然牺牲C</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>1985 FLP Impossibility Result<br>1988 Oki and Liskov’s Viewstamped Repication<br>1998 Lamport’s original Paxos paper “Part-Time Parliment”<br>2000 Brewer proposes CAP conjecture during Keynote at PODC<br>2002 Proof of CAP by Gilbert and Lynch(CAP 2年后才被正式证明)<br>2005 Lamport’s Technical Report on Generalized Consensus &amp; Paxos<br>2013 Raft Consensus Paper first available online</p>
 <p><a href="http://www.cnblogs.com/foxmailed/p/3418143.html" target="_blank" rel="external">http://www.cnblogs.com/foxmailed/p/3418143.html</a><br><a href="http://raftuserstudy.s3-website-us-west-1.amazonaws.com/study/raft.pptx" target="_blank" rel="external">http://raftuserstudy.s3-website-us-west-1.amazonaws.com/study/raft.pptx</a></p>
 <p><a href="http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf" target="_blank" rel="external">http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf</a><br><a href="https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf" target="_blank" rel="external">https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf</a></p>
 
@@ -340,7 +341,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5rik1jq004w895bg3w7mpff" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5rur02y004tkb5br9k4edwz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
