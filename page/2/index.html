@@ -256,7 +256,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj5rur00e001skb5bbg9wj5ds" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/Parquet/" data-id="cj5sxaqh2001t6z5b6tgmxa8i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -396,7 +396,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5rur017002wkb5bni5soclf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/13/bitcask/" data-id="cj5sxaqhx002x6z5benh07kf9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -515,7 +515,11 @@
             <h2 id="Primer"><a href="#Primer" class="headerlink" title="Primer"></a>Primer</h2><p>Log entry = (Term, Index, Command)<br>in RDBMS, Log=WAL/redo log, FSM=records</p>
 <h3 id="Components"><a href="#Components" class="headerlink" title="Components"></a>Components</h3><ul>
 <li>FSM</li>
-<li>LogStore</li>
+<li>LogStore<ul>
+<li>LastIndex</li>
+<li>FirstIndex</li>
+</ul>
+</li>
 <li>StableStore<ul>
 <li>CurrentTerm</li>
 <li>LastVoteTerm</li>
@@ -555,6 +559,8 @@
 </ul>
 <h3 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h3><p>Leader’s log is ‘the truth’</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/raft2pc.png?raw=true" alt="2 phase commit"></p>
+<p>2.1是第一次AppendEntries，3.1后Leader apply to local FSM并update commit index，就可以向client返回了<br>4.2是下一次AppendEntries，leader通知followers最新的commit index，followers才会apply to FSM</p>
+<p>When the Commit Index is updated, the node will pass all commands between the new and old Commit Index to the state machine.</p>
 <p>phase2的作用：<br>uncommitted log是可能回滚的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">A(leader),B,C,D,E 5个节点，partition成A(leader)/B，C(leader)/D/E</div><div class="line">A: apply(set x=9)</div><div class="line">C: apply(set x=8)</div><div class="line">由于只与leader(A)心跳，B并不知道已经partition了。如果没有phase2，B会直接更改FSM，造成consensus失败</div><div class="line">partition修复后，A会退位成follower，同时A/B的(set x=9)这个log entry会回滚</div></pre></td></tr></table></figure></p>
 <h3 id="Commit"><a href="#Commit" class="headerlink" title="Commit"></a>Commit</h3><p>For a leader to decide an entry is committed</p>
 <ul>
@@ -602,7 +608,7 @@
 <h2 id="CAP"><a href="#CAP" class="headerlink" title="CAP"></a>CAP</h2><p>证明：<br>在一个network partition的2个节点，现在有两个client分别向他们发送冲突的请求，如果要C，那么必然有一个节点要拒绝：牺牲A；如果要A，必然牺牲C</p>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>1985 FLP Impossibility Result<br>1988 Oki and Liskov’s Viewstamped Repication<br>1998 Lamport’s original Paxos paper “Part-Time Parliment”<br>2000 Brewer proposes CAP conjecture during Keynote at PODC<br>2002 Proof of CAP by Gilbert and Lynch(CAP 2年后才被正式证明)<br>2005 Lamport’s Technical Report on Generalized Consensus &amp; Paxos<br>2013 Raft Consensus Paper first available online</p>
 <p><a href="http://www.cnblogs.com/foxmailed/p/3418143.html" target="_blank" rel="external">http://www.cnblogs.com/foxmailed/p/3418143.html</a><br><a href="http://raftuserstudy.s3-website-us-west-1.amazonaws.com/study/raft.pptx" target="_blank" rel="external">http://raftuserstudy.s3-website-us-west-1.amazonaws.com/study/raft.pptx</a></p>
-<p><a href="http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf" target="_blank" rel="external">http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf</a><br><a href="https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf" target="_blank" rel="external">https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf</a></p>
+<p><a href="http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf" target="_blank" rel="external">http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf</a><br><a href="https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf" target="_blank" rel="external">https://www.cse.buffalo.edu//~demirbas/publications/cloudConsensus.pdf</a><br><a href="http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-857.pdf" target="_blank" rel="external">http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-857.pdf</a></p>
 
         
         </div>
@@ -613,7 +619,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5rur02y004tkb5br9k4edwz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/12/raft/" data-id="cj5sxaqju004u6z5b39jqc5yy" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -748,7 +754,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5rur003001gkb5b9t88e92n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cj5sxaqgr001h6z5bko05odro" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -906,7 +912,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj5rur00z002mkb5bn1e8hag5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cj5sxaqho002n6z5bvmg0z1gc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1085,7 +1091,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj5rur01u003okb5bqatta0kk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cj5sxaqij003n6z5bupexnd8f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1214,7 +1220,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cj5rur01a0032kb5buaoopaeb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cj5sxaqi000336z5bw4028dge" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1341,7 +1347,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj5rur0230040kb5b4o43wcwe" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cj5sxaqiu00416z5bl22ybewh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1482,7 +1488,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj5rur00n0025kb5bra8qzf5j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cj5sxaqhc00286z5bflc98my1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1616,7 +1622,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cj5ruqzyo0005kb5bmtxdrxuo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cj5sxaqfe00056z5b59cf3alq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
