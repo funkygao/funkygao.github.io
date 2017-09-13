@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/double_spend1.jpg?raw=true">
-<meta property="og:updated_time" content="2017-09-13T08:08:18.000Z">
+<meta property="og:updated_time" content="2017-09-13T10:18:48.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="blockchain">
 <meta name="twitter:description" content="12345678910111213141516171819type Block struct &amp;#123;    // header    timestamp      [4]byte // used for difficulty calculation    prevHash, hash [32]byte    merkleTreeRoot [32]byte    nonce">
@@ -274,8 +274,8 @@
 <li>wallet app</li>
 </ul>
 <h3 id="Block"><a href="#Block" class="headerlink" title="Block"></a>Block</h3><p><img src="https://bitsonblocks.files.wordpress.com/2015/09/bitcoin_blockchain_infographic1.jpg" alt="blockchain"></p>
-<h4 id="Merkle-Tree"><a href="#Merkle-Tree" class="headerlink" title="Merkle Tree"></a>Merkle Tree</h4><p>用于每个block的防篡改。</p>
-<p>每一个block有一个merkle树，叶子节点是transaction，每个中间节点有2个指针(2叉树)<br>如果修改某一个transaction叶子，就会传递到tree root</p>
+<h4 id="Merkle-Tree"><a href="#Merkle-Tree" class="headerlink" title="Merkle Tree"></a>Merkle Tree</h4><p>每一个block有一个merkle树，叶子节点是transaction，每个中间节点有2个指针(2叉树)<br>如果修改某一个transaction叶子，就会传递到tree root</p>
+<p>merkle tree，目前还没有在bitcoin中使用，但它的作用是：<br>确认一个交易是否被confirm，只要下载block header+merkle tree，而不用下载整个block</p>
 <h3 id="Proof-of-Work"><a href="#Proof-of-Work" class="headerlink" title="Proof of Work"></a>Proof of Work</h3><p>sha256(‘pay me, joe, 25 bitcoins. 000001’) =&gt; 4699f0e443b73ddd6fdc14d4662395361fa21f54e647c64e643a49c54fef511c<br>sha256(‘pay me, joe, 25 bitcoins. 000013’) =&gt; 0ac09823cf2309c63d425c21b1c3d83f6dbc4b8acfb80b37b2db3d544192b7e9</p>
 <p>猜到第13个nonce，就得到1个0开头的hash<br>bitcoin目前的难度是需要14个0开头，实际上每增加1个0，就把原来的计算量提高了16倍</p>
 <p>bitcoin sha256(input + nonce)，其中input包括</p>
@@ -332,7 +332,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7ive54g002v5e5bun3qiap4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7ivj0ln0032655bvpl0n1eh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
