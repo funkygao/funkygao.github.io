@@ -237,7 +237,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7igs31z000yqi5bf4h2kfll" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7ih2t12000yr55brwyfzlva" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -402,7 +402,8 @@
 <h3 id="同时有很多client进行交易，full-node一直在瞎忙活？"><a href="#同时有很多client进行交易，full-node一直在瞎忙活？" class="headerlink" title="同时有很多client进行交易，full node一直在瞎忙活？"></a>同时有很多client进行交易，full node一直在瞎忙活？</h3><p>T1, T2, Tn被分发到n个full node，那么每个node都开始猜数，其中一个node(N1)猜中，开始广播，此时N2~Nn还在为自己的Tn进行猜数，发现new block，就停下手中的活，重新生成新的block，并重新猜数<br>如果N1在广播时，消息还没有传到Nx，而此时Nx的猜数工作是不会停的；如果此时Nx也猜数成功，那么在它还没有收到N1广播前，就会广播自己的new block，此时fork出现<br>对于某一个full node，它可能会并发接收多个交易请求，它会进行串行化</p>
 <h3 id="如果识别一个account"><a href="#如果识别一个account" class="headerlink" title="如果识别一个account"></a>如果识别一个account</h3><p>通过wallet程序，每次交易都可以生成新的public/private key pair，由wallet管理并保存。如果wallet的数据丢了，那么bitcoin就无法证明是你的了</p>
 <h3 id="如何动态维护PoW的难度？"><a href="#如何动态维护PoW的难度？" class="headerlink" title="如何动态维护PoW的难度？"></a>如何动态维护PoW的难度？</h3><p>每个节点计算最近2016个solution，因为频率应该是10分钟一个，因此2016个，应该是2016/(6*24)=14天<br>而每个block里都有timestamp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">elapsed = timestamp(block(-2016)) - timestamp(block(-1)) </div><div class="line">// 例如，假如elapsed = 7 day，那么说明难度系统太低了</div><div class="line">difficulty = difficulty * 2</div></pre></td></tr></table></figure></p>
-<h3 id="如何保证bitcoin-address唯一？"><a href="#如何保证bitcoin-address唯一？" class="headerlink" title="如何保证bitcoin address唯一？"></a>如何保证bitcoin address唯一？</h3><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://bitcoincharts.com/" target="_blank" rel="external">https://bitcoincharts.com/</a></p>
+<h3 id="如何保证bitcoin-address唯一？"><a href="#如何保证bitcoin-address唯一？" class="headerlink" title="如何保证bitcoin address唯一？"></a>如何保证bitcoin address唯一？</h3><p>Bitcoin address是由34个alphanumerical组成的字符串，但排除了O/T/l/0，它的空间是58^34，即<br>904798310844700775313327215140493940623303545877497699631104<br>但里面有几位用于checksum，它的实际空间是2^160，即<br>1461501637330902918203684832716283019655932542976</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://bitcoincharts.com/" target="_blank" rel="external">https://bitcoincharts.com/</a></p>
 
         
         </div>
@@ -413,7 +414,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7igs33y002tqi5be3zzd2bf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7ih2t2q0030r55b1fagi86k" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -543,7 +544,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7igs383005eqi5bnn45ptjp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7ih2t49004xr55bj7fg7fdj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -828,7 +829,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7igs31u000rqi5bc8ozx3du" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7ih2t0i000sr55bgur8c1ue" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -961,7 +962,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7igs37x0056qi5b9qd2d0fb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7ih2t4d0053r55ba3k6vsg3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1108,7 +1109,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7igs31x000uqi5bxa9qltf3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7ih2t0k000ur55bm3dabv1x" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1283,7 +1284,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7igs31i000gqi5bjwazaz82" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7ih2t02000cr55bxwdgu6zi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1455,7 +1456,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7igs31p000nqi5boexfo55a" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7ih2t0d000nr55bktm3n1l6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1634,7 +1635,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7igs32y001lqi5b8qjhspx6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7ih2t1l001lr55bu4emije7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1785,7 +1786,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7igs34b0039qi5boo7lnj8d" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7ih2t2y003ar55b4lwn0wfm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
