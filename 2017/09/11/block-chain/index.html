@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    
+    <title>blockchain | Notes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="12345678910111213141516171819type Block struct &amp;#123;    // header    timestamp      [4]byte    prevHash, hash [32]byte    merkleTreeRoot [32]byte    nonce          [4]byte // sha256(hash+nonce)&amp;lt;T">
+<meta name="keywords" content="algorithm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="blockchain">
+<meta property="og:url" content="http://funkygao.github.io/2017/09/11/block-chain/index.html">
+<meta property="og:site_name" content="Notes">
+<meta property="og:description" content="12345678910111213141516171819type Block struct &amp;#123;    // header    timestamp      [4]byte    prevHash, hash [32]byte    merkleTreeRoot [32]byte    nonce          [4]byte // sha256(hash+nonce)&amp;lt;T">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true">
+<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true">
+<meta property="og:updated_time" content="2017-09-13T02:02:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="blockchain">
+<meta name="twitter:description" content="12345678910111213141516171819type Block struct &amp;#123;    // header    timestamp      [4]byte    prevHash, hash [32]byte    merkleTreeRoot [32]byte    nonce          [4]byte // sha256(hash+nonce)&amp;lt;T">
+<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true">
+    
+
+    
+        <link rel="alternate" href="/" title="Notes" type="application/atom+xml" />
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                
+                <span class="site-title">Notes</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/images/avatar.jpeg" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/images/avatar.jpeg" />
+            <h2 id="name">Funky Gao</h2>
+            <h3 id="title">Explore, Solve problems</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Beijing, China</span>
+            <a id="follow" target="_blank" href="https://github.com/funkygao/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                94
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                10
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/funkygao" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/" target="_blank" title="facebook" class=tooltip>
+                            <i class="fa fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/" target="_blank" title="dribbble" class=tooltip>
+                            <i class="fa fa-dribbble"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-block-chain" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            blockchain
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/09/11/block-chain/">
+            <time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">type Block struct &#123;</div><div class="line">    // header</div><div class="line">    timestamp      [4]byte</div><div class="line">    prevHash, hash [32]byte</div><div class="line">    merkleTreeRoot [32]byte</div><div class="line">    nonce          [4]byte // sha256(hash+nonce)&lt;T</div><div class="line"></div><div class="line">    // body</div><div class="line">    transactions   []byte</div><div class="line">&#125;</div><div class="line"></div><div class="line">type BlockChain []Block</div><div class="line">type Ledger BlockChain</div><div class="line"></div><div class="line">node.run() &#123;</div><div class="line">    connectToP2PThenDownloadBlockchain()</div><div class="line">    go node.listenForTransactions()</div><div class="line">    go node.listenForBlocks()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间)</p>
+<p>中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟</p>
+<p>blockchain的所谓去中心化，实际上是建立一个少数服从多数的分布式权威网络，只要这个网络上节点足够多，就是可以信赖的<br>以前，用户trust银行；现在，用户trust majority nodes in blockchain network</p>
+<p>Bitcoin accounts: address<br>public key: 1MKe24pNsLmFYk9mJd1dXHkKj9h5YhoEey<br>private key: 5KkKR3VAjjPbHPzi3pWEHVQWrVa3C4fwD4PjR9wWgSV2D3kdmeM</p>
+<h2 id="Key-Design"><a href="#Key-Design" class="headerlink" title="Key Design"></a>Key Design</h2><p>BlockChain是以牺牲效率和性能为代价但换来了可靠的安全的最终一致性的分布式数据库</p>
+<ul>
+<li>与数据库不同，它不保存状态，只保存commit log，而通过commit log来计算出状态<br>bitcoin的blockchain里并不保存balance，只有[]transaction(inputs, outputs, sender, receiver)</li>
+<li>no range query</li>
+<li>blockchain可以想象成只有1个table的replicated database</li>
+<li>each transaction must commit before next transaction can enter proposal phase<ul>
+<li>throughput bottleneck</li>
+</ul>
+</li>
+</ul>
+<p>关键技术</p>
+<ul>
+<li>P2P<br>节点发现和通信</li>
+<li>hash, 非对称加密<br>sender: sign(privatekey_of_sender, publickey_of_receiver)</li>
+<li>merkle tree</li>
+<li>wallet app</li>
+</ul>
+<h3 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1. client send to replica nodes, proposing new log entries</div><div class="line">2. proposal会在replica nodes间进行广播(unconfirmed transaction)，进行leader election: proposal phase</div><div class="line">3. 通过PoW，leader胜出，本地append到blockchain，并广播到其他replicas</div><div class="line">4. 所有replicas append to local blockchain，transaction confirmed</div></pre></td></tr></table></figure>
+<h3 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h3><p>通过PoW，每次生成block时进行一次leader选举，由leader生产new block，猜数成功的node自认为成为了leader，然后通过P2P广播(gossip)<br>由于猜数比较困难，多节点同时成为leader并且在接收到其他leader广播前猜成功的可能性非常小，但还是存在可能性，这就需要解决冲突</p>
+<h3 id="Conflict-Resolve"><a href="#Conflict-Resolve" class="headerlink" title="Conflict Resolve"></a>Conflict Resolve</h3><p>采用longest chain rule，发现冲突时，block chain fork branch，在发现longest chain时，把short chain删除：但可能会造成confirmed transaction lost</p>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true" alt="conflict"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true" alt="resolve"></p>
+<h3 id="Upgrade"><a href="#Upgrade" class="headerlink" title="Upgrade"></a>Upgrade</h3><p><a href="https://github.com/bitcoin/bips" target="_blank" rel="external">https://github.com/bitcoin/bips</a></p>
+<p>BIP(bitcoin improvement proposal)在github上发布，miners自愿地下载、启动，但不是强制的</p>
+<h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h2><h3 id="同时有很多client进行交易，full-node一直在瞎忙活？"><a href="#同时有很多client进行交易，full-node一直在瞎忙活？" class="headerlink" title="同时有很多client进行交易，full node一直在瞎忙活？"></a>同时有很多client进行交易，full node一直在瞎忙活？</h3><p>T1, T2, Tn被分发到n个full node，那么每个node都开始猜数，其中一个node(N1)猜中，开始广播，此时N2~Nn还在为自己的Tn进行猜数，发现new block，就停下手中的活，重新生成新的block，并重新猜数<br>如果N1在广播时，消息还没有传到Nx，而此时Nx的猜数工作是不会停的；如果此时Nx也猜数成功，那么在它还没有收到N1广播前，就会广播自己的new block，此时fork出现<br>对于某一个full node，它可能会并发接收多个交易请求，它会进行串行化</p>
+<h3 id="如果识别一个account"><a href="#如果识别一个account" class="headerlink" title="如果识别一个account"></a>如果识别一个account</h3><p>通过wallet程序，每次交易都可以生成新的public/private key pair，由wallet管理并保存。如果wallet的数据丢了，那么bitcoin就无法证明是你的了</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7ibd0qw002p7a5bl8sv3lm2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/09/11/block-chain/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/09/11/block-chain/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2017/09/11/IPFS/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Newer</strong>
+            <div class="article-nav-title">
+                
+                    IPFS
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2017/08/24/perceptual-hash/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">perceptual hash</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
+</section>
+            
+                <aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">recent</h3>
+        <div class="widget">
+            <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/09/11/IPFS/" class="title">IPFS</a></p>
+                            <p class="item-date"><time datetime="2017-09-11T02:55:55.000Z" itemprop="datePublished">2017-09-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
+                            <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/08/24/perceptual-hash/" class="title">perceptual hash</a></p>
+                            <p class="item-date"><time datetime="2017-08-23T23:43:24.000Z" itemprop="datePublished">2017-08-24</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/25/GFS/" class="title">GFS evolution and BigTable</a></p>
+                            <p class="item-date"><time datetime="2017-07-25T06:39:34.000Z" itemprop="datePublished">2017-07-25</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/07/19/replication/" class="title">replication models</a></p>
+                            <p class="item-date"><time datetime="2017-07-19T11:12:26.000Z" itemprop="datePublished">2017-07-19</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.75px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            <div class="x2 x2-move">
+                <span id="busuanzi_container_page_pv">PV: <span id="busuanzi_value_page_pv"></span></span>
+                    <span id="busuanzi_container_site_pv">Site: <span id="busuanzi_value_site_pv"></span></span>
+                <span id="busuanzi_container_site_uv">UV: <span id="busuanzi_value_site_uv"></span></span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'http://funkygao.github.io/2017/09/11/block-chain/';
+        
+        this.page.identifier = 'block-chain';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

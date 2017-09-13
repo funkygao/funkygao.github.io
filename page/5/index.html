@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                91
+                94
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,492 @@
 
             
             <section id="main">
+    <article id="post-golang-pkg-github-pull-request" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/08/golang-pkg-github-pull-request/">golang pkg github pull request</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/08/golang-pkg-github-pull-request/">
+            <time datetime="2017-06-08T00:33:57.000Z" itemprop="datePublished">2017-06-08</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/misc/">misc</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">git remote add upstream https://github.com/funkygao/myrepo.git</div><div class="line">git fetch upstream</div><div class="line">git checkout -b mybranch</div><div class="line">git commit -a</div><div class="line">git push upstream mybranch</div></pre></td></tr></table></figure>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/" data-id="cj7ibd0su003v7a5bf5jmsjl5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/08/golang-pkg-github-pull-request/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-ElasticSearch" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/05/ElasticSearch/">ElasticSearch internals</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/05/ElasticSearch/">
+            <time datetime="2017-06-05T05:35:53.000Z" itemprop="datePublished">2017-06-05</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/storage/">storage</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><h3 id="Storage-Model"><a href="#Storage-Model" class="headerlink" title="Storage Model"></a>Storage Model</h3><p>一种特殊的LSM Tree<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">ES         LSM</div><div class="line">========   ==========</div><div class="line">translog   WAL</div><div class="line">buffer     MemTable</div><div class="line">segment    SSTable</div><div class="line">merge      merge &amp; compaction</div></pre></td></tr></table></figure></p>
+<h3 id="Defaults"><a href="#Defaults" class="headerlink" title="Defaults"></a>Defaults</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">node.master: true</div><div class="line">node.data: true</div><div class="line">index.number_of_shards: 5</div><div class="line">index.number_of_replicas: 1</div><div class="line">path.data: /path/to/data1,/path/to/data2</div><div class="line">http.max_content_length: 100mb</div></pre></td></tr></table></figure>
+<h3 id="Best-Practice"><a href="#Best-Practice" class="headerlink" title="Best Practice"></a>Best Practice</h3><p>内存，一半给ES，一半给pagecache</p>
+<h2 id="Indexing"><a href="#Indexing" class="headerlink" title="Indexing"></a>Indexing</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/eswrite1.jpg?raw=true" alt="write"></p>
+<ul>
+<li><p>translog(WAL)</p>
+<ul>
+<li>每个shard一个translog，即每个index一个translog</li>
+<li>它提供实时的CRUD by docID，先translog然后再segments</li>
+<li>默认5s刷盘</li>
+<li>translog存放在path.data，可以stripe，但存在与segments竞争资源问题<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ls nodes/0/indices/twitter/1/</div><div class="line">drwxr-xr-x  3 funky  wheel   102B  6  8 17:23 _state</div><div class="line">drwxr-xr-x  5 funky  wheel   170B  6  8 17:23 index</div><div class="line">drwxr-xr-x  3 funky  wheel   102B  6  8 17:23 translog</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>refresh</p>
+<ul>
+<li>on segments</li>
+<li>scheduled periodically(1s)，也可手工 /_refresh</li>
+<li>在此触发merge逻辑</li>
+<li>refresh后，那么在此之前的所有变更就可以搜索了，in-memory buffer的数据是不能搜索的</li>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elarefresh.png?raw=true" alt="refresh"><ul>
+<li>产生新segment，但不fsync(close不会触发fsync)，然后open(the new segment)</li>
+<li>不保证durability，那是由flush保证的</li>
+<li>in-memory buffer清除</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>flush<ul>
+<li>on translog</li>
+<li>30s/200MB/5000 ops by default，会触发commit</li>
+<li>Any docs in the in-memory buffer are written to a new segment</li>
+<li>The buffer is cleared</li>
+<li>A commit point is written to disk<br>commit point is a file that contains list of segments ready for search</li>
+<li>The filesystem cache is flushed with an fsync</li>
+<li>The old translog is deleted</li>
+</ul>
+</li>
+<li>commit<ul>
+<li>把还没有fsync的segments，一一fsync</li>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elasticsearch-internals.png?raw=true" alt="commit"></li>
+</ul>
+</li>
+<li>merge<ul>
+<li><img src="https://github.com/funkygao/blogassets/blob/master/img/elamerge.png?raw=true" alt="merge"></li>
+<li>policy<ul>
+<li>tiered(default)</li>
+<li>log_byte_size</li>
+<li>log_doc</li>
+</ul>
+</li>
+<li>可能把committed和uncommitted segments一起merge</li>
+<li>异步，不影响indexing/query</li>
+<li>合并后，fsync the merged big segment，之前的small segments被删除</li>
+<li>ES内部有throttle机制控制merge进度，防止它占用过多资源: 20MB/s</li>
+</ul>
+</li>
+<li>update<br>delete, then insert。mysql内部的变长字段update也是这么实现的</li>
+</ul>
+<h3 id="Hard-commit"><a href="#Hard-commit" class="headerlink" title="Hard commit"></a>Hard commit</h3><p>默认30分钟，或者translog size(200MB)，whoever come early</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">把in-memory buffer内容生成一个新segment，并把buffer清空</div><div class="line">把每个还没有commit point的segment进行fsync</div><div class="line">生成commit point file</div><div class="line">IndexSearcher is opened and all documents are searchable</div><div class="line">translog.empty()</div><div class="line">translog.sequence ++</div><div class="line"></div><div class="line">// 如果机器突然停电，可以完全恢复</div></pre></td></tr></table></figure>
+<h3 id="Merge"><a href="#Merge" class="headerlink" title="Merge"></a>Merge</h3><ul>
+<li>Happens in parallel to searching. Searcher is changed to new segment.</li>
+<li>Deleting a document creates a new document and .del file to keep track that document is deleted</li>
+<li>由于一个document可能多次update，在不同的segment可能出现多次delete</li>
+</ul>
+<h3 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h3><p>primary-backup model</p>
+<p>master的indexing过程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">validate indexing request</div><div class="line">local indexing</div><div class="line">concurrently dispatch the indexing request to all replicas</div></pre></td></tr></table></figure></p>
+<h2 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/esread1.jpg?raw=true" alt="read"></p>
+<h3 id="local-search"><a href="#local-search" class="headerlink" title="local search"></a>local search</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">translog.search(q)</div><div class="line">for s in range segments &#123;</div><div class="line">    s.search(q)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="deep-pagination"><a href="#deep-pagination" class="headerlink" title="deep pagination"></a>deep pagination</h3><p>search(from=50000, size=10)，那么每个shard会创建一个优先队列，队列大小=50010，从每个segment里取结果，直到填满<br>而coordinating node需要创建的优先队列 number_of_shards * 50010</p>
+<p>利用scan+scroll可以批量取数据(sorting disabled)，例如在reindex时使用</p>
+<h2 id="Cluster"><a href="#Cluster" class="headerlink" title="Cluster"></a>Cluster</h2><h3 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h3><p>所有node彼此相连，n*(n-1)个连接<br>shard = MurMurHash3(document_id) % (num_of_primary_shards)</p>
+<p>Node1节点用数据的_id计算出数据应该存储在shard0上，通过cluster state信息发现shard0的主分片在Node3节点上，Node1转发请求数据给Node3,Node3完成数据的索引<br>Node3并行转发(PUSH model replication)数据给分配有shard0的副本分片Node1和Node2上。当收到任一节点汇报副本分片数据写入成功以后，Node3即返回给初始的接受节点Node1，宣布数据写入成功。Node1成功返回给客户端。</p>
+<h3 id="Scale"><a href="#Scale" class="headerlink" title="Scale"></a>Scale</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/scalees.png?raw=true" alt="scale up"></p>
+<h3 id="Rebalance"><a href="#Rebalance" class="headerlink" title="Rebalance"></a>Rebalance</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">// 查看shard分布情况</div><div class="line">curl -XGET http://localhost:9200/_cat/shards</div><div class="line"></div><div class="line">// 手工rebalance</div><div class="line">curl-XPOST &apos;http://localhost:9200/_cluster/reroute&apos; -d&apos;&#123;</div><div class="line">    &quot;commands&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;move&quot;: &#123;</div><div class="line">                &quot;index&quot;: &quot;mylog-2016-02-08&quot;,</div><div class="line">                &quot;shard&quot;: 6,</div><div class="line">                &quot;from_node&quot;: &quot;192.168.0.1&quot;,</div><div class="line">                &quot;to_node&quot;: &quot;192.168.0.2&quot;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    ]&#125;&apos;</div></pre></td></tr></table></figure>
+<h3 id="新节点加入过程"><a href="#新节点加入过程" class="headerlink" title="新节点加入过程"></a>新节点加入过程</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">// get master node and eligible master nodes</div><div class="line">for host = range discovery.zen.ping.unicast.hosts &#123;</div><div class="line">    PingResponse = ZendPing.send(host)</div><div class="line">&#125;</div><div class="line"></div><div class="line">send(&apos;internal:discovery/zen/join&apos;) to master</div><div class="line">master.reply(&apos;internal:discovery/zen/join/validate&apos;)</div><div class="line">// 2PC join</div><div class="line">master.update(ClusterState) and broadcast to all nodes, and wait for minimum_master_nodes ack</div><div class="line">ClusterState change committed and confirmation sent</div></pre></td></tr></table></figure>
+<p>discovery.zen.ping.unicast.hosts其实是种子，5个node配2个，也可以获取全局节点信息：知一点即知天下</p>
+<h3 id="Master-fault-detection"><a href="#Master-fault-detection" class="headerlink" title="Master fault detection"></a>Master fault detection</h3><p>默认，每个node每1s ping master，ping_timeout=30s，ping_retries=3<br>失败后，会触发new master election</p>
+<h3 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h3><p>每个document有version，乐观锁</p>
+<h3 id="Consistency"><a href="#Consistency" class="headerlink" title="Consistency"></a>Consistency</h3><ul>
+<li>quorum(default)</li>
+<li>one</li>
+<li>all</li>
+</ul>
+<h3 id="Shard"><a href="#Shard" class="headerlink" title="Shard"></a>Shard</h3><h4 id="allocation"><a href="#allocation" class="headerlink" title="allocation"></a>allocation</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">weightindex(node, index) = indexBalance * (node.numShards(index) – avgShardsPerNode(index))</div><div class="line">weightnode(node, index) = shardBalance * (node.numShards() – avgShardsPerNode)</div><div class="line">weightprimary(node, index) = primaryBalance * (node.numPrimaries() – avgPrimariesPerNode)</div><div class="line">weight(node, index) = weightindex(node, index) + weightnode(node, index) + weightprimary(node, index)</div></pre></td></tr></table></figure>
+<p>如果计算最后的weight(node, index)大于threshold， 就会发生shard迁移。</p>
+<p>在一个已经创立的集群里，shard的分布总是均匀的。但是当你扩容节点的时候，你会发现，它总是先移动replica shard到新节点。<br>这样就导致新节点全部分布的全是副本，主shard几乎全留在了老的节点上。</p>
+<p>cluster.routing.allocation.balance参数，比较难找到合适的比例。</p>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">master通过ClusterState分配一个新shard</div><div class="line">node初始化一个空shard，并notify master</div><div class="line">master mark the shard as started</div><div class="line">if this is the first shard with a specific id, it is marked as primary</div></pre></td></tr></table></figure>
+<h4 id="Shrink-Index"><a href="#Shrink-Index" class="headerlink" title="Shrink Index"></a>Shrink Index</h4><p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-shrink-index.html" target="_blank" rel="external">https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-shrink-index.html</a><br>并不是resharding，开始时可以创建很多shard(e,g. 30)，用来灌数据，等数据好了，可以shrink到5<br>它只是hard link segments，执行时要先把index置为readonly<br>场景，例如tsdb，按照月份建索引，过了这个月，就可以shrink了</p>
+<h3 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h3><p>zen discovery(unicast/multicast)，存在脑裂问题，没有去解决，而是通过3台专用master机器，优化master逻辑，减少由于no reponse造成的partition可能性<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">node1, node2(master), node3</div><div class="line">2-3不通，但1-2, 2-3都通，minimum_master_nodes=2，node3会重新选举自己成为master，而1同意了，2个master</div></pre></td></tr></table></figure></p>
+<p>默认ping_interval=1s ping_timeout=3s ping_retries=3 join_timeout=20*ping_interval</p>
+<p>没有使用Paxos(zk)的原因:</p>
+<blockquote>
+<p>This, to me, is at the heart of our approach to resiliency.<br>Zookeeper, an excellent product, is a separate external system, with its own communication layer.<br>By having the discovery module in Elasticsearch using its own infrastructure, specifically the communication layer, it means that we can use the “liveness” of the cluster to assess its health.<br>Operations happen on the cluster all the time, reads, writes, cluster state updates.<br>By tying our assessment of health to the same infrastructure, we can actually build a more reliable more responsive system.<br>We are not saying that we won’t have a formal Zookeeper integration for those who already use Zookeeper elsewhere. But this will be next to a hardened, built in, discovery module.</p>
+</blockquote>
+<h4 id="ClusterState"><a href="#ClusterState" class="headerlink" title="ClusterState"></a>ClusterState</h4><p>master负责更改，并广播到机器的每个节点，每个节点本地保存<br>如果有很多index，很多fields，很多shard，很多node，那么它会很大，因此它提供了增量广播机制和压缩</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">  &quot;cluster_name&quot; : &quot;elasticsearch&quot;,</div><div class="line">  &quot;version&quot; : 11,</div><div class="line">  &quot;master_node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">  &quot;blocks&quot; : &#123; &#125;,</div><div class="line">  &quot;nodes&quot; : &#123;</div><div class="line">    &quot;sIh5gQcFThCcz3SO6txvvQ&quot; : &#123;</div><div class="line">      &quot;name&quot; : &quot;Max&quot;,</div><div class="line">      &quot;transport_address&quot; : &quot;inet[/162.245.23.194:9301]&quot;,</div><div class="line">      &quot;attributes&quot; : &#123; &#125;</div><div class="line">    &#125;,</div><div class="line">    &quot;-mq1SRuuQoeEq-3S8SdHqw&quot; : &#123;</div><div class="line">      &quot;name&quot; : &quot;Llyron&quot;,</div><div class="line">      &quot;transport_address&quot; : &quot;inet[/162.245.23.194:9300]&quot;,</div><div class="line">      &quot;attributes&quot; : &#123; &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;,</div><div class="line">  &quot;metadata&quot; : &#123;</div><div class="line">    &quot;templates&quot; : &#123; &#125;,</div><div class="line">    &quot;indices&quot; : &#123;</div><div class="line">      &quot;blog&quot; : &#123;</div><div class="line">        &quot;state&quot; : &quot;open&quot;,</div><div class="line">        &quot;settings&quot; : &#123;</div><div class="line">          &quot;index&quot; : &#123;</div><div class="line">            &quot;uuid&quot; : &quot;UQMz5vbXSBqFU_8U3u4gYQ&quot;,</div><div class="line">            &quot;number_of_replicas&quot; : &quot;1&quot;,</div><div class="line">            &quot;number_of_shards&quot; : &quot;5&quot;,</div><div class="line">            &quot;version&quot; : &#123;</div><div class="line">              &quot;created&quot; : &quot;1030099&quot;</div><div class="line">            &#125;</div><div class="line">          &#125;</div><div class="line">        &#125;,</div><div class="line">        &quot;mappings&quot; : &#123;</div><div class="line">          &quot;user&quot; : &#123;</div><div class="line">            &quot;properties&quot; : &#123;</div><div class="line">              &quot;name&quot; : &#123;</div><div class="line">                &quot;type&quot; : &quot;string&quot;</div><div class="line">              &#125;</div><div class="line">            &#125;</div><div class="line">          &#125;</div><div class="line">        &#125;,</div><div class="line">        &quot;aliases&quot; : [ ]</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;,</div><div class="line">  &quot;routing_table&quot; : &#123;</div><div class="line">    &quot;indices&quot; : &#123;</div><div class="line">      &quot;blog&quot; : &#123;</div><div class="line">        &quot;shards&quot; : &#123;</div><div class="line">          &quot;4&quot; : [ &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : true,</div><div class="line">            &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 4,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125;, &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : false,</div><div class="line">            &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 4,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125; ],</div><div class="line">          &quot;0&quot; : [ &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : true,</div><div class="line">            &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 0,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125;, &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : false,</div><div class="line">            &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 0,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125; ],</div><div class="line">          &quot;3&quot; : [ &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : false,</div><div class="line">            &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 3,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125;, &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : true,</div><div class="line">            &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 3,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125; ],</div><div class="line">          &quot;1&quot; : [ &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : false,</div><div class="line">            &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 1,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125;, &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : true,</div><div class="line">            &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 1,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125; ],</div><div class="line">          &quot;2&quot; : [ &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : true,</div><div class="line">            &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 2,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125;, &#123;</div><div class="line">            &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">            &quot;primary&quot; : false,</div><div class="line">            &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">            &quot;relocating_node&quot; : null,</div><div class="line">            &quot;shard&quot; : 2,</div><div class="line">            &quot;index&quot; : &quot;blog&quot;</div><div class="line">          &#125; ]</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;,</div><div class="line">  &quot;routing_nodes&quot; : &#123;</div><div class="line">    &quot;unassigned&quot; : [ ],</div><div class="line">    &quot;nodes&quot; : &#123;</div><div class="line">      &quot;sIh5gQcFThCcz3SO6txvvQ&quot; : [ &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : true,</div><div class="line">        &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 4,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : true,</div><div class="line">        &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 0,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : false,</div><div class="line">        &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 3,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : false,</div><div class="line">        &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 1,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : true,</div><div class="line">        &quot;node&quot; : &quot;sIh5gQcFThCcz3SO6txvvQ&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 2,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125; ],</div><div class="line">      &quot;-mq1SRuuQoeEq-3S8SdHqw&quot; : [ &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : false,</div><div class="line">        &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 4,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : false,</div><div class="line">        &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 0,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : true,</div><div class="line">        &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 3,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : true,</div><div class="line">        &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 1,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125;, &#123;</div><div class="line">        &quot;state&quot; : &quot;STARTED&quot;,</div><div class="line">        &quot;primary&quot; : false,</div><div class="line">        &quot;node&quot; : &quot;-mq1SRuuQoeEq-3S8SdHqw&quot;,</div><div class="line">        &quot;relocating_node&quot; : null,</div><div class="line">        &quot;shard&quot; : 2,</div><div class="line">        &quot;index&quot; : &quot;blog&quot;</div><div class="line">      &#125; ]</div><div class="line">    &#125;</div><div class="line">  &#125;,</div><div class="line">  &quot;allocations&quot; : [ ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Internal-Data-Structures-and-Algorithms"><a href="#Internal-Data-Structures-and-Algorithms" class="headerlink" title="Internal Data Structures and Algorithms"></a>Internal Data Structures and Algorithms</h2><h3 id="Roaring-bitmap"><a href="#Roaring-bitmap" class="headerlink" title="Roaring bitmap"></a>Roaring bitmap</h3><h3 id="T-Digest-Percentiles"><a href="#T-Digest-Percentiles" class="headerlink" title="T-Digest Percentiles"></a>T-Digest Percentiles</h3><h3 id="HDRHistogram-Percentiles"><a href="#HDRHistogram-Percentiles" class="headerlink" title="HDRHistogram Percentiles"></a>HDRHistogram Percentiles</h3><h2 id="Use-Cases"><a href="#Use-Cases" class="headerlink" title="Use Cases"></a>Use Cases</h2><h3 id="github"><a href="#github" class="headerlink" title="github"></a>github</h3><p>之前用Solr，后来改为elasticsearch，运行在多个集群。<br>其中，存储代码的集群26个data node，8 coordinator node，每个data node有2TB SSD，510 shards with 2 replicas</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.elastic.co/blog/resiliency-elasticsearch" target="_blank" rel="external">https://www.elastic.co/blog/resiliency-elasticsearch</a><br><a href="https://github.com/elastic/elasticsearch/issues/2488" target="_blank" rel="external">https://github.com/elastic/elasticsearch/issues/2488</a><br><a href="http://blog.mikemccandless.com/2011/02/visualizing-lucenes-segment-merges.html" target="_blank" rel="external">http://blog.mikemccandless.com/2011/02/visualizing-lucenes-segment-merges.html</a><br><a href="http://blog.trifork.com/2011/04/01/gimme-all-resources-you-have-i-can-use-them/" target="_blank" rel="external">http://blog.trifork.com/2011/04/01/gimme-all-resources-you-have-i-can-use-them/</a><br><a href="https://github.com/elastic/elasticsearch/issues/10708" target="_blank" rel="external">https://github.com/elastic/elasticsearch/issues/10708</a><br><a href="https://github.com/blog/1397-recent-code-search-outages" target="_blank" rel="external">https://github.com/blog/1397-recent-code-search-outages</a><br><a href="https://speakerd.s3.amazonaws.com/presentations/d7c3effadc8146a7af6229d3b5640162/friday-colin-g-zach-t-all-about-es-algorithms-and-data-structiures-stage-c.pdf" target="_blank" rel="external">https://speakerd.s3.amazonaws.com/presentations/d7c3effadc8146a7af6229d3b5640162/friday-colin-g-zach-t-all-about-es-algorithms-and-data-structiures-stage-c.pdf</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/05/ElasticSearch/" data-id="cj7ibd0ov000q7a5blh1uqads" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/05/ElasticSearch/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/05/ElasticSearch/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-Kafka-vs-Kinesis-Redis" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/05/Kafka-vs-Kinesis-Redis/">Kafka vs Kinesis vs Redis</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/05/Kafka-vs-Kinesis-Redis/">
+            <time datetime="2017-06-05T03:15:08.000Z" itemprop="datePublished">2017-06-05</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="vs-Kinesis"><a href="#vs-Kinesis" class="headerlink" title="vs Kinesis"></a>vs Kinesis</h2><p>US East region，要支持10万/秒的吞吐量，Kinesis需要的费用是4787美元/月</p>
+<p><a href="https://www.quora.com/Amazon-Kinesis-versus-Apache-Kafka-which-of-them-is-the-most-proven-and-high-performance-oriented" target="_blank" rel="external">https://www.quora.com/Amazon-Kinesis-versus-Apache-Kafka-which-of-them-is-the-most-proven-and-high-performance-oriented</a></p>
+<h2 id="vs-Redis-PubSub"><a href="#vs-Redis-PubSub" class="headerlink" title="vs Redis PubSub"></a>vs Redis PubSub</h2><ul>
+<li>redis OOM</li>
+<li>kafka replay messages, horizontal scale, HA, async Pub</li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/" data-id="cj7ibd0pa00147a5bz6f4nz7z" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/05/Kafka-vs-Kinesis-Redis/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-facebook-Mystery-Machine" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -250,7 +736,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/" data-id="cj5t5vcu1003kz95bj9rpqqi3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/05/facebook-Mystery-Machine/" data-id="cj7ibd0rs003f7a5b7fwj1ijs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -382,7 +868,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj5t5vcvc005bz95bne9djgml" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/02/storm-ack/" data-id="cj7ibd0to005c7a5ba2rysk8w" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -510,7 +996,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/02/monkey-patch-golang/" data-id="cj5t5vcuo004kz95byk4h8jhq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/02/monkey-patch-golang/" data-id="cj7ibd0tc004n7a5btoqd8psb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -669,7 +1155,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/KafkaSpout/" data-id="cj5t5vcss001bz95b2opifecx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/KafkaSpout/" data-id="cj7ibd0pd00177a5b6j7qd9j9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -820,7 +1306,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/aliware/" data-id="cj5t5vcto002wz95bpp29ktzi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/aliware/" data-id="cj7ibd0qu002n7a5b7t09cymg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -950,7 +1436,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/TiDB-KV-Mapping/" data-id="cj5t5vcte002cz95bg53l3ed5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/TiDB-KV-Mapping/" data-id="cj7ibd0qg00287a5b48kirn55" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1078,7 +1564,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/01/ssd-vs-hdd/" data-id="cj5t5vcva0057z95bojjyzlg7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/01/ssd-vs-hdd/" data-id="cj7ibd0tl00567a5ba13yo4in" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1156,443 +1642,6 @@
 
 
 
-    <article id="post-kafka-internals" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/01/kafka-internals/">kafka internals</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/01/kafka-internals/">
-            <time datetime="2017-06-01T03:24:34.000Z" itemprop="datePublished">2017-06-01</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/kafkaserver.png?raw=true" alt="overview"></p>
-<h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><p>负责</p>
-<ul>
-<li>leadership change of a partition<br>each partition leader can independently update ISR</li>
-<li>new topics; deleted topics</li>
-<li>replica re-assignment</li>
-</ul>
-<p>曾经的设计是没有controller，每个broker要决策时都通过zk，加入controller坏处就是要实现controller failover</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class KafkaController &#123;</div><div class="line">    partitionStateMachine PartitionStateMachine</div><div class="line">    replicaStateMachine ReplicaStateMachine</div><div class="line"></div><div class="line">    // controller选举，并LeaderChangeListener</div><div class="line">    controllerElector ZookeeperLeaderElector </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="ControllerContext"><a href="#ControllerContext" class="headerlink" title="ControllerContext"></a>ControllerContext</h3><p>一个全局变量。在选举为controller时，一次性从zk里读入所有状态信息KafkaController.initializeControllerContext</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">class ControllerContext &#123;</div><div class="line">    epoch, epochZkVersion, correlationId</div><div class="line">    controllerChannelManager // 维护controller与每个broker之间的socket conn</div><div class="line"></div><div class="line">    // 初始化时从/brokers/ids里取得的，并在BrokerChangeListener里修改</div><div class="line">    liveBrokersUnderlying: Set[Broker]</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics里取得的，并在TopicChangeListener里修改</div><div class="line">    allTopics: Set[String]</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics/$topic里一一取得，并在如下情况下修改</div><div class="line">    // - assignReplicasToPartitions.assignReplicasToPartitions</div><div class="line">    // - updateAssignedReplicasForPartition</div><div class="line">    // - TopicChangeListener</div><div class="line">    // - ReplicaStateMachine.handleStateChange</div><div class="line">    partitionReplicaAssignment: mutable.Map[TopicAndPartition, Seq[Int]] // AR</div><div class="line"></div><div class="line">    // 初始化时从/brokers/topics/$topic/$partitionID/state一一取得，如下情况下修改</div><div class="line">    // - PartitionStateMachine.initializeLeaderAndIsrForPartition</div><div class="line">    // - PartitionStateMachine.electLeaderForPartition</div><div class="line">    partitionLeadershipInfo: mutable.Map[TopicAndPartition, LeaderIsrAndControllerEpoch]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="ControllerChannelManager"><a href="#ControllerChannelManager" class="headerlink" title="ControllerChannelManager"></a>ControllerChannelManager</h4><p>controller为每个broker建立一个socket(BlockingChannel)连接和一个thread用于从内存batch取request进行逐条socket send/receive<br>e,g. 1个8节点的机器，controller上为这部分工作，需要建立(7个线程 + 7个socket conn)<br>与每个broker的连接是并发的，互不干扰；对于某一个broker，请求是完全串行的</p>
-<h5 id="config"><a href="#config" class="headerlink" title="config"></a>config</h5><ul>
-<li>controller.socket.timeout.ms<br>default 30s, socket connect/io timeout</li>
-</ul>
-<h5 id="broker-shutdown-startup-crash"><a href="#broker-shutdown-startup-crash" class="headerlink" title="broker shutdown/startup/crash?"></a>broker shutdown/startup/crash?</h5><p>zk.watch(“/brokers/ids”), BrokerChangeListener会调用ControllerChannelManager.addBroker/removeBroker</p>
-<h5 id="conn-broken-timeout"><a href="#conn-broken-timeout" class="headerlink" title="conn broken/timeout?"></a>conn broken/timeout?</h5><p>如果socket send/receive失败，那么自动重连重发，backoff=300ms，死循环<br>但如果broker长时间无法reach，它会触发zk.watch(“/brokers/ids”)，removeBroker，死循环退出</p>
-<h3 id="ControllerBrokerRequestBatch"><a href="#ControllerBrokerRequestBatch" class="headerlink" title="ControllerBrokerRequestBatch"></a>ControllerBrokerRequestBatch</h3><p>controller -&gt; broker，这里的圣旨请求有3种，都满足幂等性</p>
-<ul>
-<li>LeaderAndIsrRequest<br>replicaManager.becomeLeaderOrFollower</li>
-<li>UpdateMetadataRequest<br>replicaManager.maybeUpdateMetadataCache</li>
-<li>StopReplicaRequest<br>删除topic</li>
-</ul>
-<h3 id="onBrokerStartup"><a href="#onBrokerStartup" class="headerlink" title="onBrokerStartup"></a>onBrokerStartup</h3><p>由BrokerChangeListener触发<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">sendUpdateMetadataRequest(newBrokers)</div><div class="line"></div><div class="line">// 告诉它它上面的所有partitions</div><div class="line">replicaStateMachine.handleStateChanges(allReplicasOnNewBrokers, OnlineReplica)</div><div class="line"></div><div class="line">// 让所有的NewPartition/OfflinePartition进行leader election</div><div class="line">partitionStateMachine.triggerOnlinePartitionStateChange()</div></pre></td></tr></table></figure></p>
-<h3 id="onBrokerFailure"><a href="#onBrokerFailure" class="headerlink" title="onBrokerFailure"></a>onBrokerFailure</h3><p>找出受影响的状态，并触发partitionStateMachine、replicaStateMachine的状态切换</p>
-<h3 id="StateMachine"><a href="#StateMachine" class="headerlink" title="StateMachine"></a>StateMachine</h3><p>只有controller那台机器的state machine才会启动</p>
-<p>terms<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Replica &#123;</div><div class="line">    broker_id int</div><div class="line">    partition Partition // a Replica belongs to a Partition</div><div class="line">    log Log</div><div class="line">    hw, leo long</div><div class="line">    isLeader bool</div><div class="line">&#125;</div><div class="line"></div><div class="line">Partition &#123;</div><div class="line">    topic string</div><div class="line">    partition_id int</div><div class="line">    leader Replica</div><div class="line">    ISR Set[Replica]</div><div class="line">    AR  Set[Replica] // assigned replicas</div><div class="line">    zkVersion long   // for CAS</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h4 id="PartitionStateMachine"><a href="#PartitionStateMachine" class="headerlink" title="PartitionStateMachine"></a>PartitionStateMachine</h4><p>每个partition的状态，负责分配、选举partion的leader<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">class PartitionStateMachine &#123;</div><div class="line">    // - NonExistentPartition</div><div class="line">    // - NewPartition</div><div class="line">    // - OnlinePartition</div><div class="line">    // - OfflinePartition</div><div class="line">    partitionState: mutable.Map[TopicAndPartition, PartitionState] = mutable.Map.empty</div><div class="line"></div><div class="line">    topicChangeListener   // childChanges(&quot;/brokers/topics&quot;)</div><div class="line">    addPartitionsListener // all.dataChanges(&quot;/brokers/topics/$topic&quot;)</div><div class="line">    deleteTopicsListener  // childChanges(&quot;/admin/delete_topics&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<ul>
-<li>PartitionLeaderSelector.selectLeader<ul>
-<li>OfflinePartitionLeaderSelector</li>
-<li>ReassignedPartitionLeaderSelector</li>
-<li>PreferredReplicaPartitionLeaderSelector</li>
-<li>ControlledShutdownLeaderSelector</li>
-</ul>
-</li>
-</ul>
-<h4 id="ReplicaStateMachine"><a href="#ReplicaStateMachine" class="headerlink" title="ReplicaStateMachine"></a>ReplicaStateMachine</h4><p>每个partition在assigned replic(AR)上的状态，track每个broker的存活<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">class ReplicaStateMachine &#123;</div><div class="line">    replicaState: mutable.Map[PartitionAndReplica, ReplicaState] = mutable.Map.empty</div><div class="line">    brokerRequestBatch = new ControllerBrokerRequestBatch</div><div class="line"></div><div class="line">    // 只有controller关心每个broker的存活，broker自己是不关心的</div><div class="line">    // 而且broker die只有2种标准，不会因为conn broken认为broker死</div><div class="line">    // 1. broker id ephemeral znode deleted</div><div class="line">    // 2. broker controlled shutdown</div><div class="line">    brokerChangeListener  // childChanges(&quot;/brokers/ids&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p><img src="https://github.com/funkygao/blogassets/blob/master/img/replicastate.png?raw=true" alt="replica state transition"></p>
-<h5 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h5><p>对所有replica，如果其对应的broker活，那么就置为OnlineReplica，否则ReplicaDeletionIneligible</p>
-<h5 id="state-transition"><a href="#state-transition" class="headerlink" title="state transition"></a>state transition</h5><ul>
-<li>校验当前状态与目标状态</li>
-<li>维护内存replicaState</li>
-<li>必要时通过brokerRequestBatch广播给所有broker</li>
-</ul>
-<h2 id="Failover"><a href="#Failover" class="headerlink" title="Failover"></a>Failover</h2><h3 id="broker-failover"><a href="#broker-failover" class="headerlink" title="broker failover"></a>broker failover</h3><p>每个broker有KafkaHealthcheck，它向/brokers/ids/$id这个ephemeral znode写数据，session expire就会重写，其中timestamp置为当前时间<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;jmx_port&quot;:-1,&quot;timestamp&quot;:&quot;1460677527837&quot;,&quot;host&quot;:&quot;10.1.1.1&quot;,&quot;version&quot;:1,&quot;port&quot;:9002&#125;</div></pre></td></tr></table></figure></p>
-<p>controller的BrokerChangeListener监视所有broker的存活<br>参考 onBrokerStartup， onBrokerFailure</p>
-<h4 id="leader-failover"><a href="#leader-failover" class="headerlink" title="leader failover"></a>leader failover</h4><p>一个partition的leader broker crash了，controlle选举出新的leader后，该new leader的LEO会成为新的HW<br>leader负责维护/propogate HW，以及每个follower的LEO</p>
-<p>存在一个partition多Leader脑裂<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">partition0 broker(A, B, C)，A是leader</div><div class="line">A GC很久，crontroller认为A死，让B成为leader，写zk ISR znode，正在此时A活了但还没有收到controller发来的RPC，此时A、B都是leader</div><div class="line">如果client1连接A，clientB连接B，他们都发消息?</div><div class="line">A活过来的时候，A认为它的ISR=(A,B,C)，clientA发的消息commit条件是A,B,C都ack by fetch request才可以，但B在promoted to leader后会先stop fetching from previous leader。</div><div class="line">因此，A只有shrink ISR后才可能commit消息，但shrink时它会写zk，通过CAS失败，此时A意识到它已经不是leader</div></pre></td></tr></table></figure></p>
-<h3 id="controller-failover"><a href="#controller-failover" class="headerlink" title="controller failover"></a>controller failover</h3><p>controller session expire example<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">broker1，是controller</div><div class="line">  在sessionTimeout*2/3=4s内还没有收到response，就会try next zk server</div><div class="line">  zk connected，发现session(0x35c1876461ec9d3)已经expire了</div><div class="line">  触发KafkaController.SessionExpirationListener &#123;</div><div class="line">      onControllerResignation()</div><div class="line">      brokerState设置为RunningAsBroker // 之前是RunningAsController</div><div class="line">      controllerElector.elect &#123;</div><div class="line">          switch write(&quot;/controller&quot;) &#123;</div><div class="line">              case ok:</div><div class="line">                  onBecomingLeader &#123;</div><div class="line">                      // 1 successfully elected as leader</div><div class="line">                      // Broker 1 starting become controller state transition</div><div class="line">                      controllerEpoch.increment()</div><div class="line">                      register listeners</div><div class="line">                      replicaStateMachine.startup()</div><div class="line">                      partitionStateMachine.startup()</div><div class="line">                      brokerState = RunningAsController</div><div class="line">                      sendUpdateMetadataRequest(to all live brokers)</div><div class="line">                  &#125;</div><div class="line">              case ZkNodeExistsException:</div><div class="line">                  read(&quot;/controller&quot;) and get leaderID</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">broker0:</div><div class="line">  ZookeeperLeaderElector.LeaderChangeListener被触发，它watch(&quot;/controller&quot;) &#123;</div><div class="line">      elect</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
-<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><ul>
-<li>ReplicationUtils.updateLeaderAndIsr</li>
-</ul>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://issues.apache.org/jira/browse/KAFKA-1460" target="_blank" rel="external">https://issues.apache.org/jira/browse/KAFKA-1460</a><br><a href="https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/KAFKA/kafka+Detailed+Replication+Design+V3</a><br><a href="https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Improvement+Proposals" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Improvement+Proposals</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/01/kafka-internals/" data-id="cj5t5vcuh0048z95bggvj65hx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/01/kafka-internals/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/kafka-internals/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
-    <article id="post-scale" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/01/scale/">scale</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/01/scale/">
-            <time datetime="2017-05-31T23:48:41.000Z" itemprop="datePublished">2017-06-01</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/architecture/">architecture</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/scale.png?raw=true" alt="scale"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/growth.png?raw=true" alt="growth"></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/01/scale/" data-id="cj5t5vcv90053z95b73tsy23c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/01/scale/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/01/scale/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
-    <article id="post-gnatsd" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/31/gnatsd/">gnatsd</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/31/gnatsd/">
-            <time datetime="2017-05-31T07:33:01.000Z" itemprop="datePublished">2017-05-31</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>2011年用Ruby完成了一个版本，后来用golang重写，目前只维护golang版本<br>NATS = Not Another Tibco Server</p>
-<p>协议类似redis<br>持久化通过上层的NATS Streaming完成</p>
-<p>竞品是0mq/nanomsg/aeron</p>
-<p><a href="https://github.com/real-logic/Aeron" target="_blank" rel="external">https://github.com/real-logic/Aeron</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/31/gnatsd/" data-id="cj5t5vcu7003qz95b7ma8nmk6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/31/gnatsd/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/31/gnatsd/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
     </nav>
@@ -1605,6 +1654,33 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/09/11/IPFS/" class="title">IPFS</a></p>
+                            <p class="item-date"><time datetime="2017-09-11T02:55:55.000Z" itemprop="datePublished">2017-09-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
+                            <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/08/24/perceptual-hash/" class="title">perceptual hash</a></p>
+                            <p class="item-date"><time datetime="2017-08-23T23:43:24.000Z" itemprop="datePublished">2017-08-24</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1624,33 +1700,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/19/Google-container-evolution/" class="title">Google container evolution</a></p>
-                            <p class="item-date"><time datetime="2017-07-19T01:45:30.000Z" itemprop="datePublished">2017-07-19</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/18/Ceph/" class="title">Ceph Internals</a></p>
-                            <p class="item-date"><time datetime="2017-07-18T07:27:20.000Z" itemprop="datePublished">2017-07-18</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/18/Dynamo-flaw/" class="title">Dynamo - A flawed architecture</a></p>
-                            <p class="item-date"><time datetime="2017-07-18T00:35:12.000Z" itemprop="datePublished">2017-07-18</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1660,7 +1709,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1669,7 +1718,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
