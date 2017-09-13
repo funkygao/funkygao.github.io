@@ -237,7 +237,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7ih5mbe000ys05bm95crgwm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7ime50p000v7c5b2cte1oqw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -353,11 +353,13 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">type Block struct &#123;</div><div class="line">    // header</div><div class="line">    timestamp      [4]byte</div><div class="line">    prevHash, hash [32]byte</div><div class="line">    merkleTreeRoot [32]byte</div><div class="line">    nonce          [4]byte // sha256(hash+nonce)&lt;T</div><div class="line"></div><div class="line">    // body</div><div class="line">    transactions   []byte</div><div class="line">&#125;</div><div class="line"></div><div class="line">type BlockChain []Block</div><div class="line">type Ledger BlockChain</div><div class="line"></div><div class="line">node.run() &#123;</div><div class="line">    connectToP2PThenDownloadBlockchain()</div><div class="line">    go node.listenForTransactions()</div><div class="line">    go node.listenForBlocks()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">type Block struct &#123;</div><div class="line">    // header</div><div class="line">    timestamp      [4]byte // used for difficulty calculation</div><div class="line">    prevHash, hash [32]byte</div><div class="line">    merkleTreeRoot [32]byte</div><div class="line">    nonce          [4]byte // sha256(hash+nonce)&lt;T</div><div class="line"></div><div class="line">    // body</div><div class="line">    transactions   []byte</div><div class="line">&#125;</div><div class="line"></div><div class="line">type BlockChain []Block</div><div class="line">type Ledger BlockChain</div><div class="line"></div><div class="line">node.run() &#123;</div><div class="line">    connectToP2PThenDownloadBlockchain()</div><div class="line">    go node.listenForTransactions()</div><div class="line">    go node.listenForBlocks()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间)</p>
 <p>中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟</p>
 <p>blockchain的所谓去中心化，实际上是建立一个少数服从多数的分布式权威网络，只要这个网络上节点足够多，就是可以信赖的<br>以前，用户trust银行；现在，用户trust majority nodes in blockchain network</p>
 <p>Bitcoin accounts: address<br>public key: 1MKe24pNsLmFYk9mJd1dXHkKj9h5YhoEey<br>private key: 5KkKR3VAjjPbHPzi3pWEHVQWrVa3C4fwD4PjR9wWgSV2D3kdmeM</p>
+<p>Currently, the top 10 mining pools consistently create about 90% of the blocks, and China-based pools create more than 60% of the blocks.<br>所以，虽然bitcoin设计上是去中心的，但目前的现状是实际上控制在少数人手里</p>
+<p><img src="https://bitsonblocks.files.wordpress.com/2015/09/miner_dist_2.jpg?w=594&amp;h=476&amp;crop=1" alt="miners"></p>
 <h3 id="bitcoin"><a href="#bitcoin" class="headerlink" title="bitcoin"></a>bitcoin</h3><ul>
 <li>Blocks<br>481823</li>
 <li>Total BTC<br>16.523M</li>
@@ -393,10 +395,12 @@
 <li>timestamp</li>
 <li>prev hash</li>
 </ul>
-<h3 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1. client send to replica nodes, proposing new log entries</div><div class="line">2. proposal会在replica nodes间进行广播(unconfirmed transaction)，进行leader election: proposal phase</div><div class="line">3. 通过PoW，leader胜出，本地append到blockchain，并广播到其他replicas</div><div class="line">4. 所有replicas append to local blockchain，transaction confirmed</div></pre></td></tr></table></figure>
-<h3 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h3><p>通过PoW，每次生成block时进行一次leader选举，由leader生产new block，猜数成功的node自认为成为了leader，然后通过P2P广播(gossip)<br>由于猜数比较困难，多节点同时成为leader并且在接收到其他leader广播前猜成功的可能性非常小，但还是存在可能性，这就需要解决冲突</p>
+<h3 id="Sybil-Attack"><a href="#Sybil-Attack" class="headerlink" title="Sybil Attack"></a>Sybil Attack</h3><p>女巫攻击，来源是70年代的一部叫做《Sybil》的美国系列片。片中的女主角人格混乱，扮演着16个角色。</p>
+<h3 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">1. client send to replica nodes, proposing new log entries</div><div class="line">2. proposal会在replica nodes间进行广播(unconfirmed transaction)，进行leader election: proposal phase</div><div class="line">3. 通过PoW，leader胜出，本地append到blockchain，并广播到其他replicas</div><div class="line">   miner会把unconfirmed transactions进行合并(batch)，生成到一个block(一个block最多4096个transactions)</div><div class="line">4. 所有replicas append to local blockchain，transaction confirmed</div><div class="line"></div><div class="line">block chain实际上实现了global transaction time order</div></pre></td></tr></table></figure>
+<h3 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h3><p>通过PoW，每次生成block时进行一次leader选举，由leader生产new block，猜数成功的node自认为成为了leader，然后通过P2P广播(gossip)<br>由于猜数比较困难，多节点同时成为leader并且在接收到其他leader广播前猜成功的可能性非常小，但还是存在可能性，即多主，这就需要解决冲突</p>
 <h3 id="Conflict-Resolve"><a href="#Conflict-Resolve" class="headerlink" title="Conflict Resolve"></a>Conflict Resolve</h3><p>采用longest chain rule，发现冲突时，block chain fork branch，在发现longest chain时，把short chain删除：但可能会造成confirmed transaction lost</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true" alt="conflict"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true" alt="resolve"></p>
+<h3 id="Double-Spent"><a href="#Double-Spent" class="headerlink" title="Double Spent"></a>Double Spent</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/double_spend1.jpg?raw=true" alt="double-spent"></p>
 <h3 id="Upgrade"><a href="#Upgrade" class="headerlink" title="Upgrade"></a>Upgrade</h3><p><a href="https://github.com/bitcoin/bips" target="_blank" rel="external">https://github.com/bitcoin/bips</a></p>
 <p>BIP(bitcoin improvement proposal)在github上发布，miners自愿地下载、启动，但不是强制的</p>
 <h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h2><h3 id="为什么blocks通过hash进行chain，而不是通过普通的编号？"><a href="#为什么blocks通过hash进行chain，而不是通过普通的编号？" class="headerlink" title="为什么blocks通过hash进行chain，而不是通过普通的编号？"></a>为什么blocks通过hash进行chain，而不是通过普通的编号？</h3><p>因为hash具有不可篡改性，hash本身包含了内容的指纹</p>
@@ -404,7 +408,18 @@
 <h3 id="如果识别一个account"><a href="#如果识别一个account" class="headerlink" title="如果识别一个account"></a>如果识别一个account</h3><p>通过wallet程序，每次交易都可以生成新的public/private key pair，由wallet管理并保存。如果wallet的数据丢了，那么bitcoin就无法证明是你的了</p>
 <h3 id="如何动态维护PoW的难度？"><a href="#如何动态维护PoW的难度？" class="headerlink" title="如何动态维护PoW的难度？"></a>如何动态维护PoW的难度？</h3><p>每个节点计算最近2016个solution，因为频率应该是10分钟一个，因此2016个，应该是2016/(6*24)=14天<br>而每个block里都有timestamp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">elapsed = timestamp(block(-2016)) - timestamp(block(-1)) </div><div class="line">// 例如，假如elapsed = 7 day，那么说明难度系统太低了</div><div class="line">difficulty = difficulty * 2</div></pre></td></tr></table></figure></p>
 <h3 id="如何保证bitcoin-address唯一？"><a href="#如何保证bitcoin-address唯一？" class="headerlink" title="如何保证bitcoin address唯一？"></a>如何保证bitcoin address唯一？</h3><p>Bitcoin address是由34个alphanumerical组成的字符串，但排除了O/T/l/0，它的空间是58^34，即<br>904798310844700775313327215140493940623303545877497699631104<br>但里面有几位用于checksum，它的实际空间是2^160，即<br>1461501637330902918203684832716283019655932542976</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://bitcoincharts.com/" target="_blank" rel="external">https://bitcoincharts.com/</a></p>
+<h3 id="一个恶意node可以做什么，不能做什么？"><a href="#一个恶意node可以做什么，不能做什么？" class="headerlink" title="一个恶意node可以做什么，不能做什么？"></a>一个恶意node可以做什么，不能做什么？</h3><p>它能</p>
+<ul>
+<li>Refuse to relay valid transactions to other nodes<br>但其他节点会replay</li>
+<li>Attempt to create blocks that include or exclude specific transactions of his choosing</li>
+<li>Attempt to create a ‘longer chain’ of blocks that make previously accepted blocks become ‘orphans’ and not part of the main chain</li>
+</ul>
+<p>它不能</p>
+<ul>
+<li>Steal bitcoins from your account</li>
+<li>Make payments on your behalf or pretend to be you</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://bitcoincharts.com/" target="_blank" rel="external">https://bitcoincharts.com/</a><br><a href="https://blockchain.info/" target="_blank" rel="external">https://blockchain.info/</a><br><a href="http://www.cs.rice.edu/Conferences/IPTPS02/101.pdf" target="_blank" rel="external">http://www.cs.rice.edu/Conferences/IPTPS02/101.pdf</a></p>
 
         
         </div>
@@ -415,7 +430,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7ih5mcs0030s05bc4u7bp4n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7ime51v002p7c5b7fy3rgaz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -545,7 +560,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7ih5me0004xs05b0ha8jfkq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7ime55k00527c5bcea0lf2n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -830,7 +845,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7ih5mbb000ss05b6ni5z8ze" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7ime50q000x7c5b7wip8a1b" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -963,7 +978,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7ih5mek0053s05bs5mag98e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7ime55n00587c5bsczo42k4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1110,7 +1125,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7ih5mbc000us05bdnwffc3f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7ime50n000s7c5bw2v19so1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1285,7 +1300,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7ih5may000cs05bbmdqi8or" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7ime50a000c7c5bsyatf5bo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1457,7 +1472,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7ih5mb5000ns05b1mcerrqw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7ime50h000n7c5b24rjr5w0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1636,7 +1651,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7ih5mbv001ls05be0jb190f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7ime518001o7c5bo55euxk2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1787,7 +1802,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7ih5mcz003as05bue3u8sxy" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7ime54k003j7c5bcz11d96g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
