@@ -5,23 +5,23 @@
     
     <title>blockchain | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="12345678910111213141516171819202122type Block struct &amp;#123;    // header    index          int    timestamp      [4]byte // used for difficulty calculation    prevHash, hash [32]byte    merkleTreeRoot">
+    <meta name="description" content="Overview目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间) 中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟 bitcoin是一种通货紧缩货币，到2140年到达最大值：2100万个比特币 blockchain的所">
 <meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
 <meta property="og:title" content="blockchain">
 <meta property="og:url" content="http://funkygao.github.io/2017/09/11/block-chain/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="12345678910111213141516171819202122type Block struct &amp;#123;    // header    index          int    timestamp      [4]byte // used for difficulty calculation    prevHash, hash [32]byte    merkleTreeRoot">
+<meta property="og:description" content="Overview目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间) 中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟 bitcoin是一种通货紧缩货币，到2140年到达最大值：2100万个比特币 blockchain的所">
 <meta property="og:image" content="https://bitsonblocks.files.wordpress.com/2015/09/miner_dist_2.jpg?w=594&h=476&crop=1">
 <meta property="og:image" content="https://bitsonblocks.files.wordpress.com/2015/09/bitcoin_blockchain_infographic1.jpg">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/double_spend1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/digital_signature.png?raw=true">
-<meta property="og:updated_time" content="2017-09-14T06:05:14.000Z">
+<meta property="og:updated_time" content="2017-09-14T09:25:41.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="blockchain">
-<meta name="twitter:description" content="12345678910111213141516171819202122type Block struct &amp;#123;    // header    index          int    timestamp      [4]byte // used for difficulty calculation    prevHash, hash [32]byte    merkleTreeRoot">
+<meta name="twitter:description" content="Overview目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间) 中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟 bitcoin是一种通货紧缩货币，到2140年到达最大值：2100万个比特币 blockchain的所">
 <meta name="twitter:image" content="https://bitsonblocks.files.wordpress.com/2015/09/miner_dist_2.jpg?w=594&h=476&crop=1">
     
 
@@ -243,8 +243,7 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">type Block struct &#123;</div><div class="line">    // header</div><div class="line">    index          int</div><div class="line">    timestamp      [4]byte // used for difficulty calculation</div><div class="line">    prevHash, hash [32]byte</div><div class="line">    merkleTreeRoot [32]byte</div><div class="line">    nonce          [4]byte // sha256(hash+nonce)&lt;T</div><div class="line">    signature      [] byte</div><div class="line"></div><div class="line">    // body</div><div class="line">    transactions   []byte</div><div class="line">&#125;</div><div class="line"></div><div class="line">type BlockChain []Block</div><div class="line">type Ledger BlockChain</div><div class="line"></div><div class="line">node.run() &#123;</div><div class="line">    connectToP2PThenDownloadBlockchain()</div><div class="line">    go node.listenForTransactions()</div><div class="line">    go node.listenForBlocks()</div><div class="line">    go node.listenForNodesDiscovery()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间)</p>
+            <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间)</p>
 <p>中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟</p>
 <p>bitcoin是一种通货紧缩货币，到2140年到达最大值：2100万个比特币</p>
 <p>blockchain的所谓去中心化，实际上是建立一个少数服从多数的分布式权威网络，只要这个网络上节点足够多，就是可以信赖的<br>以前，用户trust银行；现在，用户trust majority nodes in blockchain network</p>
@@ -354,7 +353,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7k3kf9i002wm15bqk4qqm7e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7k92kdy002ytu5bjzlby9yt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
