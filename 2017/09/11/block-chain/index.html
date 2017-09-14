@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/double_spend1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/digital_signature.png?raw=true">
-<meta property="og:updated_time" content="2017-09-14T01:16:53.000Z">
+<meta property="og:updated_time" content="2017-09-14T01:21:19.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="blockchain">
 <meta name="twitter:description" content="12345678910111213141516171819202122type Block struct &amp;#123;    // header    index          int    timestamp      [4]byte // used for difficulty calculation    prevHash, hash [32]byte    merkleTreeRoot">
@@ -306,12 +306,12 @@
 </ul>
 <h3 id="验证身份verify"><a href="#验证身份verify" class="headerlink" title="验证身份verify"></a>验证身份verify</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/digital_signature.png?raw=true" alt="signature"></p>
 <p>创建交易时，payer利用自己的private key给transaction签名，同时把自己的public key存放在消息里：(payer_public_key, signature)<br>miners通过这个信息，就可以verify这个transaction确实是payer发出的<br>同时，transaction里也包含了payee的public key信息，只有payee利用他的private key才能解开</p>
-<p>如果我知道Alice的public key(X)，然后创建一笔交易：X支付给me 1BTC，系统是怎么知道有诈的?<br>首先我不知道X对应的私钥，只能拿我的私钥对交易加签名，miner通过X和signature就能验证：invalid signature</p>
 <p>key pair，非对称加密的特性：</p>
 <ul>
-<li>用私钥加密的内容，只能用公钥解密</li>
-<li>用公钥加密的内容，只能用私钥解密</li>
+<li>用私钥加密的内容，只能用公钥解密<br>如果能通过(payer_public_key, signature)能解密，就证明了payer的身份</li>
+<li>用公钥加密的内容，只能用私钥解密<br>只有payee才能用他的私钥解密交易</li>
 </ul>
+<p>如果我知道Alice的public key(X)，然后创建一笔交易：X支付给me 1BTC，系统是怎么知道有诈的?<br>首先我不知道X对应的私钥，只能拿我的私钥对交易加签名，miner通过X和signature就能验证：invalid signature</p>
 <h3 id="Upgrade"><a href="#Upgrade" class="headerlink" title="Upgrade"></a>Upgrade</h3><p><a href="https://github.com/bitcoin/bips" target="_blank" rel="external">https://github.com/bitcoin/bips</a></p>
 <p>BIP(bitcoin improvement proposal)在github上发布，miners自愿地下载、启动，但不是强制的</p>
 <h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h2><h3 id="为什么blocks通过hash进行chain，而不是通过普通的编号？"><a href="#为什么blocks通过hash进行chain，而不是通过普通的编号？" class="headerlink" title="为什么blocks通过hash进行chain，而不是通过普通的编号？"></a>为什么blocks通过hash进行chain，而不是通过普通的编号？</h3><p>因为hash具有不可篡改性，hash本身包含了内容的指纹</p>
@@ -350,7 +350,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7jrnays0030g85bu0uitil4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7jrrh5d003bgr5bygsx54ce" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
