@@ -237,7 +237,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7jr8gq4000wfb5b7rqpk34u" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7jrnaxg000yg85bgti2llzi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -416,6 +416,12 @@
 </ul>
 <h3 id="验证身份verify"><a href="#验证身份verify" class="headerlink" title="验证身份verify"></a>验证身份verify</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/digital_signature.png?raw=true" alt="signature"></p>
 <p>创建交易时，payer利用自己的private key给transaction签名，同时把自己的public key存放在消息里：(payer_public_key, signature)<br>miners通过这个信息，就可以verify这个transaction确实是payer发出的<br>同时，transaction里也包含了payee的public key信息，只有payee利用他的private key才能解开</p>
+<p>如果我知道Alice的public key(X)，然后创建一笔交易：X支付给me 1BTC，系统是怎么知道有诈的?<br>首先我不知道X对应的私钥，只能拿我的私钥对交易加签名，miner通过X和signature就能验证：invalid signature</p>
+<p>key pair，非对称加密的特性：</p>
+<ul>
+<li>用私钥加密的内容，只能用公钥解密</li>
+<li>用公钥加密的内容，只能用私钥解密</li>
+</ul>
 <h3 id="Upgrade"><a href="#Upgrade" class="headerlink" title="Upgrade"></a>Upgrade</h3><p><a href="https://github.com/bitcoin/bips" target="_blank" rel="external">https://github.com/bitcoin/bips</a></p>
 <p>BIP(bitcoin improvement proposal)在github上发布，miners自愿地下载、启动，但不是强制的</p>
 <h2 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h2><h3 id="为什么blocks通过hash进行chain，而不是通过普通的编号？"><a href="#为什么blocks通过hash进行chain，而不是通过普通的编号？" class="headerlink" title="为什么blocks通过hash进行chain，而不是通过普通的编号？"></a>为什么blocks通过hash进行chain，而不是通过普通的编号？</h3><p>因为hash具有不可篡改性，hash本身包含了内容的指纹</p>
@@ -454,7 +460,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7jr8grs002sfb5b7po52ly8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7jrnays0030g85bu0uitil4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -584,7 +590,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7jr8gtj004vfb5byigr0bkr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7jrnb0f004xg85bq0oi95ef" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -869,7 +875,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7jr8gq5000yfb5bnry30psk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7jrnaxd000sg85bq6f46fi0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1002,7 +1008,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7jr8gto0055fb5bbi7lb9n8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7jrnb0i0053g85bfdjuteod" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1149,7 +1155,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7jr8gpv000mfb5b5ucqmlf0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7jrnaxf000ug85b2ruq6ngo" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1324,7 +1330,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7jr8gpp000cfb5bqihuxfpc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7jrnawz000cg85b6rvszjx1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1496,7 +1502,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7jr8gpv000kfb5b63habkvf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7jrnaxa000ng85bovoikiuz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1675,7 +1681,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7jr8gqt001kfb5b9re3oz7v" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7jrnaxx001lg85b3dul2s3c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1826,7 +1832,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7jr8gsm003efb5b9p4axwtf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7jrnaz0003cg85b1ig4iq0u" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
