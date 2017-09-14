@@ -237,7 +237,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7jrrh3g000zgr5bmz5tgxx3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7k3kf7j000pm15blx64snmv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -405,6 +405,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">node1: block 1, 2, 3, 4</div><div class="line">main blockchain: 1, 2, 3, 4, 5, 6, 7</div><div class="line">此时node2成功创建了block8，并广播给node1</div><div class="line">node1发现block 5-7还没有同步过来，先进行同步，然后再把block8 append to local blockchain</div></pre></td></tr></table></figure>
 <h3 id="Confirm"><a href="#Confirm" class="headerlink" title="Confirm"></a>Confirm</h3><p>确认数 = 该交易所在的block在blockchain中后面的block数量 + 1<br>如果确认数 &gt;= 6，那么就可以认为无法逆转了</p>
 <h3 id="Consensus"><a href="#Consensus" class="headerlink" title="Consensus"></a>Consensus</h3><p>通过PoW，每次生成block时进行一次leader选举，由leader生产new block，猜数成功的node自认为成为了leader，然后通过P2P广播(gossip)<br>由于猜数比较困难，多节点同时成为leader并且在接收到其他leader广播前猜成功的可能性非常小，但还是存在可能性，即多主，这就需要解决冲突</p>
+<p>miner一旦recv a new block，就意识到在这个block的race上自己输了，它会立即把一些pending transactions和这个收到的block作为prev hash来构建下一个block</p>
 <h3 id="Conflict-Resolve"><a href="#Conflict-Resolve" class="headerlink" title="Conflict Resolve"></a>Conflict Resolve</h3><p>采用longest chain rule，发现冲突时，block chain fork branch，在发现longest chain时，把short chain删除：但可能会造成confirmed transaction lost</p>
 <p><img src="https://github.com/funkygao/blogassets/blob/master/img/longrule1.png?raw=true" alt="conflict"><br><img src="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true" alt="resolve"></p>
 <h3 id="Double-Spent"><a href="#Double-Spent" class="headerlink" title="Double Spent"></a>Double Spent</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/double_spend1.jpg?raw=true" alt="double-spent"></p>
@@ -415,11 +416,14 @@
 <li>You can create a new identity at any time by generating a new key pair<br>with no central authority or registry</li>
 </ul>
 <h3 id="验证身份verify"><a href="#验证身份verify" class="headerlink" title="验证身份verify"></a>验证身份verify</h3><p><img src="https://github.com/funkygao/blogassets/blob/master/img/digital_signature.png?raw=true" alt="signature"></p>
+<p>比特币的所有权是通过数字密钥、比特币地址、数字签名来确立的<br>密钥实现了去中心化的信任，所有权认证</p>
 <p>创建交易时，payer利用自己的private key给transaction签名，同时把自己的public key存放在消息里：(payer_public_key, signature)<br>miners通过这个信息，就可以verify这个transaction确实是payer发出的<br>同时，transaction里也包含了payee的public key信息，只有payee利用他的private key才能解开</p>
 <p>key pair，非对称加密的特性：</p>
 <ul>
 <li>用私钥加密的内容，只能用公钥解密<br>如果能通过(payer_public_key, signature)能解密，就证明了payer的身份</li>
-<li>用公钥加密的内容，只能用私钥解密<br>只有payee才能用他的私钥解密交易</li>
+<li>用公钥加密的内容，只能用私钥解密<br>只有payee才能用他的私钥解密交易<br>每个交易必须有效的签名才能被存入ledger<br>当payee花销这笔钱时，他必须给这个交易签名，由于这笔钱已经在ledger里记录了payee的公钥，只有payee才能签名</li>
+<li>公钥用于收钱，私钥用于花钱时生成数字签名</li>
+<li>通过私钥能计算出公钥，但反过来不行<br>只要私钥不丢，公钥丢了也没关系</li>
 </ul>
 <p>如果我知道Alice的public key(X)，然后创建一笔交易：X支付给me 1BTC，系统是怎么知道有诈的?<br>首先我不知道X对应的私钥，只能拿我的私钥对交易加签名，miner通过X和signature就能验证：invalid signature</p>
 <h3 id="Upgrade"><a href="#Upgrade" class="headerlink" title="Upgrade"></a>Upgrade</h3><p><a href="https://github.com/bitcoin/bips" target="_blank" rel="external">https://github.com/bitcoin/bips</a></p>
@@ -460,7 +464,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7jrrh5d003bgr5bygsx54ce" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7k3kf9i002wm15bqk4qqm7e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -590,7 +594,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7jrrh6l004ugr5bhp7dt2sq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7k3kfb4004tm15bj04yokvv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -875,7 +879,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7jrrh2q000pgr5bu1goa4xz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7k3kf7z0015m15b6mf9xzm9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1008,7 +1012,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7jrrh6n004ygr5bxxeyblgk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7k3kfb7004zm15b54c8hj4r" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1155,7 +1159,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7jrrh3c000ugr5bifs0esi1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7k3kf7r000wm15by7purqai" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1330,7 +1334,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7jrrh2f000cgr5brcacg8y5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7k3kf6u000dm15bi0b5c5se" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1502,7 +1506,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7jrrh2o000ngr5bxu383k5f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7k3kf7p000um15bmz3xt161" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1681,7 +1685,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7jrrh40001ogr5bonw286a4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7k3kf8e001lm15b6ni36d7k" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1832,7 +1836,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7jrrh590035gr5b5m1uwenn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7k3kf9q0036m15b1xw4cpkh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
