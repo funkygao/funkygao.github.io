@@ -237,7 +237,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7k92kbu000utu5bp0q4wpcj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/IPFS/" data-id="cj7l92ob5000xxs5bc19mnkxc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -446,6 +446,8 @@
 <h3 id="为什么建议每次transaction都新生成key-pair？"><a href="#为什么建议每次transaction都新生成key-pair？" class="headerlink" title="为什么建议每次transaction都新生成key pair？"></a>为什么建议每次transaction都新生成key pair？</h3><p>公钥虽然没有安全问题，但有隐私，毕竟它属于某一个人，如果我的交易都用一个key pair，那么最终这些交易可以发现是一个人的行为</p>
 <h3 id="如果写错了接受者payee公钥，这笔钱能回来吗？"><a href="#如果写错了接受者payee公钥，这笔钱能回来吗？" class="headerlink" title="如果写错了接受者payee公钥，这笔钱能回来吗？"></a>如果写错了接受者payee公钥，这笔钱能回来吗？</h3><p>首先，公钥(bitcoin address)是有校验位的，写错的时候，基本上就可以在提交时离线发现<br>如果恰巧校验一致，而地址是不存在的，那么交易会成功，但由于那个payee不存在，也就不存在对应的private key，也就无法spend it：黑洞，那笔钱永远消失了</p>
 <p>如果本来我想给A钱，却输入时写成了B的address，那么：<br>Bitcoin transactions are not reversible. Sending to the wrong person cannot be undone.</p>
+<h3 id="Block-timestamp如果做假怎么办？"><a href="#Block-timestamp如果做假怎么办？" class="headerlink" title="Block timestamp如果做假怎么办？"></a>Block timestamp如果做假怎么办？</h3><p>A timestamp is accepted as valid if it is greater than the median timestamp of previous 11 blocks, and less than the network-adjusted time + 2 hours.<br>“Network-adjusted time” is the median of the timestamps returned by all nodes connected to you.</p>
+<p>Whenever a node connects to another node, it gets a UTC timestamp from it, and stores its offset from node-local UTC. The network-adjusted time is then the node-local UTC plus the median offset from all connected nodes. Network time is never adjusted more than 70 minutes from local system time, however.</p>
 <h3 id="如果真有人控制了51-计算能力，会发生什么？"><a href="#如果真有人控制了51-计算能力，会发生什么？" class="headerlink" title="如果真有人控制了51%计算能力，会发生什么？"></a>如果真有人控制了51%计算能力，会发生什么？</h3><p>attacker只能把他刚花的钱payment取消掉，即double spent</p>
 <h3 id="据说bitcoin最大吞吐量是7-TPS，怎么计算来的？"><a href="#据说bitcoin最大吞吐量是7-TPS，怎么计算来的？" class="headerlink" title="据说bitcoin最大吞吐量是7 TPS，怎么计算来的？"></a>据说bitcoin最大吞吐量是7 TPS，怎么计算来的？</h3><p>每个block最大1MB，4096个transaction，10分钟产生一个block</p>
 <p>4096/(10*60) = 6.83 = 7</p>
@@ -463,7 +465,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7k92kdy002ytu5bjzlby9yt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7l92ocp002yxs5bkl072lys" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -593,7 +595,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7k92kf6004ntu5bjso5muje" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cj7l92oe6004vxs5btj89u6m4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -878,7 +880,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7k92kbs000rtu5bs0b8ug48" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cj7l92oaz000rxs5bsf93c05i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1011,7 +1013,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7k92kf7004rtu5bc8y3asrg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cj7l92oea0051xs5b2jm6ke2v" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1158,7 +1160,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7k92kbp000ptu5btdgqhzij" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cj7l92ob2000txs5bk7x0x6mq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1333,7 +1335,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7k92kbf000btu5bhscnol2d" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cj7l92oao000dxs5bsdv7ap8m" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1505,7 +1507,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7k92kbj000ktu5bikcrbqmd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Dynamo-flaw/" data-id="cj7l92oav000nxs5b9gx6ym5i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1684,7 +1686,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7k92kcc001gtu5bufoawl69" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/MapReduce-A-major-step-backwards/" data-id="cj7l92obp001mxs5bt65j077g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1835,7 +1837,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7k92ke9003ctu5bt7nxu21o" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/17/conferences-and-journals/" data-id="cj7l92ocw0038xs5bmwcymro8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

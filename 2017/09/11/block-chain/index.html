@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/longrule2.png?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/double_spend1.jpg?raw=true">
 <meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/digital_signature.png?raw=true">
-<meta property="og:updated_time" content="2017-09-14T09:25:41.000Z">
+<meta property="og:updated_time" content="2017-09-15T02:13:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="blockchain">
 <meta name="twitter:description" content="Overview目前公开的bitcoin只能支持每秒7笔的吞吐量，一般对于大额交易来说，安全的交易确认时间为1小时(6个block生成时间) 中本聪设计比特币时，为区块设置了1MB的容量限制，使每一个区块只能容纳4096个交易；同时，工作量证明机制使得确认交易并将交易记录到区块链中需要约10分钟 bitcoin是一种通货紧缩货币，到2140年到达最大值：2100万个比特币 blockchain的所">
@@ -336,6 +336,8 @@
 <h3 id="为什么建议每次transaction都新生成key-pair？"><a href="#为什么建议每次transaction都新生成key-pair？" class="headerlink" title="为什么建议每次transaction都新生成key pair？"></a>为什么建议每次transaction都新生成key pair？</h3><p>公钥虽然没有安全问题，但有隐私，毕竟它属于某一个人，如果我的交易都用一个key pair，那么最终这些交易可以发现是一个人的行为</p>
 <h3 id="如果写错了接受者payee公钥，这笔钱能回来吗？"><a href="#如果写错了接受者payee公钥，这笔钱能回来吗？" class="headerlink" title="如果写错了接受者payee公钥，这笔钱能回来吗？"></a>如果写错了接受者payee公钥，这笔钱能回来吗？</h3><p>首先，公钥(bitcoin address)是有校验位的，写错的时候，基本上就可以在提交时离线发现<br>如果恰巧校验一致，而地址是不存在的，那么交易会成功，但由于那个payee不存在，也就不存在对应的private key，也就无法spend it：黑洞，那笔钱永远消失了</p>
 <p>如果本来我想给A钱，却输入时写成了B的address，那么：<br>Bitcoin transactions are not reversible. Sending to the wrong person cannot be undone.</p>
+<h3 id="Block-timestamp如果做假怎么办？"><a href="#Block-timestamp如果做假怎么办？" class="headerlink" title="Block timestamp如果做假怎么办？"></a>Block timestamp如果做假怎么办？</h3><p>A timestamp is accepted as valid if it is greater than the median timestamp of previous 11 blocks, and less than the network-adjusted time + 2 hours.<br>“Network-adjusted time” is the median of the timestamps returned by all nodes connected to you.</p>
+<p>Whenever a node connects to another node, it gets a UTC timestamp from it, and stores its offset from node-local UTC. The network-adjusted time is then the node-local UTC plus the median offset from all connected nodes. Network time is never adjusted more than 70 minutes from local system time, however.</p>
 <h3 id="如果真有人控制了51-计算能力，会发生什么？"><a href="#如果真有人控制了51-计算能力，会发生什么？" class="headerlink" title="如果真有人控制了51%计算能力，会发生什么？"></a>如果真有人控制了51%计算能力，会发生什么？</h3><p>attacker只能把他刚花的钱payment取消掉，即double spent</p>
 <h3 id="据说bitcoin最大吞吐量是7-TPS，怎么计算来的？"><a href="#据说bitcoin最大吞吐量是7-TPS，怎么计算来的？" class="headerlink" title="据说bitcoin最大吞吐量是7 TPS，怎么计算来的？"></a>据说bitcoin最大吞吐量是7 TPS，怎么计算来的？</h3><p>每个block最大1MB，4096个transaction，10分钟产生一个block</p>
 <p>4096/(10*60) = 6.83 = 7</p>
@@ -353,7 +355,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7k92kdy002ytu5bjzlby9yt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cj7l92ocp002yxs5bkl072lys" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
