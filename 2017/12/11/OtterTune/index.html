@@ -5,17 +5,17 @@
     
     <title>OtterTune | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Controller就是agent,定期把通过配置文件配置的数据库实例的paramters &amp;amp; metrics通过HTTP POST以JSON格式上传 PostgreSQL SELECT version() parametersSHOW ALL metrics select * from pg_stat_archiver/pg_stat_bgwriter/pg_stat_database/">
+    <meta name="description" content="DB tuning问题传统方法：DBA把生产库copy到另外一个机器，回放sql，根据metrics尝试调节某一个参数看效果，再尝试多个  数据库的调优参数过多，通常都是数百个，而且新的版本会增加更多参数 同一个db的参数之间是互相依赖的 依赖于运行环境例如，增加innobuffer，在某些条件下是正回馈，但如果物理机内存开始swap，增加它会起副作用 跟业务数据有关  OtterTune解决办法">
 <meta name="keywords" content="algorithm">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OtterTune">
 <meta property="og:url" content="http://funkygao.github.io/2017/12/11/OtterTune/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Controller就是agent,定期把通过配置文件配置的数据库实例的paramters &amp;amp; metrics通过HTTP POST以JSON格式上传 PostgreSQL SELECT version() parametersSHOW ALL metrics select * from pg_stat_archiver/pg_stat_bgwriter/pg_stat_database/">
-<meta property="og:updated_time" content="2017-12-11T01:54:22.000Z">
+<meta property="og:description" content="DB tuning问题传统方法：DBA把生产库copy到另外一个机器，回放sql，根据metrics尝试调节某一个参数看效果，再尝试多个  数据库的调优参数过多，通常都是数百个，而且新的版本会增加更多参数 同一个db的参数之间是互相依赖的 依赖于运行环境例如，增加innobuffer，在某些条件下是正回馈，但如果物理机内存开始swap，增加它会起副作用 跟业务数据有关  OtterTune解决办法">
+<meta property="og:updated_time" content="2017-12-14T09:36:16.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OtterTune">
-<meta name="twitter:description" content="Controller就是agent,定期把通过配置文件配置的数据库实例的paramters &amp;amp; metrics通过HTTP POST以JSON格式上传 PostgreSQL SELECT version() parametersSHOW ALL metrics select * from pg_stat_archiver/pg_stat_bgwriter/pg_stat_database/">
+<meta name="twitter:description" content="DB tuning问题传统方法：DBA把生产库copy到另外一个机器，回放sql，根据metrics尝试调节某一个参数看效果，再尝试多个  数据库的调优参数过多，通常都是数百个，而且新的版本会增加更多参数 同一个db的参数之间是互相依赖的 依赖于运行环境例如，增加innobuffer，在某些条件下是正回馈，但如果物理机内存开始swap，增加它会起副作用 跟业务数据有关  OtterTune解决办法">
     
 
     
@@ -236,8 +236,20 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><p>就是agent,定期把通过配置文件配置的数据库实例的paramters &amp; metrics通过HTTP POST以JSON格式上传</p>
-<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><ul>
+            <h2 id="DB-tuning问题"><a href="#DB-tuning问题" class="headerlink" title="DB tuning问题"></a>DB tuning问题</h2><p>传统方法：DBA把生产库copy到另外一个机器，回放sql，根据metrics尝试调节某一个参数看效果，再尝试多个</p>
+<ul>
+<li>数据库的调优参数过多，通常都是数百个，而且新的版本会增加更多参数</li>
+<li>同一个db的参数之间是互相依赖的</li>
+<li>依赖于运行环境<br>例如，增加innobuffer，在某些条件下是正回馈，但如果物理机内存开始swap，增加它会起副作用</li>
+<li>跟业务数据有关</li>
+</ul>
+<h2 id="OtterTune解决办法"><a href="#OtterTune解决办法" class="headerlink" title="OtterTune解决办法"></a>OtterTune解决办法</h2><p>通过controller收集数据库的参数和负载metrics以及hardware profile，定期向中央报告。<br>分析系统从中央取得原始数据，进行分析，提供参数配置建议，生效后，持续分析比较，找出合适的参数配置</p>
+<h3 id="target-workload"><a href="#target-workload" class="headerlink" title="target workload"></a>target workload</h3><ul>
+<li>latency</li>
+<li>throughput</li>
+</ul>
+<h3 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h3><p>就是agent,定期把通过配置文件配置的数据库实例的paramters &amp; metrics通过HTTP POST以JSON格式上传<br>同时，它是trial and error的执行者，对参数不断的尝试取得样本数据，它必须有修改数据库参数权限，甚至restart db</p>
+<h4 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h4><ul>
 <li>SELECT version()</li>
 <li>parameters<br>SHOW ALL</li>
 <li>metrics<ul>
@@ -245,7 +257,11 @@
 </ul>
 </li>
 </ul>
-<p>##</p>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><ul>
+<li>通过factor analysis(FA)对收集来的metrics进行降维<br>例如，read_in_bytes/read_in_kbytes</li>
+<li>通过k-means对metrics进行聚类</li>
+<li>通过Lasso线性回归，来发现哪些参数对target workload有重大影响</li>
+</ul>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://db.cs.cmu.edu/papers/2017/p1009-van-aken.pdf" target="_blank" rel="external">http://db.cs.cmu.edu/papers/2017/p1009-van-aken.pdf</a><br><a href="https://github.com/cmu-db/ottertune" target="_blank" rel="external">https://github.com/cmu-db/ottertune</a></p>
 
         
@@ -257,7 +273,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjb68kzdp001vsh5bi40s3md6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjb6an8lf001v4y5btfwufuj8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -338,7 +354,7 @@
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
-                    各个公司功能模块的实现笔记
+                    知名公司功能模块的实现笔记
                 
             </div>
         </a>
@@ -381,7 +397,7 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/12/14/Misc/" class="title">各个公司功能模块的实现笔记</a></p>
+                            <p class="item-title"><a href="/2017/12/14/Misc/" class="title">知名公司功能模块的实现笔记</a></p>
                             <p class="item-date"><time datetime="2017-12-14T02:06:48.000Z" itemprop="datePublished">2017-12-14</time></p>
                         </div>
                     </li>
