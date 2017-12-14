@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                93
+                96
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,415 @@
 
             
             <section id="main">
+    <article id="post-repeatable-read-write-skew" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/12/repeatable-read-write-skew/">mysql repeatable read write skew</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/12/repeatable-read-write-skew/">
+            <time datetime="2017-05-12T01:18:24.000Z" itemprop="datePublished">2017-05-12</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/database/">database</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Isolation"><a href="#Isolation" class="headerlink" title="Isolation"></a>Isolation</h2><p>教科书里的4种isolation</p>
+<ul>
+<li>read uncommitted: 即dirty read，可能读到其他rollback的数据</li>
+<li>read committed: 即non-repeatable read，同一个txn内读一条数据多次，结果可能不同</li>
+<li>repeatable read: 一个txn内读一条数据多次结果相同，但不保证读多个数据的时候也相同(phantom read)</li>
+<li>serialized</li>
+</ul>
+<p>但它只是从锁的实现来描述的，不适用于MVCC。<br>各个数据库产品，虽然采用了这些isolation名字，但语义各不相同，很多与教科书里的定义不符</p>
+<h3 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h3><p>不会出现phantom read。<br>MySQL里的RR其实是Snapshot Isolation，只有Serialized是完全基于锁</p>
+<h3 id="PostgreSQL"><a href="#PostgreSQL" class="headerlink" title="PostgreSQL"></a>PostgreSQL</h3><p>实际上只有2个隔离级别：Read Committed和Serialized<br>而Serialized是基于MVCC的无锁实现，即Serialized Snapshot</p>
+<h2 id="MVCC-Snapshot"><a href="#MVCC-Snapshot" class="headerlink" title="MVCC Snapshot"></a>MVCC Snapshot</h2><p>存在write skew问题</p>
+<p>甲在一个银行有两张信用卡，分别是A和B。银行给这两张卡总的信用额度是2000，即A透支的额度和B透支的额度相加必须不大于2000：A+B&lt;=2000。</p>
+<p>A账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update a set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
+<p>B账号扣款<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin;</div><div class="line">a = select credit from a</div><div class="line">b = select credit from b</div><div class="line">if (a + b) + amount &lt;= 2000 &#123;</div><div class="line">    update b set credit = credit + amount</div><div class="line">&#125;</div><div class="line">commit</div></pre></td></tr></table></figure></p>
+<p>假设现在credit(a)=1000, credit(b)=500, 1500&lt;=2000<br>甲同时用a账号消费400，b账号消费300<br>在mysql RR下，2个事务都成功，但2个事务结束后<br>credit(a)=1400, credit(b)=700, 2100&gt;2000</p>
+<p>如果是serialized隔离级别，则没有问题：一个事务会失败</p>
+<p>在mysql RR下，可以通过应用层加约束来避免write skew</p>
+<h2 id="结论for-mysql"><a href="#结论for-mysql" class="headerlink" title="结论for mysql"></a>结论for mysql</h2><p>不能期望加了一个事务就万事大吉，而要了解每种隔离级别的语义。</p>
+<ul>
+<li>涉及单行数据事务的话，只要 Read Committed ＋ 乐观锁就足够保证不丢写</li>
+<li>涉及多行数据的事务的话，Serializable 隔离环境的话不会出错，但是你不会开</li>
+<li>如果开 Repeatable Read （Snapshot）隔离级别，那么可能会因为 Write Skew 而丢掉写</li>
+</ul>
+<p>如果是金融业务，尽量不要用MySQL</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cjb68etv00055os5bu2magglg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-dual-write-conflict" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/12/dual-write-conflict/">dual write conflict</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/12/dual-write-conflict/">
+            <time datetime="2017-05-11T23:58:30.000Z" itemprop="datePublished">2017-05-12</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/一致性/">一致性</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>Issues</p>
+<ul>
+<li>race condition</li>
+<li>partial failure</li>
+</ul>
+<p><img src="https://github.com/funkygao/blogassets/blob/master/img/dual-write.png?raw=true" alt="conflicts"></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cjb68etty003mos5bhoq229h5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-shard-scales" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/12/shard-scales/">shard scales</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/12/shard-scales/">
+            <time datetime="2017-05-11T23:58:16.000Z" itemprop="datePublished">2017-05-12</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/shared-scales.png?raw=true" alt="sharding"></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cjb68etv5005dos5b54nhx7yu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/12/shard-scales/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/12/shard-scales/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-mysql-group-replication" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -301,7 +710,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cj8ji9ujb004mbt5bilj6d46z" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cjb68etus004sos5bfm1l4ym0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -433,7 +842,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cj8ji9uje004tbt5bxhvd852c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cjb68etuw004zos5b60mvp8rb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -569,7 +978,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cj8ji9ufa0002bt5b6agvp2ge" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cjb68etqu0005os5bvy1xg6yp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -664,6 +1073,33 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/12/14/Misc/" class="title">各个公司功能模块的实现笔记</a></p>
+                            <p class="item-date"><time datetime="2017-12-14T02:06:48.000Z" itemprop="datePublished">2017-12-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/12/11/OtterTune/" class="title">OtterTune</a></p>
+                            <p class="item-date"><time datetime="2017-12-11T01:28:11.000Z" itemprop="datePublished">2017-12-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2017/09/28/TimescaleDB/" class="title">TimescaleDB</a></p>
+                            <p class="item-date"><time datetime="2017-09-28T00:42:41.000Z" itemprop="datePublished">2017-09-28</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
                             <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
                         </div>
@@ -678,33 +1114,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/25/GFS/" class="title">GFS evolution and BigTable</a></p>
-                            <p class="item-date"><time datetime="2017-07-25T06:39:34.000Z" itemprop="datePublished">2017-07-25</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/19/replication/" class="title">replication models</a></p>
-                            <p class="item-date"><time datetime="2017-07-19T11:12:26.000Z" itemprop="datePublished">2017-07-19</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/07/19/Google-container-evolution/" class="title">Google container evolution</a></p>
-                            <p class="item-date"><time datetime="2017-07-19T01:45:30.000Z" itemprop="datePublished">2017-07-19</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -714,7 +1123,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -723,7 +1132,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">18</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
@@ -732,7 +1141,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
-            <a href="/tags/PubSub/" style="font-size: 18.75px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 16.25px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 13.75px;">architecture</a> <a href="/tags/cloud/" style="font-size: 13.75px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.5px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.25px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.5px;">storage</a> <a href="/tags/一致性/" style="font-size: 15px;">一致性</a>
+            <a href="/tags/PubSub/" style="font-size: 18.57px;">PubSub</a> <a href="/tags/algorithm/" style="font-size: 17.14px;">algorithm</a> <a href="/tags/architecture/" style="font-size: 15.71px;">architecture</a> <a href="/tags/cloud/" style="font-size: 14.29px;">cloud</a> <a href="/tags/database/" style="font-size: 20px;">database</a> <a href="/tags/hacking/" style="font-size: 10px;">hacking</a> <a href="/tags/misc/" style="font-size: 12.86px;">misc</a> <a href="/tags/protocol/" style="font-size: 11.43px;">protocol</a> <a href="/tags/storage/" style="font-size: 17.14px;">storage</a> <a href="/tags/一致性/" style="font-size: 15.71px;">一致性</a>
         </div>
     </div>
 
