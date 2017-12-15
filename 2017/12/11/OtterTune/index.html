@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/12/11/OtterTune/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="DB tuning问题传统方法：DBA把生产库copy到另外一个机器，回放sql，根据metrics尝试调节某一个参数看效果，再尝试多个  数据库的调优参数过多，通常都是数百个，而且新的版本会增加更多参数 同一个db的参数之间是互相依赖的 依赖于运行环境例如，增加innobuffer，在某些条件下是正回馈，但如果物理机内存开始swap，增加它会起副作用 跟业务数据有关  OtterTune解决办法">
-<meta property="og:updated_time" content="2017-12-14T09:36:16.000Z">
+<meta property="og:updated_time" content="2017-12-15T00:52:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OtterTune">
 <meta name="twitter:description" content="DB tuning问题传统方法：DBA把生产库copy到另外一个机器，回放sql，根据metrics尝试调节某一个参数看效果，再尝试多个  数据库的调优参数过多，通常都是数百个，而且新的版本会增加更多参数 同一个db的参数之间是互相依赖的 依赖于运行环境例如，增加innobuffer，在某些条件下是正回馈，但如果物理机内存开始swap，增加它会起副作用 跟业务数据有关  OtterTune解决办法">
@@ -261,6 +261,9 @@
 <li>通过factor analysis(FA)对收集来的metrics进行降维<br>例如，read_in_bytes/read_in_kbytes</li>
 <li>通过k-means对metrics进行聚类</li>
 <li>通过Lasso线性回归，来发现哪些参数对target workload有重大影响</li>
+<li>workload mapping<br>通过Euclidean计算目标workload与历史采样数据的相似度，找出最相似的</li>
+<li>推荐配置<br>通过GaussianProcess(GP)回归进行训练</li>
+<li>controller接受推荐的配置apply on DB，并收集新的数据</li>
 </ul>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://db.cs.cmu.edu/papers/2017/p1009-van-aken.pdf" target="_blank" rel="external">http://db.cs.cmu.edu/papers/2017/p1009-van-aken.pdf</a><br><a href="https://github.com/cmu-db/ottertune" target="_blank" rel="external">https://github.com/cmu-db/ottertune</a></p>
 
@@ -273,7 +276,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjb6an8lf001v4y5btfwufuj8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjb779bq3001u055b195c3hyp" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
