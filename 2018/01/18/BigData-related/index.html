@@ -5,17 +5,17 @@
     
     <title>BigData related | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Open Source HDFS/Kudu Cassandra/Hbase SQL-on-hadoop Hive(on MR)SQL解析，物理执行是通过生成map/reduce job完成的 ad-hoc query to group,filter,aggregate data PrestoFacebook开发的Hive，但后来放弃了，转而开发了Presto。一个Presto query可以跨越多">
+    <meta name="description" content="Open Source Storage HDFS RCFile ORCFile Parquet   Kudu   NoSQL Cassandra/DynamoDB Hbase Voldemort Espresso   SQL-on-hadoop Hive(on MR)SQL解析，物理执行是通过生成map/reduce job完成的 ad-hoc query to group,filter,aggr">
 <meta name="keywords" content="architecture">
 <meta property="og:type" content="article">
 <meta property="og:title" content="BigData related">
 <meta property="og:url" content="http://funkygao.github.io/2018/01/18/BigData-related/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Open Source HDFS/Kudu Cassandra/Hbase SQL-on-hadoop Hive(on MR)SQL解析，物理执行是通过生成map/reduce job完成的 ad-hoc query to group,filter,aggregate data PrestoFacebook开发的Hive，但后来放弃了，转而开发了Presto。一个Presto query可以跨越多">
-<meta property="og:updated_time" content="2018-01-18T09:29:02.000Z">
+<meta property="og:description" content="Open Source Storage HDFS RCFile ORCFile Parquet   Kudu   NoSQL Cassandra/DynamoDB Hbase Voldemort Espresso   SQL-on-hadoop Hive(on MR)SQL解析，物理执行是通过生成map/reduce job完成的 ad-hoc query to group,filter,aggr">
+<meta property="og:updated_time" content="2018-01-27T12:41:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="BigData related">
-<meta name="twitter:description" content="Open Source HDFS/Kudu Cassandra/Hbase SQL-on-hadoop Hive(on MR)SQL解析，物理执行是通过生成map/reduce job完成的 ad-hoc query to group,filter,aggregate data PrestoFacebook开发的Hive，但后来放弃了，转而开发了Presto。一个Presto query可以跨越多">
+<meta name="twitter:description" content="Open Source Storage HDFS RCFile ORCFile Parquet   Kudu   NoSQL Cassandra/DynamoDB Hbase Voldemort Espresso   SQL-on-hadoop Hive(on MR)SQL解析，物理执行是通过生成map/reduce job完成的 ad-hoc query to group,filter,aggr">
     
 
     
@@ -237,8 +237,23 @@
         
             
             <h2 id="Open-Source"><a href="#Open-Source" class="headerlink" title="Open Source"></a>Open Source</h2><ul>
-<li>HDFS/Kudu</li>
-<li>Cassandra/Hbase</li>
+<li>Storage<ul>
+<li>HDFS<ul>
+<li>RCFile</li>
+<li>ORCFile</li>
+<li>Parquet</li>
+</ul>
+</li>
+<li>Kudu</li>
+</ul>
+</li>
+<li>NoSQL<ul>
+<li>Cassandra/DynamoDB</li>
+<li>Hbase</li>
+<li>Voldemort</li>
+<li>Espresso</li>
+</ul>
+</li>
 <li>SQL-on-hadoop<ul>
 <li>Hive(on MR)<br>SQL解析，物理执行是通过生成map/reduce job完成的</li>
 <li>ad-hoc query to group,filter,aggregate data<ul>
@@ -257,13 +272,32 @@
 </li>
 </ul>
 </li>
-<li>Spark/Storm/Flink</li>
-<li>mesos/yarn/k8s</li>
+<li>Stream Processing<ul>
+<li>Storm</li>
+<li>Heron</li>
+<li>Spark mini batch</li>
+<li>Flink</li>
+<li>Samza</li>
+</ul>
+</li>
+<li>ETL</li>
+<li>Network OS<ul>
+<li>yarn</li>
+<li>mesos</li>
+<li>k8s</li>
 <li>Apache Tez<br>一个Hadoop DAG技术框架，解决MR的问题一个替代方案，依赖YARN</li>
+</ul>
+</li>
 <li>tools<ul>
 <li>sqoop</li>
 </ul>
 </li>
+</ul>
+<h2 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h2><ul>
+<li>thrift</li>
+<li>avro</li>
+<li>hessian</li>
+<li>protocol buffer</li>
 </ul>
 <h2 id="Apache-Kylin"><a href="#Apache-Kylin" class="headerlink" title="Apache Kylin"></a>Apache Kylin</h2><p>MOLAP engine built on Hive</p>
 <h3 id="OLAP"><a href="#OLAP" class="headerlink" title="OLAP"></a>OLAP</h3><p>Slice/Dice/Drill-down/Roll-up/Pivot</p>
@@ -318,7 +352,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjcxbtvad0009005bx4kh4ew0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjcxcigqv00094w5br6rnsdm5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
