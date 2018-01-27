@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/12/14/Misc/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="Storage微信支付的交易记录之前kv，每个用户一个key(相当于redis list)，这样问题是：  value会大 无法根据条件filter value  改进后：没有用户多个value，其中1个root value，保存metadata，其他value为data多value解决了以前单value大的问题，但：  多了一次请求先root，再value root成为新瓶颈 可以把root也变">
-<meta property="og:updated_time" content="2017-12-14T08:43:26.000Z">
+<meta property="og:updated_time" content="2018-01-27T12:22:31.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="知名公司功能模块的实现笔记">
 <meta name="twitter:description" content="Storage微信支付的交易记录之前kv，每个用户一个key(相当于redis list)，这样问题是：  value会大 无法根据条件filter value  改进后：没有用户多个value，其中1个root value，保存metadata，其他value为data多value解决了以前单value大的问题，但：  多了一次请求先root，再value root成为新瓶颈 可以把root也变">
@@ -254,6 +254,31 @@
 <p>查询条件：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">(row1, row5) =&gt; (field3, field7)</div><div class="line">(row2) =&gt; (field2, field4)</div><div class="line">(row3) =&gt; (field3, field5)</div><div class="line">(row4, row6) =&gt; (field1, field4, field8)</div></pre></td></tr></table></figure>
 <p>利用二部图把图切分，把零散查询归并为少数集中的查询</p>
+<h2 id="M-Cloud-Design-Pattern"><a href="#M-Cloud-Design-Pattern" class="headerlink" title="M$ Cloud Design Pattern"></a>M$ Cloud Design Pattern</h2><ul>
+<li>cache-aside</li>
+<li>ciruit breaker</li>
+<li>compensating transation</li>
+<li>competing consumers</li>
+<li>CQRS</li>
+<li>event sourcing</li>
+<li>external configuration store</li>
+<li>federated identity</li>
+<li>gatekeeper(gateway)</li>
+<li>health endpoint monitoring</li>
+<li>index table</li>
+<li>lead election</li>
+<li>materialized view</li>
+<li>pipes and filters</li>
+<li>priority queue</li>
+<li>queue-based load leveling</li>
+<li>retry</li>
+<li>runtime reconfiguration</li>
+<li>scheduler agent supervisor</li>
+<li>sharding</li>
+<li>static content hosting</li>
+<li>throttling</li>
+<li>valet key</li>
+</ul>
 
         
         </div>
@@ -264,7 +289,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjcxblhmm001owd5buv9v4swi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjcxbtvbh001n005bt2n9tlu6" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
