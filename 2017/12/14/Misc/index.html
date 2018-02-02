@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/12/14/Misc/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="Storage微信支付的交易记录之前kv，每个用户一个key(相当于redis list)，这样问题是：  value会大 无法根据条件filter value  改进后：没有用户多个value，其中1个root value，保存metadata，其他value为data多value解决了以前单value大的问题，但：  多了一次请求先root，再value root成为新瓶颈 可以把root也变">
-<meta property="og:updated_time" content="2018-01-27T12:22:31.000Z">
+<meta property="og:updated_time" content="2018-02-02T02:59:07.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="知名公司功能模块的实现笔记">
 <meta name="twitter:description" content="Storage微信支付的交易记录之前kv，每个用户一个key(相当于redis list)，这样问题是：  value会大 无法根据条件filter value  改进后：没有用户多个value，其中1个root value，保存metadata，其他value为data多value解决了以前单value大的问题，但：  多了一次请求先root，再value root成为新瓶颈 可以把root也变">
@@ -250,6 +250,19 @@
 </ul>
 </li>
 </ul>
+<h3 id="数据库的高可靠、强一致"><a href="#数据库的高可靠、强一致" class="headerlink" title="数据库的高可靠、强一致"></a>数据库的高可靠、强一致</h3><ol>
+<li><p>数据库异步复制，主备数据无法保证一致<br>主死后，判断哪些用户最近没有做过主库update，他们可以在从库上进行新的操作；否则，在数据库恢复前不允许写操作</p>
+</li>
+<li><p>Failover库<br>订单编号里有1位，表示存放在主库还是failover库。当主死了，健康检查发现，通知订单编号生成器，它修改该bit，DAL会<br>把后续的数据写入failover库。<br>主库恢复后，健康健康发现，修改bit，DAL后续继续写主库。<br>经过一段时间后，主库+failover库的记录都会迁移到历史库。<br>failover机制，使得主备切换期间，仍然可以对外服务，用户不中断</p>
+</li>
+<li><p>业务数据可以归为3大类</p>
+</li>
+</ol>
+<ul>
+<li>状态型<br>读写比例差不多</li>
+<li>流水型<br>例如订单</li>
+<li>配置型<br>读多写少，不要求严格的一致性</li>
+</ul>
 <h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><h3 id="biparties-graph-二部图-二分图"><a href="#biparties-graph-二部图-二分图" class="headerlink" title="biparties graph(二部图/二分图)"></a>biparties graph(二部图/二分图)</h3><p>对多种查询条件进行归并缓存，提高缓存命中率</p>
 <p>查询条件：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">(row1, row5) =&gt; (field3, field7)</div><div class="line">(row2) =&gt; (field2, field4)</div><div class="line">(row3) =&gt; (field3, field5)</div><div class="line">(row4, row6) =&gt; (field1, field4, field8)</div></pre></td></tr></table></figure>
@@ -289,7 +302,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjcxcigsu00204w5bdli11wqm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjd5ent79001iug5bh5hlqrj5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

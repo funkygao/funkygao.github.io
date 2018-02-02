@@ -348,7 +348,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjcxcigqv00094w5br6rnsdm5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjd5ent630005ug5bh78x7rlq" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -478,6 +478,19 @@
 </ul>
 </li>
 </ul>
+<h3 id="数据库的高可靠、强一致"><a href="#数据库的高可靠、强一致" class="headerlink" title="数据库的高可靠、强一致"></a>数据库的高可靠、强一致</h3><ol>
+<li><p>数据库异步复制，主备数据无法保证一致<br>主死后，判断哪些用户最近没有做过主库update，他们可以在从库上进行新的操作；否则，在数据库恢复前不允许写操作</p>
+</li>
+<li><p>Failover库<br>订单编号里有1位，表示存放在主库还是failover库。当主死了，健康检查发现，通知订单编号生成器，它修改该bit，DAL会<br>把后续的数据写入failover库。<br>主库恢复后，健康健康发现，修改bit，DAL后续继续写主库。<br>经过一段时间后，主库+failover库的记录都会迁移到历史库。<br>failover机制，使得主备切换期间，仍然可以对外服务，用户不中断</p>
+</li>
+<li><p>业务数据可以归为3大类</p>
+</li>
+</ol>
+<ul>
+<li>状态型<br>读写比例差不多</li>
+<li>流水型<br>例如订单</li>
+<li>配置型<br>读多写少，不要求严格的一致性</li>
+</ul>
 <h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><h3 id="biparties-graph-二部图-二分图"><a href="#biparties-graph-二部图-二分图" class="headerlink" title="biparties graph(二部图/二分图)"></a>biparties graph(二部图/二分图)</h3><p>对多种查询条件进行归并缓存，提高缓存命中率</p>
 <p>查询条件：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">(row1, row5) =&gt; (field3, field7)</div><div class="line">(row2) =&gt; (field2, field4)</div><div class="line">(row3) =&gt; (field3, field5)</div><div class="line">(row4, row6) =&gt; (field1, field4, field8)</div></pre></td></tr></table></figure>
@@ -517,7 +530,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjcxcigsu00204w5bdli11wqm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjd5ent79001iug5bh5hlqrj5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -673,7 +686,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjcxcigsq001v4w5be1svwo02" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjd5ent7m001vug5b9wzzi8t4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -822,7 +835,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjcxcigt6002i4w5b8cszsi8h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjd5ent7y002cug5bwvb854fa" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1050,7 +1063,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjcxcigtl00344w5bclw6p88d" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjd5ent8c002yug5bllqkwcbl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1180,7 +1193,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjcxcigv200514w5bbzeyrtgt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjd5enta9005dug5bq25urk3b" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1465,7 +1478,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjcxcigrf000s4w5bblgivewr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjd5ent6p000sug5b3hw5g3z5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1598,7 +1611,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cjcxcigv700574w5bacq27b8p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cjd5enta0004zug5b9nug3iax" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1745,7 +1758,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cjcxcigrg000u4w5bp4fvnk2d" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cjd5ent6r000uug5botrjxcor" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1920,7 +1933,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cjcxcigr2000g4w5bsnmdx2jr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/18/Ceph/" data-id="cjd5ent6d000eug5b10wqd842" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
