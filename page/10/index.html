@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                97
+                98
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,214 @@
 
             
             <section id="main">
+    <article id="post-zookeeper" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/15/zookeeper/">zookeeper internals</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/15/zookeeper/">
+            <time datetime="2017-05-15T02:26:14.000Z" itemprop="datePublished">2017-05-15</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/一致性/">一致性</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Basics"><a href="#Basics" class="headerlink" title="Basics"></a>Basics</h2><h3 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h3><p>File api without partial R/W<br>No rename operation</p>
+<p>zab通过TCP+zxid实现事务的totally order<br>sequential consistency一致性模型，保证the real execution looks to clients like some sequential execution in which the operations of every client appear in the order they were submitted</p>
+<h3 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h3><p>ZKDatabase<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// zk的内存数据库</div><div class="line">class ZKDatabase &#123;</div><div class="line">    DataTree dataTree</div><div class="line">    LinkedList&lt;Proposal&gt; committedLog</div><div class="line">    FileTxnSnapLog snapLog</div><div class="line">    ConcurrentHashMap&lt;Long, Integer&gt; sessionsWithTimeouts // &#123;sessionID: timeout&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>DataTree<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">class DataTree &#123;</div><div class="line">    ConcurrentHashMap&lt;String, DataNode&gt; nodes // &#123;path: znode&#125;, flat</div><div class="line">    ConcurrentHashMap&lt;Long, HashSet&lt;String&gt;&gt; ephemerals // &#123;sessionID: [path, ]&#125;</div><div class="line">    WatchManager dataWatches, childWatches</div><div class="line"></div><div class="line">    func createNode(path, data) &#123;</div><div class="line">        parent = nodes.get(parentPath)</div><div class="line">        parent.Lock()</div><div class="line">        // check NodeExistsException</div><div class="line">        // set stat of the new znode and its parent</div><div class="line">        child = new DataNode(parent, data, stat) // the new znode</div><div class="line">        parent.addChild(child)</div><div class="line">        nodes.put(path, child)</div><div class="line">        if ephemeralOwner != nil &#123;</div><div class="line">            ephemerals.get(ephemeralOwner).add(path)</div><div class="line">        &#125;</div><div class="line">        parent.Unlock()</div><div class="line"></div><div class="line">        dataWatches.triggerWatch(path, NodeCreated)</div><div class="line">        childWatches.triggerWatch(parentPath, NodeChildrenChanged)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>DataNode<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class DataNode &#123;</div><div class="line">    DataNode parent</div><div class="line">    Set&lt;String&gt; children</div><div class="line"></div><div class="line">    StatPersisted stat</div><div class="line">    []byte data</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="n-n-1-2-conns"><a href="#n-n-1-2-conns" class="headerlink" title="n(n-1)/2 conns"></a>n(n-1)/2 conns</h3><p>只允许id比较大的server发起主动连接：由于任意server在启动时都会主动向其他server发起连接，如果这样，任意两台server之间就拥有两条连接，这明显是没有必要的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">======= ======= ======= ======= ======= ========</div><div class="line">sid     1       2       3       4       5</div><div class="line">======= ======= ======= ======= ======= ========</div><div class="line">1       &lt;&gt;      &lt;       &lt;       &lt;       &lt;</div><div class="line">2               &lt;&gt;      &lt;       &lt;       &lt;</div><div class="line">3                       &lt;&gt;      &lt;       &lt;</div><div class="line">4                               &lt;&gt;      &lt;</div><div class="line">5                                       &lt;&gt;</div><div class="line">======= ======= ======= ======= ======= ========</div></pre></td></tr></table></figure></p>
+<h3 id="成为-leader-的条件"><a href="#成为-leader-的条件" class="headerlink" title="成为 leader 的条件"></a>成为 leader 的条件</h3><ol>
+<li>选epoch最大的</li>
+<li>epoch相等，选 zxid 最大的</li>
+<li>epoch和zxid都相等，选择server id最大的</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">(newEpoch &gt; curEpoch) ||</div><div class="line">	((newEpoch == curEpoch) &amp;&amp;</div><div class="line">		((newZxid &gt; curZxid) ||</div><div class="line">			((newZxid == curZxid) &amp;&amp; (newId &gt; curId))))</div></pre></td></tr></table></figure>
+<h3 id="何时选举"><a href="#何时选举" class="headerlink" title="何时选举"></a>何时选举</h3><p>进入LOOKING状态</p>
+<ul>
+<li>刚启动时</li>
+<li>稳定运行中，任何的异常都会让本机进入LOOKING态<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">catch (Exception e) &#123;</div><div class="line">    setPeerState(LOOKING)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h3><p>是个简化的2PC，因为不存在abort/rollback，只有commit</p>
+<p>传统2PC里coordinator crash的硬伤，zk是怎么解决的？<br>重新选举，recover from txnlog</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">class LearnerHandler extends Thread &#123;</div><div class="line">    queuedPackets = new LinkedBlockingQueue&lt;QuorumPacket&gt;()</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Leader &#123;</div><div class="line">    func processAck(long zxid) &#123;</div><div class="line">        Proposal p = outstandingProposals.get(zxid)</div><div class="line">        p.ackSet.add(1)</div><div class="line">        if p.ackSet.verifyQuorum() &#123;</div><div class="line">            // 大多数返回ack了</div><div class="line">            outstandingProposals.remove(zxid)</div><div class="line">            commit(zxid) &#123;</div><div class="line">                // 通知all followers</div><div class="line">                QuorumPacket qp = new QuorumPacket(Leader.COMMIT, zxid, null, null)</div><div class="line">                sendPacket(qp) // 异步</div><div class="line">            &#125;</div><div class="line">            inform(p) &#123;</div><div class="line">                // 通知all observers</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    func propose(req Request) &#123;</div><div class="line">        Proposal p = new Proposal(req)</div><div class="line">        outstandingProposals.put(zxid, p)</div><div class="line">        sendPacket(p) &#123;</div><div class="line">            for LearnerHandler f = range followers &#123;</div><div class="line">                f.queuePacket(p)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Follower &#123;</div><div class="line">    func processPacket(QuorumPacket qp) &#123;</div><div class="line">        switch qp.type &#123;</div><div class="line">            case Leader.PROPOSAL:</div><div class="line">                // proposal只是记录txnlog，不改变database</div><div class="line">                FollowerZooKeeperServer.logRequest() &#123;</div><div class="line">                    pendingTxns.add(req)</div><div class="line">                    txnLog.append(req)</div><div class="line">                &#125;</div><div class="line"></div><div class="line">            case Leader.COMMIT:</div><div class="line">                FollowerZooKeeperServer.commit(qp.zxid) &#123;</div><div class="line">                    commitProcessor.commit(pendingTxns.remove()) &#123;</div><div class="line">                        committedRequests.add(req) &#123;</div><div class="line">                            FinalRequestProcessor.processRequest(req) &#123;</div><div class="line">                                ZooKeeperServer.processTxn -&gt; ZKDatabase().processTxn</div><div class="line">                                根据req.type来创建response，并发送</div><div class="line">                            &#125;</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Constraints"><a href="#Constraints" class="headerlink" title="Constraints"></a>Constraints</h3><p>Many ZooKeeper write requests are conditional in nature:</p>
+<ul>
+<li>a znode can only be deleted if it does not have any children</li>
+<li>a znode can be created with a name and a sequence number appended to it</li>
+<li>a change to data will only be applied if it is at an expected version</li>
+</ul>
+<h3 id="Quorum"><a href="#Quorum" class="headerlink" title="Quorum"></a>Quorum</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">func isQuorum(type) &#123;</div><div class="line">    // zk的请求有2种 1. 事务请求 2. 只读请求</div><div class="line">    switch (type) &#123;</div><div class="line">    case OpCode.exists, getACL, getChildren, getChildren2, getData:</div><div class="line">        // 本地执行，不需要proposal</div><div class="line">        return false</div><div class="line"></div><div class="line">    case OpCode.error, closeSession, create, createSession, delete, setACL, setData, check, multi:</div><div class="line">        return true</div><div class="line"></div><div class="line">    default:</div><div class="line">        return false</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注意：session部分，也会走txn</p>
+<h3 id="multi"><a href="#multi" class="headerlink" title="multi"></a>multi</h3><p>是原子操作，multi里的每个op都使用相同的zxid</p>
+<h3 id="Watch"><a href="#Watch" class="headerlink" title="Watch"></a>Watch</h3><p>Watches are maintained locally at the ZooKeeper server to which the client is connected.<br>它是不走proposal quorum的</p>
+<p>Watcher只会告诉客户端发生了什么类型的事件，而不会说明事件的具体内容<br>例如，NodeDataChanged，watcher只会通知client：<br>在你watch的path上，发生了NodeDataChanged这个事件<br>但最新的数据是什么，不在event里，而需要client主动重新去get</p>
+<p>Watch的通知，由WatchManager完成，它先从内存里删除这个watcher，然后回调watcher.process<br>后者在NIOServerCnxn，即watches are sent asynchronously to watchers(client).<br>But ZooKeeper guarantees that a client will see a watch event for a znode it is watching before seeing the new data that corresponds to that znode. </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">class WatchManager &#123;</div><div class="line">    HashMap&lt;String, HashSet&lt;Watcher&gt;&gt; watchTable</div><div class="line"></div><div class="line">    func triggerWatch(path, event) &#123;</div><div class="line">        synchronized(this) &#123; </div><div class="line">            watchers = watchTable.remove(path) // so one time trigger</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Watch机制本身是非常轻量级的，对服务器不会有多大开销：</div><div class="line">        // 它都是local zk server在内存中处理</div><div class="line">        // 但如果一个path的watcher很多，那么这个O(n)循环</div><div class="line">        for watcher = range watchers &#123;</div><div class="line">            w.process(event)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">func process(WatchedEvent event) &#123;</div><div class="line">    h = new ReplyHeader(-1, -1L, 0)</div><div class="line">    sendResponse(h, event) // if IOException, close the client conn</div><div class="line">                           // sock.write(非阻塞) async write</div><div class="line">                           // sendResponse对同一个client是串行的，顺序的</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="顺序"><a href="#顺序" class="headerlink" title="顺序"></a>顺序</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">client.get(path, watch=true)</div><div class="line">// 此时数据发生变化</div><div class="line"></div><div class="line">zk保证的顺序：</div><div class="line">client先拿到watch event，之后才能看到最新的数据</div><div class="line">client如果watch很多时间，那么得到这些event的顺序与server端发生的顺序是完全一致的</div></pre></td></tr></table></figure>
+<h4 id="watch的保持"><a href="#watch的保持" class="headerlink" title="watch的保持"></a>watch的保持</h4><p>zk client连接zk1, 并get with watch，突然zk1 crash，client连接到zk2，那么watch<br>是如何保持的?<br>这是client端实现的，内存里记录watches，在pick new server后，sendSetWatches</p>
+<h4 id="watch的事件会丢吗"><a href="#watch的事件会丢吗" class="headerlink" title="watch的事件会丢吗"></a>watch的事件会丢吗</h4><p>client2能获取到每次的set事件吗?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">client1不停地set(node, newValue)</div><div class="line">client2 get with watch</div></pre></td></tr></table></figure></p>
+<p>不一定：因为是one time trigger<br>获取event后，要重新watch，在此过程中可能产生新的事件: 期间事件lost</p>
+<p>此外，zk与client的conn断开后，client会连接下一个zk，在此期间的事件lost<br>例如，watch NodeCreated事件，在client重新连接期间，该node created，那么client将永远无法获取该事件</p>
+<h4 id="watch同一个znode多次，会收到几条event"><a href="#watch同一个znode多次，会收到几条event" class="headerlink" title="watch同一个znode多次，会收到几条event?"></a>watch同一个znode多次，会收到几条event?</h4><p>由于WatchManager的实现，相同类型的watch在一个path上被set多次，只会触发一次</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">create(&quot;/foo&quot;, EPHEMERAL_SEQUENTIAL)</div><div class="line">exists(&quot;/foo&quot;, watcher) // 那么这个watch事件是永远不会trigger的，因为path不同，见WatchManager的实现</div></pre></td></tr></table></figure>
+<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><p>recvLoop里任意的错误，都会pick next server and authentication，进入新的循环</p>
+<ul>
+<li>conn reset by peer</li>
+<li>conn EOF</li>
+<li>receive packet timeout</li>
+<li>session expire</li>
+</ul>
+<h4 id="time"><a href="#time" class="headerlink" title="time"></a>time</h4><ul>
+<li>conn.recvTimeout = sessionTimeout * 2 / 3</li>
+<li>ping interval = sessionTimeout / 3</li>
+</ul>
+<p>例如，sessionTimeout=30s，那么client在等待20s还得不到response，就会try next server<br>恰好赶在ping的窗口期 10+20=30</p>
+<h2 id="Q-A"><a href="#Q-A" class="headerlink" title="Q/A"></a>Q/A</h2><h3 id="client-ping是如何保持住session的"><a href="#client-ping是如何保持住session的" class="headerlink" title="client ping是如何保持住session的?"></a>client ping是如何保持住session的?</h3><p>client连接s1，定期ping，但s1 crash后client连接s2，为什么session能保持住?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">connect(s2)</div><div class="line">send(ConnectRequest&#123;LastZxidSeen, SessionID&#125;) // SessionID是s1当时分配的</div><div class="line">var r ConnectResponse = recv()</div><div class="line">if r.SessionID == 0 &#123;</div><div class="line">    // session expire</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>createSession会通过txn，因此client可以failover<br>server在sessionTimeout内没有收到ping，就会closeSession，它也通过txn</p>
+<h3 id="session-id"><a href="#session-id" class="headerlink" title="session id"></a>session id</h3><p>zk session id assigned by server, global unique</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">func initializeNextSession(id=1) &#123;</div><div class="line">    long nextSid = 0;</div><div class="line">    nextSid = (System.currentTimeMillis() &lt;&lt; 24) &gt;&gt;&gt; 8;</div><div class="line">    nextSid =  nextSid | (id &lt;&lt;56);</div><div class="line">    return nextSid;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>后面的session id就是这个种子基础上 increment by 1</p>
+<h2 id="Snapshot"><a href="#Snapshot" class="headerlink" title="Snapshot"></a>Snapshot</h2><p>dataLogDir(txn log) and dataDir(snapshot) should be placed in 2 disk devices<br>如果txn log和snapshot处于同一块硬盘，异步的snapshot可能会block txn log，连锁反应就是把proposal阻塞，进而造成follower重新选举</p>
+<h3 id="when"><a href="#when" class="headerlink" title="when"></a>when</h3><ul>
+<li>System.getProperty(“zookeeper.snapCount”), 默认值100,000</li>
+<li>takeSnapshot的时间在50,000 ~ 100,0000 之间的随机值</li>
+<li>txn数量超过snapCount+随机数<ul>
+<li>roll txn log</li>
+<li>创建一个线程，异步执行takeSnapshot。但前面的takeSnapshot线程未完成，则放弃<br>Too busy to snap, skipping</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">Request si = getRequest()</div><div class="line">if (zks.getZKDatabase().append(si)) &#123; // txn log ok</div><div class="line">    logCount++; // logCount就是txn的数量</div><div class="line">    if (logCount &gt; (snapCount / 2 + randRoll)) &#123;</div><div class="line">        randRoll = r.nextInt(snapCount/2); // 为了防止集群内所有节点同时takeSnapshot加入随机</div><div class="line">        zks.getZKDatabase().rollLog(); // txn log will roll</div><div class="line">        if (snapInProcess != null &amp;&amp; snapInProcess.isAlive()) &#123;</div><div class="line">            LOG.warn(&quot;Too busy to snap, skipping&quot;);</div><div class="line">        &#125; else &#123;</div><div class="line">            snapInProcess = new Thread(&quot;Snapshot Thread&quot;) &#123;</div><div class="line">                public void run() &#123;</div><div class="line">                    try &#123;</div><div class="line">                        zks.takeSnapshot();</div><div class="line">                    &#125; catch(Exception e) &#123;</div><div class="line">                        LOG.warn(&quot;Unexpected exception&quot;, e);</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;;</div><div class="line">            snapInProcess.start();</div><div class="line">        &#125;</div><div class="line">        logCount = 0;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="size"><a href="#size" class="headerlink" title="size"></a>size</h3><p>每个znode meta data至少76+path+data，如果1M znodes，平均size(path+data)=100，那么snapshot文件长度至少200MB<br>我的一个生产环境zk，znode 3万，snapshot文件15MB；即，如果300万个znodes，那么snapshot文件将是1.5GB</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">path(len4, path)</div><div class="line">node</div><div class="line">  data(len4, data)</div><div class="line">  acl8</div><div class="line">  meta60</div><div class="line">    czxid8, mzxid8, ctime8, mtime8, version4, cversion4, aversion4, ephemeralOwner8, pzxid8</div></pre></td></tr></table></figure>
+<h3 id="checksum"><a href="#checksum" class="headerlink" title="checksum"></a>checksum</h3><p>Adler32</p>
+<h2 id="Edge-cases"><a href="#Edge-cases" class="headerlink" title="Edge cases"></a>Edge cases</h2><h3 id="leader-election"><a href="#leader-election" class="headerlink" title="leader election"></a>leader election</h3><p>LOOKING后，把自己的zxid广播，是得到大多数同意就成为leader?<br>是，不需要等全部ack</p>
+<h3 id="async-commit"><a href="#async-commit" class="headerlink" title="async commit"></a>async commit</h3><p>[S1(leader), S2, S3]<br>S1 Propose set(a)=5，在得到majority Ack(proposal)后，向所有机器发送Commit，<br>Q1. S1需要在得到majority Ack(commit)后才return OK to client?<br>Q2. 如果S1发送Commit给所有机器前恰好挂了，new leader会恢复这个事务吗？</p>
+<p>leader在得到majority Ack(proposal)后，majority servers已经记录下了txnlog，leader发送Commit只是为了让servers<br>make the txn visibile to client，Commit消息是不会记录txnlog的<br>leader处理Commit是异步的，不需要等待Commit的ack，即Q1: no，Q2: yes</p>
+<p>ZAB makes the guarantee that a proposal which has been logged by a quorum of followers will eventually be committed<br>any uncommited proposals from a previous epoch seen by a new leader will be committed by that leader before it becomes active.</p>
+<p>换个角度看这个问题：<br>S1得到请求set(a)=5，commit locally，但commit还没有发送给S2，S3，crash!<br>这时候，一个client可能发请求 get(a)，如果它连接的是S1，在S1 crash前，get(a)=2<br>所以，这个commit必须让新leader知道</p>
+<h3 id="sync-proposal"><a href="#sync-proposal" class="headerlink" title="sync proposal"></a>sync proposal</h3><p>[S1(leader), S2, S3, S4, S5]<br>S1 Propose set(a)=2，发送给了S2 Proposal，但S3-5还没有收到Proposal，此时S1 crash，那么这个proposal在new leader<br>上会被恢复吗? 即重新选举后，get(a)=2?</p>
+<p>不一定！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">S1(leader), S2, S3, S4, S5</div><div class="line"></div><div class="line">现在propose set(a)=b，S1确认了，但其他还没有确认，此时全部crash</div><div class="line">然后启动S2-S5，等一会儿再启动S1，那么S2-S5他们的txid相同，会选出S5 leader</div><div class="line">等S1启动时，它的txid是最大的，a=b可能会丢：</div><div class="line">如果S1启动慢了200ms内，可能不会丢；否则，例如慢了1分钟，则丢了，S1变成follower后</div><div class="line">会把该txid truncate: txnlog seek</div></pre></td></tr></table></figure>
+<p>FastLeaderElection.java<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">finalizeWait=200ms // 在得到majority确认后，但还没有得到全部确认，wait before make leader</div><div class="line"></div><div class="line">sendNotifications()</div><div class="line">for i.am.looking &#123;</div><div class="line">    n = recvqueue.poll()</div><div class="line">    switch n.state &#123;</div><div class="line">        case LOOKING:</div><div class="line">            compare my proposal with n and update my proposal</div><div class="line">            if every node agrees &#123;</div><div class="line">                // got the leader!</div><div class="line">                return</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            if quorum agrees &#123;</div><div class="line">                // Verify if there is any change in the proposed leader</div><div class="line">                for &#123;</div><div class="line">                    n = recvqueue.poll(200ms)</div><div class="line">                    if n == nil &#123;</div><div class="line">                        break</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        case FOLLOWING, LEADING:</div><div class="line">            if leader is not me &#123;</div><div class="line">                // confirm I have recv notification from leader</div><div class="line">                // stating that he is leader</div><div class="line">            &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1813" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-1813</a><br><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-417" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-417</a><br><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1674" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-1674</a><br><a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1642" target="_blank" rel="external">https://issues.apache.org/jira/browse/ZOOKEEPER-1642</a><br><a href="http://blog.csdn.net/pwlazy/article/details/8080626" target="_blank" rel="external">http://blog.csdn.net/pwlazy/article/details/8080626</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/15/zookeeper/" data-id="cje9yfrs8005p155bfxqnsvec" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/15/zookeeper/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/15/zookeeper/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-delay-and-schedule-message-delivery" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -248,7 +456,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cjd5ent8m003gug5bwnkvm6cl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/15/delay-and-schedule-message-delivery/" data-id="cje9yfrqc003m155bva9prgtm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -398,7 +606,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cjd5enta00051ug5b3c8jr6ep" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/repeatable-read-write-skew/" data-id="cje9yfrru004z155b64y5pbr0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -530,7 +738,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cjd5ent8l003eug5b9xbn46zs" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/dual-write-conflict/" data-id="cje9yfrqe003o155boggy4af9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -657,7 +865,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cjd5enta40055ug5bspn9b1lh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/12/shard-scales/" data-id="cje9yfrs0005b155bdj031mwz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -842,7 +1050,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cjd5ent9x004tug5bmmh0z76l" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/mysql-group-replication/" data-id="cje9yfrrv0051155btd2e1cwc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -974,7 +1182,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cjd5ent9z004xug5bek59xz3j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/osc/" data-id="cje9yfrs6005l155bi1putv63" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1110,7 +1318,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cjd5ent610004ug5bgvl4unym" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/11/2PL/" data-id="cje9yfrnh0005155b0b75rb3c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1205,6 +1413,15 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2018/02/08/Kafka-Exactly-Once/" class="title">Kafka Exactly Once</a></p>
+                            <p class="item-date"><time datetime="2018-02-08T03:08:55.000Z" itemprop="datePublished">2018-02-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2018/01/18/BigData-related/" class="title">BigData related</a></p>
                             <p class="item-date"><time datetime="2018-01-18T00:44:54.000Z" itemprop="datePublished">2018-01-18</time></p>
                         </div>
@@ -1237,15 +1454,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
-                            <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1255,7 +1463,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1264,7 +1472,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 

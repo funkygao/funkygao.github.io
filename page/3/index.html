@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                97
+                98
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,141 @@
 
             
             <section id="main">
+    <article id="post-Linux-TCP-implementation" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/06/30/Linux-TCP-implementation/">Linux 2.6.19 TCP implementation</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/06/30/Linux-TCP-implementation/">
+            <time datetime="2017-06-29T23:52:33.000Z" itemprop="datePublished">2017-06-30</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/misc/">misc</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="read"><a href="#read" class="headerlink" title="read"></a>read</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/netread.png?raw=true" alt="read"></p>
+<ul>
+<li>/proc/sys/net/ipv4/tcp_rmem<br>TCP recv Buffer</li>
+<li>net.core.netdev_max_backlog<br>maximum number of packets queued at a device, which are waiting to be processed by the TCP receiving process<br>Socket Backlog, dropped if full</li>
+</ul>
+<h2 id="write"><a href="#write" class="headerlink" title="write"></a>write</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/netwrite.png?raw=true" alt="write"></p>
+<ul>
+<li>txqueuelen<br>ifconfig eth0 txqueuelen</li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/" data-id="cje9yfroq001k155bu2o896uc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/30/Linux-TCP-implementation/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-an-IM-implementation" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -274,7 +409,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cjd5ent87002qug5b822vkg34" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/29/an-IM-implementation/" data-id="cje9yfrpr002u155bdcc1fui1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -453,7 +588,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cjd5ent8x003uug5bfeen1rd7" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/geo-distributed-storage/" data-id="cje9yfrr3003y155bmdb9fe0x" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -582,7 +717,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cjd5ent8e0034ug5b072475g1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/chain-replication/" data-id="cje9yfrq5003e155bppghz6m9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -709,7 +844,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cjd5ent960046ug5b59wawlx2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/http-Preconnect/" data-id="cje9yfrrd004a155bniw4vt85" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -850,7 +985,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cjd5ent7t0027ug5b7h3vt046" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/27/TLS-Session-Resumption/" data-id="cje9yfrpf002f155bekvocg1e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -984,7 +1119,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cjd5ent640006ug5bpyf0kat0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/AWS-Marketplace/" data-id="cje9yfrnf0004155b6bqb5m4i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1120,7 +1255,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cjd5ent7i001qug5bcnwqjtn0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/NILFS/" data-id="cje9yfrp1001w155bcz1bjhyl" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1256,7 +1391,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/CryptDB/" data-id="cjd5ent6e000gug5bt3xr0y9e" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/CryptDB/" data-id="cje9yfrnq000c155bt424orlt" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1386,7 +1521,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/26/Bloom-Filter/" data-id="cjd5ent670009ug5bxqiubqse" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/06/26/Bloom-Filter/" data-id="cje9yfrno000a155by5kfoyil" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1464,156 +1599,6 @@
 
 
 
-    <article id="post-Why-Do-Computers-Stop" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/06/26/Why-Do-Computers-Stop/">Why Do Computers Stop</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/06/26/Why-Do-Computers-Stop/">
-            <time datetime="2017-06-26T06:55:45.000Z" itemprop="datePublished">2017-06-26</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <p>Jim Gray, June 1985, Tandem Technical report 85.7</p>
-<h2 id="Terms"><a href="#Terms" class="headerlink" title="Terms"></a>Terms</h2><p>Reliability != Availability</p>
-<ul>
-<li>availability is doing the right thing within the specified response time<ul>
-<li>Availability = MTBF/(MTBF + MTTR)</li>
-<li>分布式系统下，整体的可用性=各个子系统可用性的乘积</li>
-<li>模块化使得局部failure不会影响全部，冗余减少MTTR</li>
-<li>磁盘的MTBF是1万小时，即1年；如果两张盘完全独立冗余，假设MTBR是24h，那么整体的MTBF是1000年</li>
-</ul>
-</li>
-<li>reliability is not doing the wrong thing</li>
-</ul>
-<h2 id="Report"><a href="#Report" class="headerlink" title="Report"></a>Report</h2><p><img src="https://github.com/funkygao/blogassets/blob/master/img/mtbf.png?raw=true" alt="MTBF"></p>
-<h2 id="设计容错系统的方法"><a href="#设计容错系统的方法" class="headerlink" title="设计容错系统的方法"></a>设计容错系统的方法</h2><p>process pair</p>
-<ul>
-<li>Lockstep<br>一个执行失败，就启用另外一个<br>容忍了硬件故障，但没有解决Heisenbugs(难以重现的bug)</li>
-<li>State Checkpointing<br>primary通过消息同步把请求发送给backup，如果primary挂了，切到backup<br>通过序列号来排重和发现消息丢失<br>实现起来比较困难</li>
-<li>Automatic Checkpointing<br>kernal自动管理checkpoint，而不是让上层应用管理<br>发送的消息很多</li>
-<li>Delta Checkpointing<br>发给backup的是logical updates，而不是physical updates<br>性能更好，消息更少，但也更难实现</li>
-<li>Persistence<br>失败的时候可能丢失状态<br>需要加入事务来提高可靠性</li>
-</ul>
-<h2 id="Fault-tolerent-Communication"><a href="#Fault-tolerent-Communication" class="headerlink" title="Fault-tolerent Communication"></a>Fault-tolerent Communication</h2><p>硬件，通过multiple data paths with independent failure modes<br>软件，引入session概念(类似tcp)</p>
-<h2 id="Fault-tolerent-Storage"><a href="#Fault-tolerent-Storage" class="headerlink" title="Fault-tolerent Storage"></a>Fault-tolerent Storage</h2><p>2份复制正好，3份不一定提高MTBF，因为其他失败因素会变为主导<br>分布式复制<br>把数据分片，会限制scope of failure</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="http://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf" target="_blank" rel="external">http://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf</a></p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/" data-id="cjd5ent82002kug5bobttcdfx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/26/Why-Do-Computers-Stop/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
     </nav>
@@ -1626,6 +1611,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2018/02/08/Kafka-Exactly-Once/" class="title">Kafka Exactly Once</a></p>
+                            <p class="item-date"><time datetime="2018-02-08T03:08:55.000Z" itemprop="datePublished">2018-02-08</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1663,15 +1657,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
-                            <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1681,7 +1666,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1690,7 +1675,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 

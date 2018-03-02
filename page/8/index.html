@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                97
+                98
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,136 @@
 
             
             <section id="main">
+    <article id="post-cache-invalidation" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2017/05/22/cache-invalidation/">cache invalidation</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2017/05/22/cache-invalidation/">
+            <time datetime="2017-05-22T01:52:37.000Z" itemprop="datePublished">2017-05-22</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/一致性/">一致性</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">// read data</div><div class="line">val = cache.get(key)</div><div class="line">if val == nil &#123;</div><div class="line">    val = db.get(key)</div><div class="line">    cache.put(key, val)</div><div class="line">&#125;</div><div class="line">return val</div><div class="line"></div><div class="line">// write data</div><div class="line">db.put(key, val)</div><div class="line">cache.put(key, val)</div></pre></td></tr></table></figure>
+<p>这会造成<a href="http://funkygao.github.io/2017/05/12/dual-write-conflict/">dual write conflict</a></p>
+<p>如果需要的只是eventaul consistency，那么通过<a href="https://github.com/funkygao/dbus" target="_blank" rel="external">dbus</a>来进行cache invalidation是最有效的</p>
+<p><a href="https://martinfowler.com/bliki/TwoHardThings.html" target="_blank" rel="external">https://martinfowler.com/bliki/TwoHardThings.html</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2017/05/22/cache-invalidation/" data-id="cje9yfrpz0036155bktw4j7vg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2017/05/22/cache-invalidation/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/22/cache-invalidation/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-Linked-Esprosso" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -252,7 +382,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/22/Linked-Esprosso/" data-id="cjd5ent76001gug5brjgqffpr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/22/Linked-Esprosso/" data-id="cje9yfroo001h155bs9xeigdw" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -381,7 +511,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/" data-id="cjd5ent7g001nug5bfojv7jib" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/19/Multi-Data-Center-Consistency/" data-id="cje9yfrou001p155bqmowhb4g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -520,7 +650,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/19/distributed-snapshot/" data-id="cjd5ent8k003cug5btnyuex2a" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/19/distributed-snapshot/" data-id="cje9yfrqa003k155bcctqdt84" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -647,7 +777,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/19/https/" data-id="cjd5ent910040ug5bbpaq3gjb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/19/https/" data-id="cje9yfrrf004c155bm1l9g5qf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -778,7 +908,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/19/hlc/" data-id="cjd5ent8z003yug5bmciys7yr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/19/hlc/" data-id="cje9yfrra0046155bvj9vvyp3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -905,7 +1035,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/18/SRE/" data-id="cjd5ent7q0020ug5b9so459a3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/18/SRE/" data-id="cje9yfrpd002b155b5r18ccxh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1036,7 +1166,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/18/MySQL-B-Tree/" data-id="cjd5ent89002sug5bqbzwnmlg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/18/MySQL-B-Tree/" data-id="cje9yfroz001u155bybzu3lne" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1172,7 +1302,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/18/batch-insert/" data-id="cjd5ent9v004mug5bthvmujnj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/18/batch-insert/" data-id="cje9yfrpu0030155b1fmn4l20" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1299,7 +1429,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/05/17/cannot-have-exactly-once-delivery/" data-id="cjd5ent8d0032ug5bxeh4qica" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/05/17/cannot-have-exactly-once-delivery/" data-id="cje9yfrq00038155bc21eb4dd" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1377,170 +1507,6 @@
 
 
 
-    <article id="post-RocketMQ" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/05/17/RocketMQ/">RocketMQ解读</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/RocketMQ/">
-            <time datetime="2017-05-17T02:38:32.000Z" itemprop="datePublished">2017-05-17</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h2><ul>
-<li>Producer Group<br>发送事务消息时，作为TC，要多机，保存事务状态表{offset: P/C/R}</li>
-<li>Broker tag-based message filter </li>
-<li>定时消息，不支持任意精度，只是特定level: 5s, 10s, 1m等 queueID=delayLevel-1<br>因此，应该不支持message revoke</li>
-<li>区分commit log和consume log，有点类似WAL和table关系<br>可以把它们放在不同FS下，但没有更细粒度的<br>增加了一个分发步骤的好处：可以不分发</li>
-</ul>
-<h2 id="Commit-Log"><a href="#Commit-Log" class="headerlink" title="Commit Log"></a>Commit Log</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$&#123;rocketmq.home&#125;\store\commitlog\$&#123;fileName&#125;</div><div class="line"></div><div class="line">fileName[n] = fileName[n-1] + mappedFileSize</div><div class="line">为了保证mappedFileSize相同，在每个file tail加padding，默认1GB</div></pre></td></tr></table></figure>
-<p>每条消息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">QueueOffset针对普通消息，存的是consume log里的offset；如果事务消息，是事务状态表的offset</div><div class="line">+---------+-------+-----+---------+------+-------------+----------------+----------------+</div><div class="line">| MsgSize | Magic | CRC | QueueID | Flag | QueueOffset | PhysicalOffset | SysFlag(P/C/R) |</div><div class="line">+---------+-------+-----+---------+------+-------------+----------------+----------------+</div><div class="line"></div><div class="line">+--------------+------------------+-----------+---------------+----+------+-------+------+</div><div class="line">| ProducedTime | ProduderHostPort | StoreTime | StoreHostPort | .. | Body | Topic | Prop |</div><div class="line">+--------------+------------------+-----------+---------------+----+------+-------+------+</div></pre></td></tr></table></figure></p>
-<p>每次append commit log，会同步调用dispatch分发到consume queue和索引服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">new DispatchRequest(topic, queueId, </div><div class="line">    result.getWroteOffset(), result.getWroteBytes(),</div><div class="line">    tagsCode, msg.getStoreTimestamp(), </div><div class="line">    result.getLogicsOffset(), msg.getKeys(),</div><div class="line">    // Transaction</div><div class="line">    msg.getSysFlag(),</div><div class="line">    msg.getPreparedTransactionOffset());</div></pre></td></tr></table></figure></p>
-<h3 id="queue"><a href="#queue" class="headerlink" title="queue"></a>queue</h3><p>仅仅是逻辑概念，可以通过它来参与producer balance，类似一致哈希里的虚拟节点<br>每台broker上的commitlog被本机所有的queue共享，不做任何区分</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">broker1: queue0, queue2</div><div class="line">broker2: queue0, </div><div class="line"></div><div class="line">then, topicA has 3 queues:</div><div class="line">broker1_queue0, broker1_queue2, broker2_queue0</div><div class="line"></div><div class="line">producer.selectOneMessageQueue(&quot;topicA&quot;, &quot;broker1&quot;, &quot;queue0&quot;)</div></pre></td></tr></table></figure>
-<p>消息的局部顺序由producer client保证</p>
-<h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><ul>
-<li>如何实现retention by topic: 没有实现<br>仅仅根据commit log file的mtime来判断是否过期，虽然里面混杂多topics</li>
-<li>如何I/O balancing</li>
-<li>如何压缩</li>
-<li>如果CRC出错，那么所有topic都受影响?</li>
-<li>为什么要存StoreHostPort？如何迁移topic：无法迁移</li>
-<li>写commit log需要加锁，这个锁粒度太大，相当于db level lock，而非table level</li>
-<li>broker的脑裂问题</li>
-<li>failover</li>
-<li>topic的commit log是分散在所有broker上的</li>
-</ul>
-<h2 id="Consume-Queue"><a href="#Consume-Queue" class="headerlink" title="Consume Queue"></a>Consume Queue</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$&#123;rocketmq.home&#125;/store/consumequeue/$&#123;topicName&#125;/$&#123;queueId&#125;/$&#123;fileName&#125;</div></pre></td></tr></table></figure>
-<p>读一条消息，先读consume queue(类似mysql的secondary index)，再读commit log(clustered index)</p>
-<p>没有采用sendfile，而是通过mmap：因为random read</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">+---------------------+-----------------+------------------------+</div><div class="line">| CommitLogOffset(8B) | MessageSize(4B) | MessageTagHashcode(8B) |</div><div class="line">+---------------------+-----------------+------------------------+</div></pre></td></tr></table></figure>
-<p>虽然消费时，consume queue是顺序的，但接下来的commit log几乎都是random read，此外<br>如何优化压缩？光靠pagecache+readahead是远远不够的</p>
-<h2 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">TopicPublishInfo topicPublishInfo = this.tryToFindTopicPublishInfo(msg.getTopic()); // from local cache or name server</div><div class="line">MessageQueue mq = topicPublishInfo.selectOneMessageQueue(lastBrokerName);</div><div class="line">sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, timeout);</div></pre></td></tr></table></figure>
-<h2 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">// 2PC，2 messages</div><div class="line"></div><div class="line">// Phase1</div><div class="line">producer group write redolog</div><div class="line">producer group send a message(type=TransactionPreparedType) to broker</div><div class="line">broker append it to CommitLog and return MessageId</div><div class="line">broker will not append it to consume queue</div><div class="line"></div><div class="line">// Phase2</div><div class="line">producer group write redolog</div><div class="line">producer group send a message(type=TransactionCommitType, msgId=$msgId) to broker</div><div class="line">broker find the message with msgId in CommitLog and clone it and append it to CommitLog(type=TransactionCommitType|TransactionRollbackType)</div><div class="line">if type == TransactionCommitType &#123;</div><div class="line">    broker append commit log offset to consume queue</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="State-Table"><a href="#State-Table" class="headerlink" title="State Table"></a>State Table</h3><p>保存在broker，默认1m扫一次</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">24B, mmap</div><div class="line"></div><div class="line">+-----------------+------+-----------+-----------------------+--------------+</div><div class="line">| CommitLogOffset | Size | Timestamp | ProducerGroupHashcode | State(P/C/R) |</div><div class="line">+-----------------+------+-----------+-----------------------+--------------+</div><div class="line"></div><div class="line">prepare消息，insert table</div><div class="line">commit/rollback消息，update table</div></pre></td></tr></table></figure>
-<p>对于未决事务，根据随机向Producer Group里的一台发请求CHECK_TRANSACTION_STATE<br>Producer Group根据redolog(mmap)定位状态<br>Producer Group信息存放在namesvr</p>
-<h3 id="Problems"><a href="#Problems" class="headerlink" title="Problems"></a>Problems</h3><ul>
-<li>Producer不再是普通的client，它已经变成server(TC)，而且要求不能随便shutdown</li>
-<li>Producer Group里写redolog的机器死了怎么办</li>
-</ul>
-<h2 id="HA"><a href="#HA" class="headerlink" title="HA"></a>HA</h2><p>粒度只控制在Broker，而kafka是在partition上</p>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/05/17/RocketMQ/" data-id="cjd5ent7p001xug5b1t6nsqag" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/05/17/RocketMQ/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/05/17/RocketMQ/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
     </nav>
@@ -1553,6 +1519,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2018/02/08/Kafka-Exactly-Once/" class="title">Kafka Exactly Once</a></p>
+                            <p class="item-date"><time datetime="2018-02-08T03:08:55.000Z" itemprop="datePublished">2018-02-08</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1590,15 +1565,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
-                            <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -1608,7 +1574,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -1617,7 +1583,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 

@@ -12,7 +12,7 @@
 <meta property="og:url" content="http://funkygao.github.io/2017/12/14/Misc/index.html">
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="Storage微信支付的交易记录之前kv，每个用户一个key(相当于redis list)，这样问题是：  value会大 无法根据条件filter value  改进后：没有用户多个value，其中1个root value，保存metadata，其他value为data多value解决了以前单value大的问题，但：  多了一次请求先root，再value root成为新瓶颈 可以把root也变">
-<meta property="og:updated_time" content="2018-02-02T02:59:07.000Z">
+<meta property="og:updated_time" content="2018-03-01T09:28:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="知名公司功能模块的实现笔记">
 <meta name="twitter:description" content="Storage微信支付的交易记录之前kv，每个用户一个key(相当于redis list)，这样问题是：  value会大 无法根据条件filter value  改进后：没有用户多个value，其中1个root value，保存metadata，其他value为data多value解决了以前单value大的问题，但：  多了一次请求先root，再value root成为新瓶颈 可以把root也变">
@@ -146,7 +146,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                97
+                98
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -250,6 +250,10 @@
 </ul>
 </li>
 </ul>
+<h3 id="柔性事务如何解决分布式事务"><a href="#柔性事务如何解决分布式事务" class="headerlink" title="柔性事务如何解决分布式事务"></a>柔性事务如何解决分布式事务</h3><ol>
+<li>引入日志和补偿机制<br>正向补偿：重试<br>逆向补偿：undo log</li>
+</ol>
+<h3 id="无锁修改库存"><a href="#无锁修改库存" class="headerlink" title="无锁修改库存"></a>无锁修改库存</h3><p>可以记录增件变化的明细表，避免所有事务对同一行更新，避开hotspot。<br>例如，下订单时，记录库存变化明细；支付成功时，真正进行update。为了防止超卖，在支付前，扫描库存明细表计算目前真正的库存，此时可能会库存不够，那就不让支付了</p>
 <h3 id="数据库的高可靠、强一致"><a href="#数据库的高可靠、强一致" class="headerlink" title="数据库的高可靠、强一致"></a>数据库的高可靠、强一致</h3><ol>
 <li><p>数据库异步复制，主备数据无法保证一致<br>主死后，判断哪些用户最近没有做过主库update，他们可以在从库上进行新的操作；否则，在数据库恢复前不允许写操作</p>
 </li>
@@ -302,7 +306,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjd5ent79001iug5bh5hlqrj5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cje9yfros001m155b2mw089si" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -426,6 +430,15 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
+                            <p class="item-title"><a href="/2018/02/08/Kafka-Exactly-Once/" class="title">Kafka Exactly Once</a></p>
+                            <p class="item-date"><time datetime="2018-02-08T03:08:55.000Z" itemprop="datePublished">2018-02-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
                             <p class="item-title"><a href="/2018/01/18/BigData-related/" class="title">BigData related</a></p>
                             <p class="item-date"><time datetime="2018-01-18T00:44:54.000Z" itemprop="datePublished">2018-01-18</time></p>
                         </div>
@@ -458,15 +471,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/09/11/block-chain/" class="title">blockchain</a></p>
-                            <p class="item-date"><time datetime="2017-09-11T00:25:49.000Z" itemprop="datePublished">2017-09-11</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -476,7 +480,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -485,7 +489,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 

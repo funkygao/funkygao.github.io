@@ -3,14 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Archive: 2017 | Notes</title>
+    <title>Kafka Exactly Once | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta property="og:type" content="website">
-<meta property="og:title" content="Notes">
-<meta property="og:url" content="http://funkygao.github.io/archives/2017/page/8/index.html">
+    <meta name="description" content="Exactly onceproducer client端，打开enable.idempotence=true每个batch messages包含一个seqNo。broker把该信息持久化到replicated log，并进行dedupe Transactionactomic writes across multiple partitions">
+<meta name="keywords" content="PubSub">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka Exactly Once">
+<meta property="og:url" content="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/index.html">
 <meta property="og:site_name" content="Notes">
+<meta property="og:description" content="Exactly onceproducer client端，打开enable.idempotence=true每个batch messages包含一个seqNo。broker把该信息持久化到replicated log，并进行dedupe Transactionactomic writes across multiple partitions">
+<meta property="og:updated_time" content="2018-02-08T03:23:53.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Notes">
+<meta name="twitter:title" content="Kafka Exactly Once">
+<meta name="twitter:description" content="Exactly onceproducer client端，打开enable.idempotence=true每个batch messages包含一个seqNo。broker把该信息持久化到replicated log，并进行dedupe Transactionactomic writes across multiple partitions">
     
 
     
@@ -193,328 +198,157 @@
 </aside>
 
             
-            <section id="main"><div class="timeline timeline-wrap">
-    
-            <div class="timeline-row timeline-row-major">
-                <span class="node"><i class="fa fa-calendar"></i></span>
-                <h1 class="title">2017</h1>
-            </div>
+            <section id="main"><article id="post-Kafka-Exactly-Once" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
         
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+        
+            <header class="article-header">
                 
     
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/Multi-Data-Center-Consistency/">Multi-Data Center Consistency</a>
+        <h1 class="article-title" itemprop="name">
+            Kafka Exactly Once
         </h1>
     
 
-                <div class="article-meta">
-                    
+                
+                    <div class="article-meta">
+                        
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/Multi-Data-Center-Consistency/">
-            <time datetime="2017-05-19T07:18:33.000Z" itemprop="datePublished">2017-05-19</time>
+        <a href="/2018/02/08/Kafka-Exactly-Once/">
+            <time datetime="2018-02-08T03:08:55.000Z" itemprop="datePublished">2018-02-08</time>
         </a>
     </div>
 
 
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/一致性/">一致性</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/distributed-snapshot/">asynchronous distributed snapshot</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/distributed-snapshot/">
-            <time datetime="2017-05-19T02:32:48.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/https/">https</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/https/">
-            <time datetime="2017-05-19T00:21:27.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/protocol/">protocol</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/19/hlc/">hybrid logical clock</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/19/hlc/">
-            <time datetime="2017-05-18T23:51:28.000Z" itemprop="datePublished">2017-05-19</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/algorithm/">algorithm</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/18/SRE/">可靠性金字塔 SRE</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/18/SRE/">
-            <time datetime="2017-05-18T05:55:21.000Z" itemprop="datePublished">2017-05-18</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/architecture/">architecture</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/18/MySQL-B-Tree/">MySQL B+ Tree</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/18/MySQL-B-Tree/">
-            <time datetime="2017-05-18T01:32:32.000Z" itemprop="datePublished">2017-05-18</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/18/batch-insert/">batch insert(mysql)</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/18/batch-insert/">
-            <time datetime="2017-05-18T00:46:17.000Z" itemprop="datePublished">2017-05-18</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/database/">database</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/17/cannot-have-exactly-once-delivery/">cannot have exactly-once delivery</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/cannot-have-exactly-once-delivery/">
-            <time datetime="2017-05-17T02:46:26.000Z" itemprop="datePublished">2017-05-17</time>
-        </a>
-    </div>
-
-
-                    
-                    
+                        
+                        
     <div class="article-tag">
         <i class="fa fa-tag"></i>
         <a class="tag-link" href="/tags/PubSub/">PubSub</a>
     </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+                    </div>
                 
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/17/RocketMQ/">RocketMQ解读</a>
-        </h1>
-    
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="Exactly-once"><a href="#Exactly-once" class="headerlink" title="Exactly once"></a>Exactly once</h2><p>producer client端，打开enable.idempotence=true<br>每个batch messages包含一个seqNo。<br>broker把该信息持久化到replicated log，并进行dedupe</p>
+<h2 id="Transaction"><a href="#Transaction" class="headerlink" title="Transaction"></a>Transaction</h2><p>actomic writes across multiple partitions</p>
 
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/RocketMQ/">
-            <time datetime="2017-05-17T02:38:32.000Z" itemprop="datePublished">2017-05-17</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/PubSub/">PubSub</a>
-    </div>
-
-                </div>
-            </div>
+        
         </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2017/05/17/architecture-design-checklist/">architecture design checklist</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/05/17/architecture-design-checklist/">
-            <time datetime="2017-05-17T01:00:00.000Z" itemprop="datePublished">2017-05-17</time>
-        </a>
-    </div>
+        <footer class="article-footer">
+            <div class="share-container">
 
 
-                    
-                    
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/architecture/">architecture</a>
-    </div>
 
-                </div>
-            </div>
-        </div>
-    
 </div>
 
-    <nav id="page-nav">
-        <a class="extend prev" rel="prev" href="/archives/2017/page/7/">&laquo; Prev</a><a class="page-number" href="/archives/2017/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/2017/page/6/">6</a><a class="page-number" href="/archives/2017/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/archives/2017/page/9/">9</a><a class="page-number" href="/archives/2017/page/10/">10</a><a class="extend next" rel="next" href="/archives/2017/page/9/">Next &raquo;</a>
-    </nav>
+    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cje9yfroa0010155blgx73b40" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/01/18/BigData-related/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">BigData related</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
 </section>
             
                 <aside id="sidebar">
@@ -625,11 +459,13 @@
     <script>
     var disqus_config = function () {
         
-        this.page.identifier = 'undefined';
+            this.page.url = 'http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/';
+        
+        this.page.identifier = 'Kafka-Exactly-Once';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/count.js';
+        s.src = '//' + 'hexo-theme-icarus' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
