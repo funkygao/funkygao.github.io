@@ -244,7 +244,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cje9yfroa0010155blgx73b40" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjeggom8c0013zl5b1bhvok5q" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -476,7 +476,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cje9yfrnj0006155bkf8cqtsn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjeggom78000azl5bkcp5f1nu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -662,7 +662,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cje9yfros001m155b2mw089si" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjeggom8w001qzl5b7cztn2s2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -818,7 +818,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cje9yfrp60021155b1kdtfuge" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjeggom950020zl5bo9u93gar" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -967,7 +967,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cje9yfrpj002k155bg3jipmqh" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjeggom9h002lzl5bbjnqtfoi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1181,6 +1181,7 @@
 <h3 id="如果真有人控制了51-计算能力，会发生什么？"><a href="#如果真有人控制了51-计算能力，会发生什么？" class="headerlink" title="如果真有人控制了51%计算能力，会发生什么？"></a>如果真有人控制了51%计算能力，会发生什么？</h3><p>attacker只能把他刚花的钱payment取消掉，即double spent</p>
 <h3 id="据说bitcoin最大吞吐量是7-TPS，怎么计算来的？"><a href="#据说bitcoin最大吞吐量是7-TPS，怎么计算来的？" class="headerlink" title="据说bitcoin最大吞吐量是7 TPS，怎么计算来的？"></a>据说bitcoin最大吞吐量是7 TPS，怎么计算来的？</h3><p>每个block最大1MB，4096个transaction，10分钟产生一个block</p>
 <p>4096/(10*60) = 6.83 = 7</p>
+<h3 id="增加每个block大小，不就可以提高tps了吗？"><a href="#增加每个block大小，不就可以提高tps了吗？" class="headerlink" title="增加每个block大小，不就可以提高tps了吗？"></a>增加每个block大小，不就可以提高tps了吗？</h3><p>是的，但也会产生新的问题。<br>目前，每个block平均大小在300KB。<br>Visa在2013高峰期TPS=47，000笔，如果让比特币达到这个标准，每个block需要8GB，那样的话每年新产生数据超过400GB.</p>
 <h3 id="miner做恶的惩罚"><a href="#miner做恶的惩罚" class="headerlink" title="miner做恶的惩罚"></a>miner做恶的惩罚</h3><p>miner竞争成功后，创建一个block，它会获得奖励；如果它发布一个非法的block，那么大部分miners会拒绝；并在下一个block时，该非法block被取消，同时它的奖励也被取消。除非，它能保证它一直是竞争成功</p>
 <h3 id="seed-nodes"><a href="#seed-nodes" class="headerlink" title="seed nodes?"></a>seed nodes?</h3><p>hard coded<br><a href="https://github.com/bitcoin/bitcoin/blob/863e995b79ec388bf292d80f181912d01e20e2e5/src/net.cpp#L1198" target="_blank" rel="external">https://github.com/bitcoin/bitcoin/blob/863e995b79ec388bf292d80f181912d01e20e2e5/src/net.cpp#L1198</a></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">unsigned int pnSeed[] =</div><div class="line">&#123;</div><div class="line">    0x959bd347, 0xf8de42b2, 0x73bc0518, 0xea6edc50, 0x21b00a4d, 0xc725b43d, 0xd665464d, 0x1a2a770e,</div><div class="line">    0x27c93946, 0x65b2fa46, 0xb80ae255, 0x66b3b446, 0xb1877a3e, 0x6ee89e3e, 0xc3175b40, 0x2a01a83c,</div><div class="line">    0x95b1363a, 0xa079ad3d, 0xe6ca801f, 0x027f4f4a, 0x34f7f03a, 0xf790f04a, 0x16ca801f, 0x2f4d5e40,</div><div class="line">    0x3a4d5e40, 0xc43a322e, 0xc8159753, 0x14d4724c, 0x7919a118, 0xe0bdb34e, 0x68a16b2e, 0xff64b44d,</div><div class="line">    // 列出了500多个节点</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -1195,7 +1196,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cje9yfrq3003c155b8baavjpr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjeggom9u0033zl5bkzhshhr2" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1325,7 +1326,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cje9yfrrz0059155b7lyhdw63" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjeggombe0054zl5brmb50oeb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1610,7 +1611,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cje9yfro7000w155b440d4d4i" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjeggom87000wzl5bdyzai5dj" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1743,7 +1744,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cje9yfrrw0053155bddl7rnqn" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cjeggombg0058zl5bhdlwh2ps" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1890,7 +1891,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cje9yfro8000x155btssxss1z" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/19/Google-container-evolution/" data-id="cjeggom88000yzl5bfqzpzl4v" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
