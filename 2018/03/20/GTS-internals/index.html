@@ -3,23 +3,19 @@
 <head>
     <meta charset="utf-8">
     
-    <title>HDD Stats Q1 2017 | Notes</title>
+    <title>GTS internals WIP | Notes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta name="keywords" content="storage">
+    <meta name="description" content="GTS是阿里的分布式事务解决方案，是在TXC基础上改进的，主要原因是TXC是TCC模式，对业务侵入大，而GTS对业务代码侵入很小。 它支持的isolation有2种  read uncommitted(默认) read committed(吞吐量严重下降)  Usageclient通过dubbo rpc调用OrderService和StockService Client123456&amp;lt;bean">
+<meta name="keywords" content="database,architecture">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HDD Stats Q1 2017">
-<meta property="og:url" content="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/index.html">
+<meta property="og:title" content="GTS internals WIP">
+<meta property="og:url" content="http://funkygao.github.io/2018/03/20/GTS-internals/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta property="og:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
-<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg">
-<meta property="og:image" content="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg">
-<meta property="og:updated_time" content="2017-06-14T06:05:54.000Z">
+<meta property="og:description" content="GTS是阿里的分布式事务解决方案，是在TXC基础上改进的，主要原因是TXC是TCC模式，对业务侵入大，而GTS对业务代码侵入很小。 它支持的isolation有2种  read uncommitted(默认) read committed(吞吐量严重下降)  Usageclient通过dubbo rpc调用OrderService和StockService Client123456&amp;lt;bean">
+<meta property="og:updated_time" content="2018-03-20T00:17:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HDD Stats Q1 2017">
-<meta name="twitter:description" content="Backblaze Storage Pod把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS没有iSCSI，没有NFS，没有Fibre Channel180TB成本$9,305，即每GB $0.0517  Backblze Vaults cloud backup service99.999999% annua">
-<meta name="twitter:image" content="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true">
+<meta name="twitter:title" content="GTS internals WIP">
+<meta name="twitter:description" content="GTS是阿里的分布式事务解决方案，是在TXC基础上改进的，主要原因是TXC是TCC模式，对业务侵入大，而GTS对业务代码侵入很小。 它支持的isolation有2种  read uncommitted(默认) read committed(吞吐量严重下降)  Usageclient通过dubbo rpc调用OrderService和StockService Client123456&amp;lt;bean">
     
 
     
@@ -202,7 +198,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-HDD-Stats-Q1-2017" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-GTS-internals" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -210,7 +206,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            HDD Stats Q1 2017
+            GTS internals WIP
         </h1>
     
 
@@ -219,8 +215,8 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/06/14/HDD-Stats-Q1-2017/">
-            <time datetime="2017-06-14T03:14:03.000Z" itemprop="datePublished">2017-06-14</time>
+        <a href="/2018/03/20/GTS-internals/">
+            <time datetime="2018-03-19T23:48:56.000Z" itemprop="datePublished">2018-03-20</time>
         </a>
     </div>
 
@@ -229,7 +225,7 @@
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
+        <a class="tag-link" href="/tags/architecture/">architecture</a>, <a class="tag-link" href="/tags/database/">database</a>
     </div>
 
                     </div>
@@ -240,13 +236,19 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p><img src="https://github.com/funkygao/blogassets/blob/master/img/blog-hd-stats-q1-2017-table.jpg?raw=true" alt="HDD Fail Rate"></p>
-<h2 id="Backblaze-Storage-Pod"><a href="#Backblaze-Storage-Pod" class="headerlink" title="Backblaze Storage Pod"></a>Backblaze Storage Pod</h2><p>把45块SATA盘存放到一台4U机器里，其中15块搞RAID6，ext4，可以空间是裸盘空间的87%，所有访问通过tomcat HTTPS<br>没有iSCSI，没有NFS，没有Fibre Channel<br>180TB成本$9,305，即每GB $0.0517</p>
-<p><img src="https://www.backblaze.com/blog/wp-content/uploads/2009/08/backblaze-storage-pod-main-components.jpg" alt="storage pod"></p>
-<h2 id="Backblze-Vaults-cloud-backup-service"><a href="#Backblze-Vaults-cloud-backup-service" class="headerlink" title="Backblze Vaults cloud backup service"></a>Backblze Vaults cloud backup service</h2><p>99.999999% annual durability<br>已经存储150PB，由1000个Storage Pod组成，40,000块盘，每天有10块盘损坏</p>
-<p>每个Vault由20个Storage Pod组成，每个Pod有45块盘，即每个Vault有900块盘，一块盘如果是4TB，那么每个Vault可以存3.6PB<br>每个磁盘使用ext4文件系统，每个Vault有个7位数字id，例如555-1021，前3位代表data center id，后4位是vault id<br>有个类似name service的服务，client备份前先request name service获取vault id，之后client直接与相应的vault进行backup IO(https)<br><img src="https://www.backblaze.com/blog/wp-content/uploads/2015/03/blog-vault-tome-1.jpg" alt="pod"></p>
-<p>每个文件被分成20 shards = 17 data shars + 3 parity shards，存放在ext4<br>每个shard有checksum，如果损坏，可以从其他17个shards恢复<br>如果某个Vault有1个pod crash了，backup write的parity会变成2，如果3个pod坏了，那么也可以写，但parity就不存在了，如果此时再坏一个pod，数据无法恢复了</p>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p><a href="https://www.backblaze.com/blog/vault-cloud-storage-architecture/" target="_blank" rel="external">https://www.backblaze.com/blog/vault-cloud-storage-architecture/</a><br><a href="https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/" target="_blank" rel="external">https://www.backblaze.com/blog/hard-drive-failure-rates-q1-2017/</a></p>
+            <h2 id="GTS"><a href="#GTS" class="headerlink" title="GTS"></a>GTS</h2><p>是阿里的分布式事务解决方案，是在TXC基础上改进的，主要原因是TXC是TCC模式，对业务侵入大，而GTS对业务代码侵入很小。</p>
+<p>它支持的isolation有2种</p>
+<ul>
+<li>read uncommitted(默认)</li>
+<li>read committed(吞吐量严重下降)</li>
+</ul>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>client通过dubbo rpc调用OrderService和StockService</p>
+<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;myapp&quot;/&gt; &lt;!-- appName --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- client/OrderService/StockService的定义要完全相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt; &lt;!-- mode --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt; &lt;!-- GTS server address --&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class Client &#123;</div><div class="line">    @TxcTransaction(timeout = 60000 * 3) // 3m</div><div class="line">    public void Bussiness(OrderService orderService, StockService stockService, String userId) &#123;</div><div class="line">        // TxcTransactionScaner启动的时候，已经对@TxcTransaction注解的方法进行了拦截</div><div class="line">        // 拦截开始的时候，会自动生成xid，并存放到ThreadLocal TODO</div><div class="line">        String xid = TxcContext.getCurrentXid();</div><div class="line"></div><div class="line">        // 通过dubbo的RpcContext把全局事务id传递给相关的所有dubbo service provider</div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;, xid);</div><div class="line">        OrderDO orderDO = new OrderDO(userId, productId, productNumber, new Timestamp(new Date().getTime()));</div><div class="line">        orderService.createOrder(orderDO);</div><div class="line"></div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;,xid);</div><div class="line">        stockService.updateStock(orderDO);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="OrderService"><a href="#OrderService" class="headerlink" title="OrderService"></a>OrderService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">&lt;!-- </div><div class="line">  TxcDataSource是对DruidDataSource的封装:</div><div class="line">  可以解析SQL，通过resourcemanager</div><div class="line">--&gt;</div><div class="line">&lt;bean id=&quot;txcDataSource&quot; class=&quot;com.taobao.txc.datasource.cobar.TxcDataSource&quot;&gt;</div><div class="line">    &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://127.0.0.1:3306/db1&quot; /&gt;</div><div class="line">    &lt;property name=&quot;username&quot; value=&quot;root&quot; /&gt;</div><div class="line">    &lt;property name=&quot;password&quot; value=&quot;xxx&quot; /&gt;</div><div class="line">    &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div><div class="line"></div><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;order&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class OrderServiceImpl implements OrderService &#123;</div><div class="line">    public int createOrder(OrderDO orderDO) &#123;</div><div class="line">        // 根据dubbo context活动本全局事务的id</div><div class="line">        String xid = RpcContext.getContext().getAttachment(&quot;xid&quot;);</div><div class="line"></div><div class="line">        // 通过ThreadLocal把xid传递给下层的本地事务 resourcemanager</div><div class="line">        TxcContext.bind(xid,null);</div><div class="line"></div><div class="line">        // 执行本地事务</div><div class="line">        String sql = &quot;insert into orders(user_id,product_id,number,gmt_create) values(?, ?, ?, ?)&quot;;</div><div class="line">        int ret = jdbcTemplate.update(sql, new Object[]&#123;orderDO.getUserId(), orderDO.getProductId(), orderDO.getNumber(), orderDO.getGmtCreate()&#125;);</div><div class="line"></div><div class="line">        // 从ThreadLocal里删除xid</div><div class="line">        TxcContext.unbind();</div><div class="line"></div><div class="line">        return ret;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="StockService"><a href="#StockService" class="headerlink" title="StockService"></a>StockService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;stock&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class StockServiceImpl implements StockService &#123;</div><div class="line">    public int updateStock(OrderDO orderDO) &#123;</div><div class="line">        // 与OrderService的流程一样</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 
         
         </div>
@@ -257,7 +259,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/" data-id="cjeywt7f4000ww75bwxmysyv9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/03/20/GTS-internals/" data-id="cjeywt7f3000uw75bb8txwms0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -325,7 +327,7 @@
 
             
     
-        <a href="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/">Comments</a>
+        <a href="http://funkygao.github.io/2018/03/20/GTS-internals/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2018/03/20/GTS-internals/">Comments</a>
     
 
         </footer>
@@ -334,19 +336,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/06/14/graph-database/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    graph database
-                
-            </div>
-        </a>
     
-    
-        <a href="/2017/06/14/erasure-coding/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2018/03/14/error-prone/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">Reed-Solomon erasure code</div>
+            <div class="article-nav-title">error prone</div>
         </a>
     
 </nav>
@@ -477,9 +470,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'http://funkygao.github.io/2017/06/14/HDD-Stats-Q1-2017/';
+            this.page.url = 'http://funkygao.github.io/2018/03/20/GTS-internals/';
         
-        this.page.identifier = 'HDD-Stats-Q1-2017';
+        this.page.identifier = 'GTS-internals';
     };
     (function() { 
         var d = document, s = d.createElement('script');  

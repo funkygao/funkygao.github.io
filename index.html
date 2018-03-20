@@ -141,7 +141,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                99
+                100
                 <span>posts</span>
             </div>
             <div class="article-info-block">
@@ -194,6 +194,145 @@
 
             
             <section id="main">
+    <article id="post-GTS-internals" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2018/03/20/GTS-internals/">GTS internals WIP</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2018/03/20/GTS-internals/">
+            <time datetime="2018-03-19T23:48:56.000Z" itemprop="datePublished">2018-03-20</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/architecture/">architecture</a>, <a class="tag-link" href="/tags/database/">database</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="GTS"><a href="#GTS" class="headerlink" title="GTS"></a>GTS</h2><p>是阿里的分布式事务解决方案，是在TXC基础上改进的，主要原因是TXC是TCC模式，对业务侵入大，而GTS对业务代码侵入很小。</p>
+<p>它支持的isolation有2种</p>
+<ul>
+<li>read uncommitted(默认)</li>
+<li>read committed(吞吐量严重下降)</li>
+</ul>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>client通过dubbo rpc调用OrderService和StockService</p>
+<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;myapp&quot;/&gt; &lt;!-- appName --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- client/OrderService/StockService的定义要完全相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt; &lt;!-- mode --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt; &lt;!-- GTS server address --&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class Client &#123;</div><div class="line">    @TxcTransaction(timeout = 60000 * 3) // 3m</div><div class="line">    public void Bussiness(OrderService orderService, StockService stockService, String userId) &#123;</div><div class="line">        // TxcTransactionScaner启动的时候，已经对@TxcTransaction注解的方法进行了拦截</div><div class="line">        // 拦截开始的时候，会自动生成xid，并存放到ThreadLocal TODO</div><div class="line">        String xid = TxcContext.getCurrentXid();</div><div class="line"></div><div class="line">        // 通过dubbo的RpcContext把全局事务id传递给相关的所有dubbo service provider</div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;, xid);</div><div class="line">        OrderDO orderDO = new OrderDO(userId, productId, productNumber, new Timestamp(new Date().getTime()));</div><div class="line">        orderService.createOrder(orderDO);</div><div class="line"></div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;,xid);</div><div class="line">        stockService.updateStock(orderDO);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="OrderService"><a href="#OrderService" class="headerlink" title="OrderService"></a>OrderService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">&lt;!-- </div><div class="line">  TxcDataSource是对DruidDataSource的封装:</div><div class="line">  可以解析SQL，通过resourcemanager</div><div class="line">--&gt;</div><div class="line">&lt;bean id=&quot;txcDataSource&quot; class=&quot;com.taobao.txc.datasource.cobar.TxcDataSource&quot;&gt;</div><div class="line">    &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://127.0.0.1:3306/db1&quot; /&gt;</div><div class="line">    &lt;property name=&quot;username&quot; value=&quot;root&quot; /&gt;</div><div class="line">    &lt;property name=&quot;password&quot; value=&quot;xxx&quot; /&gt;</div><div class="line">    &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div><div class="line"></div><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;order&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class OrderServiceImpl implements OrderService &#123;</div><div class="line">    public int createOrder(OrderDO orderDO) &#123;</div><div class="line">        // 根据dubbo context活动本全局事务的id</div><div class="line">        String xid = RpcContext.getContext().getAttachment(&quot;xid&quot;);</div><div class="line"></div><div class="line">        // 通过ThreadLocal把xid传递给下层的本地事务 resourcemanager</div><div class="line">        TxcContext.bind(xid,null);</div><div class="line"></div><div class="line">        // 执行本地事务</div><div class="line">        String sql = &quot;insert into orders(user_id,product_id,number,gmt_create) values(?, ?, ?, ?)&quot;;</div><div class="line">        int ret = jdbcTemplate.update(sql, new Object[]&#123;orderDO.getUserId(), orderDO.getProductId(), orderDO.getNumber(), orderDO.getGmtCreate()&#125;);</div><div class="line"></div><div class="line">        // 从ThreadLocal里删除xid</div><div class="line">        TxcContext.unbind();</div><div class="line"></div><div class="line">        return ret;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="StockService"><a href="#StockService" class="headerlink" title="StockService"></a>StockService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;stock&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class StockServiceImpl implements StockService &#123;</div><div class="line">    public int updateStock(OrderDO orderDO) &#123;</div><div class="line">        // 与OrderService的流程一样</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://funkygao.github.io/2018/03/20/GTS-internals/" data-id="cjeywt7f3000uw75bb8txwms0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://funkygao.github.io/2018/03/20/GTS-internals/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2018/03/20/GTS-internals/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-error-prone" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -232,7 +371,7 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Cache-aside"><a href="#Cache-aside" class="headerlink" title="Cache aside"></a>Cache aside</h2><p>r=read w=write<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 一个读、一个写，在并发情况下，race condition</div><div class="line">// 这种情况下，会造成缓存里的数据依然是旧的</div><div class="line">// 而且，后续的查询，都得到脏数据</div><div class="line">r.cache.get -&gt; nil -&gt; r.db.select -&gt; w.db.update -&gt; w.cache.del(put) -&gt; r.cache.put</div></pre></td></tr></table></figure></p>
+            <h2 id="Cache-aside"><a href="#Cache-aside" class="headerlink" title="Cache aside"></a>Cache aside</h2><p>r=read w=write<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 一个读、一个写，在并发情况下，race condition</div><div class="line">// 这种情况下，会造成缓存里的数据依然是旧的</div><div class="line">// 而且，后续的查询，都得到脏数据，直到有write操作</div><div class="line">r.cache.get -&gt; nil -&gt; r.db.select -&gt; w.db.update -&gt; w.cache.del(put) -&gt; r.cache.put</div></pre></td></tr></table></figure></p>
 
         
         </div>
@@ -243,7 +382,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/03/14/error-prone/" data-id="cjeqgzbj3003nim5bat4klipi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/03/14/error-prone/" data-id="cjeywt7gw003tw75bo5xcdwmf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -371,7 +510,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjeqgzbgo0013im5bqdv2grkc" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjeywt7f70011w75bcr8ist1a" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -603,7 +742,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjeqgzbfx000aim5b7vgadpan" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjeywt7ek0009w75bb02g9410" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -789,7 +928,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjeqgzbha001qim5bhxm4u3gr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjeywt7fm001lw75bfkxlwojf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -945,7 +1084,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjeqgzbhl0020im5bhi5vw8oa" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjeywt7fy0022w75bgl920cyu" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1094,7 +1233,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjeqgzbi4002lim5b1vozrl2l" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjeywt7ge002vw75bhcii7tr4" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1323,7 +1462,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjeqgzbit003dim5bpe1qe74f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjeywt7gl0039w75b7fb5rac8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1453,7 +1592,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjeqgzbkn0056im5bz2vj56am" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjeywt7i40058w75b5m4v3kw3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1738,7 +1877,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjeqgzbga000qim5b0683ng8t" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjeywt7fu001vw75bzz5sdr23" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1816,139 +1955,6 @@
 
 
 
-    <article id="post-replication" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2017/07/19/replication/">replication models</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fa fa-calendar"></i>
-        <a href="/2017/07/19/replication/">
-            <time datetime="2017-07-19T11:12:26.000Z" itemprop="datePublished">2017-07-19</time>
-        </a>
-    </div>
-
-
-                        
-                        
-    <div class="article-tag">
-        <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/storage/">storage</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            
-            <h2 id="Models"><a href="#Models" class="headerlink" title="Models"></a>Models</h2><ul>
-<li>primary-replica(failover, replica readable)/multi-master/chain</li>
-<li>replica/ec</li>
-<li>push/pull</li>
-<li>sync/async</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Dynamo      PUSH coordinator -&gt; preference list next nodes in hash ring</div><div class="line">Raft/ZK     PUSH master commit log -&gt; majority ack</div><div class="line">GFS/Hadoop  chain replication</div><div class="line">ES          PUSH primary-replica model, master concurrently dispatch index req to all replicas</div><div class="line">MySQL       PUSH master async PUSH to slaves binlog</div><div class="line">Kafka       PULL(Fetch) ISR</div><div class="line">redis</div><div class="line">Ceph        PUSH primary-replica sync model with degrade mode 同步写入</div><div class="line">Swift</div><div class="line">Aurora      PUSH primary instance R(3)+W(4)&gt;N(6)</div></pre></td></tr></table></figure>
-
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="http://funkygao.github.io/2017/07/19/replication/" data-id="cjeqgzbkq005cim5bgxjg2yoi" class="article-share-link"><i class="fa fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="http://funkygao.github.io/2017/07/19/replication/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="http://funkygao.github.io/2017/07/19/replication/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <nav id="page-nav">
         <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
@@ -1961,6 +1967,15 @@
         <h3 class="widget-title">recent</h3>
         <div class="widget">
             <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2018/03/20/GTS-internals/" class="title">GTS internals WIP</a></p>
+                            <p class="item-date"><time datetime="2018-03-19T23:48:56.000Z" itemprop="datePublished">2018-03-20</time></p>
+                        </div>
+                    </li>
                 
                     <li>
                         
@@ -1998,15 +2013,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2017/12/11/OtterTune/" class="title">OtterTune</a></p>
-                            <p class="item-date"><time datetime="2017-12-11T01:28:11.000Z" itemprop="datePublished">2017-12-11</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -2016,7 +2022,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/02/">February 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a><span class="archive-list-count">13</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">June 2017</a><span class="archive-list-count">36</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a><span class="archive-list-count">42</span></li></ul>
         </div>
     </div>
 
@@ -2025,7 +2031,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">19</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/PubSub/">PubSub</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/algorithm/">algorithm</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/architecture/">architecture</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud/">cloud</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/database/">database</a><span class="tag-list-count">20</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hacking/">hacking</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/">misc</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/protocol/">protocol</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/storage/">storage</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/一致性/">一致性</a><span class="tag-list-count">9</span></li></ul>
         </div>
     </div>
 
