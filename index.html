@@ -238,13 +238,12 @@
 <li>read uncommitted(默认)</li>
 <li>read committed(吞吐量严重下降)</li>
 </ul>
-<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>client通过dubbo rpc调用OrderService和StockService</p>
-<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;myapp&quot;/&gt; &lt;!-- appName --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- client/OrderService/StockService的定义要完全相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt; &lt;!-- mode --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt; &lt;!-- GTS server address --&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class Client &#123;</div><div class="line">    @TxcTransaction(timeout = 60000 * 3) // 3m</div><div class="line">    public void Bussiness(OrderService orderService, StockService stockService, String userId) &#123;</div><div class="line">        // TxcTransactionScaner启动的时候，已经对@TxcTransaction注解的方法进行了拦截</div><div class="line">        // 拦截开始的时候，会自动生成xid，并存放到ThreadLocal TODO</div><div class="line">        String xid = TxcContext.getCurrentXid();</div><div class="line"></div><div class="line">        // 通过dubbo的RpcContext把全局事务id传递给相关的所有dubbo service provider</div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;, xid);</div><div class="line">        OrderDO orderDO = new OrderDO(userId, productId, productNumber, new Timestamp(new Date().getTime()));</div><div class="line">        orderService.createOrder(orderDO);</div><div class="line"></div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;,xid);</div><div class="line">        stockService.updateStock(orderDO);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="OrderService"><a href="#OrderService" class="headerlink" title="OrderService"></a>OrderService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">&lt;bean id=&quot;txcDataSource&quot; class=&quot;com.taobao.txc.datasource.cobar.TxcDataSource&quot;&gt;</div><div class="line">    &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://127.0.0.1:3306/db1&quot; /&gt;</div><div class="line">    &lt;property name=&quot;username&quot; value=&quot;root&quot; /&gt;</div><div class="line">    &lt;property name=&quot;password&quot; value=&quot;xxx&quot; /&gt;</div><div class="line">    &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div><div class="line"></div><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;order&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class OrderServiceImpl implements OrderService &#123;</div><div class="line">    public int createOrder(OrderDO orderDO) &#123;</div><div class="line">        // 根据dubbo context活动本全局事务的id</div><div class="line">        String xid = RpcContext.getContext().getAttachment(&quot;xid&quot;);</div><div class="line"></div><div class="line">        // 通过ThreadLocal把xid传递给下层的本地事务 resourcemanager</div><div class="line">        TxcContext.bind(xid,null);</div><div class="line"></div><div class="line">        // 执行本地事务</div><div class="line">        String sql = &quot;insert into orders(user_id,product_id,number,gmt_create) values(?, ?, ?, ?)&quot;;</div><div class="line">        int ret = jdbcTemplate.update(sql, new Object[]&#123;orderDO.getUserId(), orderDO.getProductId(), orderDO.getNumber(), orderDO.getGmtCreate()&#125;);</div><div class="line"></div><div class="line">        // 从ThreadLocal里删除xid</div><div class="line">        TxcContext.unbind();</div><div class="line"></div><div class="line">        return ret;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="StockService"><a href="#StockService" class="headerlink" title="StockService"></a>StockService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;stock&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Java</div><div class="line"></div><div class="line">public class StockServiceImpl implements StockService &#123;</div><div class="line">    public int updateStock(OrderDO orderDO) &#123;</div><div class="line">        // 与OrderService的流程一样</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>client通过dubbo rpc调用OrderService和StockService，要保证这2个RPC的原子性。</p>
+<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;-- TxcTransactionScaner扫描所有@TxcTransaction注解的方法进行全局事务拦截 --&gt;</div><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;myapp&quot;/&gt; &lt;!-- appName --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- client/OrderService/StockService的定义要完全相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt; &lt;!-- mode --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt; &lt;!-- GTS server address --&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class Client &#123;</div><div class="line"></div><div class="line">    @TxcTransaction(timeout = 60000 * 3) // 3m</div><div class="line">    public void Bussiness(OrderService orderService, StockService stockService, String userId) &#123;</div><div class="line">        // TxcTransactionScaner启动的时候，已经对@TxcTransaction注解的方法进行了拦截</div><div class="line">        // 拦截开始的时候，通过配置中心找到txc server，后者会自动生成xid，并存放到TxcContext ThreadLocal</div><div class="line">        String xid = TxcContext.getCurrentXid(); // txc server已经把xid存放到context里了</div><div class="line"></div><div class="line">        // 通过dubbo的RpcContext把全局事务xid传递给相关的所有dubbo service provider</div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;, xid);</div><div class="line">        OrderDO orderDO = new OrderDO(userId, productId, productNumber, new Timestamp(new Date().getTime()));</div><div class="line">        orderService.createOrder(orderDO);</div><div class="line"></div><div class="line">        RpcContext.getContext().setAttachment(&quot;xid&quot;,xid);</div><div class="line">        stockService.updateStock(orderDO);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="OrderService"><a href="#OrderService" class="headerlink" title="OrderService"></a>OrderService</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;!-- 这个dataSource会对每个SQL进行解析、拦截 --&gt;</div><div class="line">&lt;bean id=&quot;txcDataSource&quot; class=&quot;com.taobao.txc.datasource.cobar.TxcDataSource&quot;&gt;</div><div class="line">    &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://127.0.0.1:3306/db1&quot; /&gt;</div><div class="line">    &lt;property name=&quot;username&quot; value=&quot;root&quot; /&gt;</div><div class="line">    &lt;property name=&quot;password&quot; value=&quot;xxx&quot; /&gt;</div><div class="line">    &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div><div class="line"></div><div class="line">&lt;bean class=&quot;com.taobao.txc.client.aop.TxcTransactionScaner&quot;&gt;</div><div class="line">    &lt;constructor-arg value=&quot;order&quot;/&gt;</div><div class="line">    &lt;constructor-arg value=&quot;txc_test_public.1129361738553704.QD&quot;/&gt; &lt;!-- 与client的相同 --&gt;</div><div class="line">    &lt;constructor-arg value=&quot;1&quot; /&gt;</div><div class="line">    &lt;constructor-arg value=&quot;https://test-cs-gts.aliyuncs.com&quot; /&gt;</div><div class="line">&lt;/bean&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">public class OrderServiceImpl implements OrderService &#123;</div><div class="line"></div><div class="line">    public int createOrder(OrderDO orderDO) &#123;</div><div class="line">        // 从dubbo context获取本全局事务的id</div><div class="line">        String xid = RpcContext.getContext().getAttachment(&quot;xid&quot;);</div><div class="line"></div><div class="line">        // 通过ThreadLocal把xid传递给下层的本地事务 resourcemanager</div><div class="line">        TxcContext.bind(xid,null);</div><div class="line"></div><div class="line">        // 执行本地事务</div><div class="line">        String sql = &quot;insert into orders(user_id,product_id,number,gmt_create) values(?, ?, ?, ?)&quot;;</div><div class="line">        int ret = jdbcTemplate.update(sql, new Object[]&#123;orderDO.getUserId(), orderDO.getProductId(), orderDO.getNumber(), orderDO.getGmtCreate()&#125;);</div><div class="line"></div><div class="line">        // 从ThreadLocal里删除xid</div><div class="line">        TxcContext.unbind();</div><div class="line"></div><div class="line">        return ret;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="StockService"><a href="#StockService" class="headerlink" title="StockService"></a>StockService</h3><p>与OrderServiceImpl的执行流程一样</p>
 <h2 id="Internals"><a href="#Internals" class="headerlink" title="Internals"></a>Internals</h2><h3 id="TxcTransactionScaner"><a href="#TxcTransactionScaner" class="headerlink" title="TxcTransactionScaner"></a>TxcTransactionScaner</h3><ul>
 <li>扫码所有TxcTransaction注解的方法，进行拦截</li>
 <li>通过gts配置(注册)中心寻找txc server list，client side load balance(round robin/weight)</li>
@@ -252,7 +251,7 @@
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">在执行TxcTransaction注解的方法前，获取xid和txc server地址</div><div class="line">    从diamond配置中心找到group对应的txc server list</div><div class="line"></div><div class="line">    TxcContext.BEGIN_COUNT=1</div><div class="line">    RPC -&gt; BeginMessage(timeout=TxcTransaction.timeout, appname=TxcTransaction.appName, txcInst=Client.Bussiness)</div><div class="line">    RPC &lt;- BeginResultMessage(xid)  txc server生成xid</div><div class="line">    然后TxcContext.bind</div><div class="line">        TXC_XID=xid</div><div class="line">        TXC_XID_OWNER=TXC</div><div class="line">        TXC_NEXT_SVR_ADDR=</div><div class="line"></div><div class="line">执行被拦截方法的proceed</div><div class="line"></div><div class="line">TxcTransaction注解的方法执行后</div><div class="line">    TxcContext.COMMIT_COUNT++</div><div class="line">    if TxcContext.COMMIT_COUNT &gt;= TxcContext.BEGIN_COUNT &#123;</div><div class="line">        // 该commit全局事务了，如果失败重试5次，中间休息3s</div><div class="line">        RPC -&gt; GlobalCommitMessage(xid)</div><div class="line">        RPC &lt;- GlobalCommitResultMessage(resultCode)</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
 <h3 id="TxcDataSource"><a href="#TxcDataSource" class="headerlink" title="TxcDataSource"></a>TxcDataSource</h3><p>multi pks not support yet.<br>必须是single pk</p>
-<p>内部包含了DruidDataSource，在getConnection的时候，返回的java.sql.Connection实现对txc_undo_log的插入、删除<br>拦截了createStatement，prepareStatement，中间通过消息与gts进行交互</p>
+<p>内部包含了DruidDataSource，实现了SQL解析，在getConnection的时候，返回的java.sql.Connection实现对txc_undo_log的插入、删除<br>拦截了createStatement，prepareStatement，中间通过消息与gts进行交互</p>
 <h4 id="TxcRuntimeContext"><a href="#TxcRuntimeContext" class="headerlink" title="TxcRuntimeContext"></a>TxcRuntimeContext</h4><ul>
 <li>xid</li>
 <li>writeKeys</li>
@@ -308,7 +307,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/03/20/GTS-internals/" data-id="cjf0nit89000mvt5bh53h10sz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/03/20/GTS-internals/" data-id="cjf1rlexw000nrz5bh9batjkz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -435,7 +434,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/03/14/error-prone/" data-id="cjf0nitc40046vt5ba5xewtlb" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/03/14/error-prone/" data-id="cjf1rlf0u003trz5bo9x81s8c" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -563,7 +562,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjf0nit8j0014vt5bsw7slxr9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjf1rlez10012rz5bu5qtro1v" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -795,7 +794,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjf0nit7w0008vt5bo5x15n9n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjf1rlex90009rz5b73fmg3wz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -981,7 +980,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjf0nit92001tvt5bo84qxmp8" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjf1rlezo001urz5boxyje9ag" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1137,7 +1136,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjf0nit96001yvt5blvhdjsli" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjf1rlezs001zrz5b6vqxx8ye" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1286,7 +1285,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjf0nit9h002kvt5b0r2jfl07" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjf1rlf02002nrz5bk4pp7t4v" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1515,7 +1514,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjf0nit9v0038vt5blgkq1rkz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjf1rlf0l003frz5bpz7qpd18" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1645,7 +1644,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjf0nitct005jvt5bldjblg09" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjf1rlf1i0054rz5btmj9nn2g" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1930,7 +1929,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjf0nit8g000wvt5bkvurrf9r" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjf1rleyc000wrz5bzus6ldgg" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
