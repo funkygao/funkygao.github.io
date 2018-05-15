@@ -354,7 +354,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/03/20/GTS-internals/" data-id="cjf27ltpp000oe65bn677glty" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/03/20/GTS-internals/" data-id="cjh7kagj5000w3f5bqsc9s92n" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -470,7 +470,7 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h2 id="Cache-aside"><a href="#Cache-aside" class="headerlink" title="Cache aside"></a>Cache aside</h2><p>r=read w=write<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 一个读、一个写，在并发情况下，race condition</div><div class="line">// 这种情况下，会造成缓存里的数据依然是旧的</div><div class="line">// 而且，后续的查询，都得到脏数据，直到有write操作</div><div class="line">r.cache.get -&gt; nil -&gt; r.db.select -&gt; w.db.update -&gt; w.cache.del(put) -&gt; r.cache.put</div></pre></td></tr></table></figure></p>
+            <h2 id="Cache-aside"><a href="#Cache-aside" class="headerlink" title="Cache aside"></a>Cache aside</h2><p>r=read w=write<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">// 一个读、一个写，在并发情况下，race condition</div><div class="line">// 这种情况下，会造成缓存里的数据依然是旧的</div><div class="line">// 而且，后续的查询，都得到脏数据，直到有write操作</div><div class="line">r.cache.get -&gt; nil -&gt; r.db.select --------------------&gt; r.cache.put</div><div class="line">                      w.db.update -&gt; w.cache.del/put()</div></pre></td></tr></table></figure></p>
 
         
         </div>
@@ -481,7 +481,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/03/14/error-prone/" data-id="cjf27ltru003ye65bzi9f9s4j" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/03/14/error-prone/" data-id="cjh7kagki003v3f5be8lgvtfe" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -609,7 +609,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjf27ltpz0014e65bl4cs4j5p" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/02/08/Kafka-Exactly-Once/" data-id="cjh7kagj900153f5bc36hlhdr" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -841,7 +841,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjf27ltpg000ae65bydvro0tz" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2018/01/18/BigData-related/" data-id="cjh7kagiv000a3f5b0krpnx37" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1027,7 +1027,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjf27ltqe001oe65bvyb4765h" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/14/Misc/" data-id="cjh7kagjn001r3f5b67ox6is5" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1183,7 +1183,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjf27ltqn0020e65bm809scim" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/12/11/OtterTune/" data-id="cjh7kagjs00213f5bci01wjvk" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1332,7 +1332,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjf27ltr1002pe65bzvgz14s3" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/28/TimescaleDB/" data-id="cjh7kagk0002n3f5bhm8rrn80" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1561,7 +1561,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjf27ltri003ie65b7w2btubx" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/09/11/block-chain/" data-id="cjh7kagk900393f5b6imdh9ja" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1691,7 +1691,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjf27ltt3005be65b5pqe92h9" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/08/24/perceptual-hash/" data-id="cjh7kagl600583f5bo2leurag" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1976,7 +1976,7 @@
 
 </div>
 
-    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjf27ltpw000we65bdootc5iv" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://funkygao.github.io/2017/07/25/GFS/" data-id="cjh7kagj4000u3f5bzyy9mjhf" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
